@@ -27,12 +27,6 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.samskivert</groupId>
-      <artifactId>samskivert</artifactId>
-      <version>1.2</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>jregistrykey</groupId>
       <artifactId>jregistrykey</artifactId>
       <version>1.0</version>
@@ -116,25 +110,6 @@
               <inclusion>
                 <groupId>io.github.bekoenig.getdown</groupId>
                 <artifactId>getdown-core</artifactId>
-              </inclusion>
-              <inclusion>
-                <groupId>com.samskivert</groupId>
-                <artifactId>samskivert</artifactId>
-                <filter>
-                  !**/*.java,
-                  !**/swing/RuntimeAdjust*,
-                  !**/swing/util/ButtonUtil*,
-                  !**/util/CalendarUtil*,
-                  !**/util/Calendars*,
-                  !**/util/Log4JLogger*,
-                  !**/util/PrefsConfig*,
-                  !**/util/SignalUtil*,
-                  com/samskivert/Log.class,
-                  **/samskivert/io/**,
-                  **/samskivert/swing/**,
-                  **/samskivert/text/**,
-                  **/samskivert/util/**
-                </filter>
               </inclusion>
               <inclusion>
                 <groupId>jregistrykey</groupId>
