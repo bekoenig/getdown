@@ -20,10 +20,6 @@
 
 package com.samskivert.util;
 
-import java.awt.event.InputEvent;
-
-import static com.samskivert.Log.log;
-
 /**
  * <cite>Write once, run anywhere.</cite> Well, at least that's what it
  * said in the brochures. For those less than fresh days, you might need

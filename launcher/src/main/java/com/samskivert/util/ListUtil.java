@@ -211,7 +211,7 @@ public class ListUtil
         return (-1 != indexOf(eqc, list, element));
     }
 
-    /** Helper function for {@link #indexOfRef}, etc. */
+    /** Helper function for {@link #contains}, etc. */
     protected static int indexOf (
         EqualityComparator eqc, Object[] list, Object element)
     {

@@ -27,24 +27,11 @@ import java.awt.geom.Rectangle2D;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import com.samskivert.annotation.ReplacedBy;
-
 /**
  * String related utility functions.
  */
 public class StringUtil
 {
-    /**
-     * @return true if the string is null or empty, false otherwise.
-     *
-     * @deprecated use isBlank instead.
-     */
-    @Deprecated
-    public static boolean blank (String value)
-    {
-        return isBlank(value);
-    }
-
     /**
      * @return true if the string is null or consists only of whitespace, false otherwise.
      */
@@ -56,35 +43,6 @@ public class StringUtil
             }
         }
         return true;
-    }
-
-    /**
-     * Returns a new string based on <code>source</code> with all instances of <code>before</code>
-     * replaced with <code>after</code>.
-     *
-     * @deprecated java.lang.String.replace() was added in 1.5
-     */
-    @Deprecated @ReplacedBy(value="java.lang.String.replace()", reason="since 1.5")
-    public static String replace (String source, String before, String after)
-    {
-        int pos = source.indexOf(before);
-        if (pos == -1) {
-            return source;
-        }
-
-        StringBuilder sb = new StringBuilder(source.length() + 32);
-
-        int blength = before.length();
-        int start = 0;
-        while (pos != -1) {
-            sb.append(source.substring(start, pos));
-            sb.append(after);
-            start = pos + blength;
-            pos = source.indexOf(before, start);
-        }
-        sb.append(source.substring(start));
-
-        return sb.toString();
     }
 
     /**
@@ -108,18 +66,6 @@ public class StringUtil
     {
         StringBuilder buf = new StringBuilder();
         toString(buf, val);
-        return buf.toString();
-    }
-
-    /**
-     * Like the single argument {@link #toString(Object)} with the additional function of
-     * specifying the characters that are used to box in list and array types. For example, if "["
-     * and "]" were supplied, an int array might be formatted like so: <code>[1, 3, 5]</code>.
-     */
-    public static String toString (Object val, String openBox, String closeBox)
-    {
-        StringBuilder buf = new StringBuilder();
-        toString(buf, val, openBox, closeBox);
         return buf.toString();
     }
 
