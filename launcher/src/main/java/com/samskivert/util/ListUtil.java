@@ -65,14 +65,6 @@ package com.samskivert.util;
 public class ListUtil
 {
     /**
-     * Rounds the specified value up to the next nearest power of two.
-     */
-    public static int nextPowerOfTwo (int value)
-    {
-        return (int)Math.pow(2, Math.ceil(Math.log(value) / Math.log(2)));
-    }
-
-    /**
      * Adds the specified element to the first empty slot in the specified
      * list. Begins searching for empty slots at zeroth index.
      *
@@ -133,49 +125,6 @@ public class ListUtil
     }
 
     /**
-     * Inserts the supplied element at the specified position in the
-     * array, shifting the remaining elements down. The array will be
-     * expanded if necessary.
-     *
-     * @param list the list in which to insert the element. Can be null.
-     * @param index the index at which to insert the element.
-     * @param element the element to insert.
-     *
-     * @return a reference to the list with element inserted (might not be
-     * the list you passed in due to expansion, or allocation).
-     */
-    public static Object[] insert (Object[] list, int index, Object element)
-    {
-        requireNotNull(element);
-
-        // make sure we've got a list to work with
-        if (list == null) {
-            list = new Object[DEFAULT_LIST_SIZE];
-        }
-
-        // make a note of the size of the array
-        int size = list.length;
-
-        // expand the list if necessary (the last element contains a
-        // value)
-        if (list[size-1] != null) {
-            list = accomodate(list, size);
-        } else {
-            // otherwise, pretend the list is one element shorter and
-            // we'll overwrite the last null
-            size--;
-        }
-
-        // shift everything down
-        System.arraycopy(list, index, list, index+1, size-index);
-
-        // stick the element on in
-        list[index] = element;
-
-        return list;
-    }
-
-    /**
      * Searches through the list checking to see if the element supplied
      * is already in the list (using reference equality to check for
      * existence) and adds it if it is not.
@@ -190,23 +139,6 @@ public class ListUtil
     public static Object[] testAndAddRef (Object[] list, Object element)
     {
         return testAndAdd(REFERENCE_COMP, list, element);
-    }
-
-    /**
-     * Searches through the list checking to see if the element supplied
-     * is already in the list (using <code>equals()</code> to check for
-     * equality) and adds it if it is not.
-     *
-     * @param list the list to which to add the element. Can be null.
-     * @param element the element to test and add.
-     *
-     * @return a reference to the list with element added (might not be
-     * the list you passed in due to expansion, or allocation) or null if
-     * the element was already in the original array.
-     */
-    public static Object[] testAndAdd (Object[] list, Object element)
-    {
-        return testAndAdd(EQUALS_COMP, list, element);
     }
 
     /** Helper function for {@link #testAndAddRef}, etc. */
@@ -279,47 +211,6 @@ public class ListUtil
         return (-1 != indexOf(eqc, list, element));
     }
 
-    /**
-     * Returns the lowest index in the array that contains null,
-     * or -1 if there is no room to add elements without expanding the array.
-     */
-    public static int indexOfNull (Object[] list)
-    {
-        if (list != null) {
-            for (int ii=0, nn = list.length; ii < nn; ii++) {
-                if (list[ii] == null) {
-                    return ii;
-                }
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Looks for an object that is referentially equal to the supplied
-     * element (<code>list[idx] == element</code>) and returns its index
-     * in the array.
-     *
-     * @return the index of the first matching element if one was found,
-     * -1 otherwise.
-     */
-    public static int indexOfRef (Object[] list, Object element)
-    {
-        return indexOf(REFERENCE_COMP, list, element);
-    }
-
-    /**
-     * Looks for an element that is functionally equal to the supplied
-     * element (<code>list[idx].equals(element)</code>).
-     *
-     * @return the index of the matching element if one was found, -1
-     * otherwise.
-     */
-    public static int indexOf (Object[] list, Object element)
-    {
-        return indexOf(EQUALS_COMP, list, element);
-    }
-
     /** Helper function for {@link #indexOfRef}, etc. */
     protected static int indexOf (
         EqualityComparator eqc, Object[] list, Object element)
@@ -385,20 +276,6 @@ public class ListUtil
         return remove(REFERENCE_COMP, list, element);
     }
 
-    /**
-     * Removes the first element that is functionally equal to the
-     * supplied element (<code>list[idx].equals(element)</code>). The
-     * elements after the removed element will be slid down the array one
-     * spot to fill the place of the removed element.
-     *
-     * @return the object that was removed from the array or null if no
-     * matching object was found.
-     */
-    public static Object remove (Object[] list, Object element)
-    {
-        return remove(EQUALS_COMP, list, element);
-    }
-
     /** Helper function for {@link #removeRef}, etc. */
     protected static Object remove (
         EqualityComparator eqc, Object[] list, Object element)
@@ -449,20 +326,6 @@ public class ListUtil
             }
         }
         return llength;
-    }
-
-    /**
-     * Returns the number of non-null elements in the supplied list.
-     */
-    public static int getSize (Object[] list)
-    {
-        int size = 0;
-        for (int ii = 0, nn = (list == null) ? 0 : list.length; ii < nn; ii++) {
-            if (list[ii] != null) {
-                size++;
-            }
-        }
-        return size;
     }
 
     /**

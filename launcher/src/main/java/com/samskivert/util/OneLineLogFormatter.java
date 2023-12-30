@@ -131,6 +131,4 @@ public class OneLineLogFormatter extends Formatter
     protected Date _date = new Date();
     protected SimpleDateFormat _format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss:SSS");
     protected FieldPosition _fpos = new FieldPosition(SimpleDateFormat.DATE_FIELD);
-
-    protected static final String DATE_FORMAT = "{0,date} {0,time}";
 }

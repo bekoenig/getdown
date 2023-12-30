@@ -56,33 +56,6 @@ public class TermUtil
     public static final String PLAIN = "\033[m";
 
     /**
-     * Returns a string that wraps the supplied string in the VT100 esacpe
-     * codes necessary to make it bold.
-     */
-    public static String makeBold (String text)
-    {
-        return BOLD + text + PLAIN;
-    }
-
-    /**
-     * Returns a string that wraps the supplied string in the VT100 esacpe
-     * codes necessary to make it underlined.
-     */
-    public static String makeUnderlined (String text)
-    {
-        return UNDERLINE + text + PLAIN;
-    }
-
-    /**
-     * Returns a string that wraps the supplied string in the VT100 esacpe
-     * codes necessary to display it in reverse video.
-     */
-    public static String makeReverseVideo (String text)
-    {
-        return REVERSE + text + PLAIN;
-    }
-
-    /**
      * Attempts to obtain the dimensions of the terminal in which the
      * application is running (the units are columns by lines, for example
      * 80 by 24).
