@@ -79,10 +79,10 @@ You can also:
 
   * Getdown version 2.0.x requires Java 8 VM or newer.
 
-## Migrating from Getdown 1.7 to Getdown 1.8
+## Migrating from Getdown 1.8 to Getdown 2.0
 
-See [this document](https://github.com/threerings/getdown/wiki/Migrating-from-1.7-to-1.8) on the
-changes needed to migrate from Getdown 1.7 to 1.8.
+See [this document](https://github.com/bekoenig/getdown/wiki/Migrating-from-1.8-to-2.0) on the
+changes needed to migrate from Getdown 1.8 to 2.0.
 
 ## Building
 
