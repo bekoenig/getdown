@@ -21,6 +21,7 @@
 package com.samskivert.util;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * A tuple is a simple object that holds a reference to two other objects. It provides hashcode and
@@ -61,7 +62,7 @@ public class Tuple<L,R> implements Serializable
             return false;
         }
         Tuple<?, ?> to = (Tuple<?, ?>)other;
-        return ObjectUtil.equals(left, to.left) && ObjectUtil.equals(right, to.right);
+        return Objects.equals(left, to.left) && Objects.equals(right, to.right);
     }
 
     @Override // from Object
