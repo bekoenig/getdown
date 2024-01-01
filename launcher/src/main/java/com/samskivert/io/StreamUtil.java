@@ -61,35 +61,4 @@ public class StreamUtil
         return out;
     }
 
-    /**
-     * Reads the contents of the supplied stream into a string using the platform default charset.
-     */
-    public static String toString (InputStream stream)
-        throws IOException
-    {
-        return copy(stream, new ByteArrayOutputStream()).toString();
-    }
-
-    /**
-     * Reads the contents of the supplied stream into a string using the supplied {@link Charset}.
-     */
-    public static String toString (InputStream stream, String charset)
-        throws IOException
-    {
-        return copy(stream, new ByteArrayOutputStream()).toString(charset);
-    }
-
-    /**
-     * Reads the contents of the supplied reader into a string.
-     */
-    public static String toString (Reader reader)
-        throws IOException
-    {
-        char[] inbuf = new char[4096];
-        StringBuilder outbuf = new StringBuilder();
-        for (int read = 0; (read = reader.read(inbuf)) > 0; ) {
-            outbuf.append(inbuf, 0, read);
-        }
-        return outbuf.toString();
-    }
 }
