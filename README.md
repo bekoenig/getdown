@@ -77,10 +77,7 @@ You can also:
 
 ## JVM Version Requirements
 
-  * Getdown version 1.8.x requires Java 7 VM or newer.
-  * Getdown version 1.7.x requires Java 7 VM or newer.
-  * Getdown version 1.6.x requires Java 6 VM or newer.
-  * Getdown version 1.5 and earlier requires Java 5 VM or newer.
+  * Getdown version 2.0.x requires Java 8 VM or newer.
 
 ## Migrating from Getdown 1.7 to Getdown 1.8
 
