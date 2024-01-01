@@ -156,26 +156,6 @@ public final class StringUtil {
     }
 
     /**
-     * Joins an array of strings (or objects which will be converted to strings) into a single
-     * string separated by commas.
-     */
-    public static String join (Object[] values)
-    {
-        return join(values, false);
-    }
-
-    /**
-     * Joins an array of strings into a single string, separated by commas, and optionally escaping
-     * commas that occur in the individual string values such that a subsequent call to {@link
-     * #parseStringArray} would recreate the string array properly. Any elements in the values
-     * array that are null will be treated as an empty string.
-     */
-    public static String join (Object[] values, boolean escape)
-    {
-        return join(values, ", ", escape);
-    }
-
-    /**
      * Joins the supplied array of strings into a single string separated by the supplied
      * separator.
      */
