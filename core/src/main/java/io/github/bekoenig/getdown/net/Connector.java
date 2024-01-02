@@ -5,24 +5,20 @@
 
 package io.github.bekoenig.getdown.net;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.util.Base64;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.bekoenig.getdown.data.SysProps;
-import io.github.bekoenig.getdown.util.Base64;
 import io.github.bekoenig.getdown.util.StreamUtil;
 
 /**
@@ -87,18 +83,21 @@ public class Connector {
             conn.setReadTimeout(rtimeout * 1000);
         }
 
+        addBasicAuthHeaderOnUserInfo(url, conn);
+
+        return conn;
+    }
+
+    protected static void addBasicAuthHeaderOnUserInfo(URL url, URLConnection conn) throws UnsupportedEncodingException {
         // If URL has a username:password@ before hostname, use HTTP basic auth
         String userInfo = url.getUserInfo();
         if (userInfo != null) {
             // Remove any percent-encoding in the username/password
             userInfo = URLDecoder.decode(userInfo, "UTF-8");
-            // Now base64 encode the auth info and make it a single line
-            String encoded = Base64.encodeToString(userInfo.getBytes(UTF_8), Base64.DEFAULT).
-                replaceAll("\\n","").replaceAll("\\r", "");
+            // Now base64 encode the auth info
+            String encoded = Base64.getEncoder().encodeToString(userInfo.getBytes(UTF_8));
             conn.setRequestProperty("Authorization", "Basic " + encoded);
         }
-
-        return conn;
     }
 
     /**

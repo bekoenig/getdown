@@ -8,28 +8,26 @@ package io.github.bekoenig.getdown.data;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.util.*;
+import java.util.Base64;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.github.bekoenig.getdown.net.Connector;
 import io.github.bekoenig.getdown.util.*;
-// avoid ambiguity with java.util.Base64 which we can't use as it's 1.8+
-import io.github.bekoenig.getdown.util.Base64;
 
 import static io.github.bekoenig.getdown.Log.log;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Parses and provide access to the information contained in the {@code getdown.txt}
@@ -1596,46 +1594,7 @@ public class Application
 
             } else {
                 File signatureFile = downloadFile(path + SIGNATURE_SUFFIX);
-                byte[] signature = null;
-                try (FileInputStream signatureStream = new FileInputStream(signatureFile)) {
-                    signature = StreamUtil.toByteArray(signatureStream);
-                } finally {
-                    FileUtil.deleteHarder(signatureFile); // delete the file regardless
-                }
-
-                byte[] buffer = new byte[8192];
-                int length, validated = 0;
-                for (Certificate cert : _envc.certs) {
-                    try (FileInputStream dataInput = new FileInputStream(target)) {
-                        Signature sig = Signature.getInstance(Digest.sigAlgorithm(sigVersion));
-                        sig.initVerify(cert);
-                        while ((length = dataInput.read(buffer)) != -1) {
-                            sig.update(buffer, 0, length);
-                        }
-
-                        if (!sig.verify(Base64.decode(signature, Base64.DEFAULT))) {
-                            log.info("Signature does not match", "cert", cert.getPublicKey());
-                            continue;
-                        } else {
-                            log.info("Signature matches", "cert", cert.getPublicKey());
-                            validated++;
-                        }
-
-                    } catch (IOException ioe) {
-                        log.warning("Failure validating signature of " + target + ": " + ioe);
-
-                    } catch (GeneralSecurityException gse) {
-                        // no problem!
-
-                    }
-                }
-
-                // if we couldn't find a key that validates our digest, we are the hosed!
-                if (validated == 0) {
-                    // delete the temporary digest file as we know it is invalid
-                    FileUtil.deleteHarder(target);
-                    throw new IOException("m.corrupt_digest_signature_error");
-                }
+                verifySignature(_envc.certs, sigVersion, signatureFile, target);
             }
         }
 
@@ -1643,6 +1602,51 @@ public class Application
         File original = getLocalPath(path);
         if (!FileUtil.renameTo(target, original)) {
             throw new IOException("Failed to rename(" + target + ", " + original + ")");
+        }
+    }
+
+    public static void verifySignature(List<Certificate> certs, int sigVersion, File signatureFile, File target) throws IOException {
+        byte[] signature;
+        try {
+            // base64 decoder does not tolerant line breaks
+            signature = String.join("", Files.readAllLines(signatureFile.toPath()))
+                .getBytes(StandardCharsets.UTF_8);
+        } finally {
+            FileUtil.deleteHarder(signatureFile); // delete the file regardless
+        }
+
+        byte[] buffer = new byte[8192];
+        int length, validated = 0;
+        for (Certificate cert : certs) {
+            try (FileInputStream dataInput = new FileInputStream(target)) {
+                Signature sig = Signature.getInstance(Digest.sigAlgorithm(sigVersion));
+                sig.initVerify(cert);
+                while ((length = dataInput.read(buffer)) != -1) {
+                    sig.update(buffer, 0, length);
+                }
+
+                if (!sig.verify(Base64.getDecoder().decode(signature))) {
+                    log.info("Signature does not match", "cert", cert.getPublicKey());
+                    continue;
+                } else {
+                    log.info("Signature matches", "cert", cert.getPublicKey());
+                    validated++;
+                }
+
+            } catch (IOException ioe) {
+                log.warning("Failure validating signature of " + target + ": " + ioe);
+
+            } catch (GeneralSecurityException gse) {
+                // no problem!
+
+            }
+        }
+
+        // if we couldn't find a key that validates our digest, we are the hosed!
+        if (validated == 0) {
+            // delete the temporary digest file as we know it is invalid
+            FileUtil.deleteHarder(target);
+            throw new IOException("m.corrupt_digest_signature_error");
         }
     }
 

@@ -21,7 +21,7 @@ public class DigesterIT {
     @Test
     public void testDigester () throws Exception {
         Path appdir = Paths.get("src/it/resources/testapp");
-        Digester.createDigests(appdir.toFile(), null, null, null);
+        Digester.createDigests(appdir.toFile(), Paths.get("src/it/resources/testapp-keystore.jks").toFile(), "abcde123", "testdomain");
 
         Path digest = appdir.resolve("digest.txt");
         List<String> digestLines = Files.readAllLines(digest, StandardCharsets.UTF_8);
@@ -50,5 +50,29 @@ public class DigesterIT {
             "script.sh = cca1c5c7628d9bf7533f655a9cfa6573d64afb8375f81960d1d832dc5135c988",
             "digest2.txt = 41eacdabda8909bdbbf61e4f980867f4003c16a12f6770e6fc619b6af100e05b"
         ), digest2Lines);
+
+        Path digestSig = appdir.resolve("digest.txt.sig");
+        List<String> digestSigLines = Files.readAllLines(digestSig, StandardCharsets.UTF_8);
+        Files.delete(digestSig);
+
+        Path digest2Sig = appdir.resolve("digest2.txt.sig");
+        List<String> digest2SigLines = Files.readAllLines(digest2Sig, StandardCharsets.UTF_8);
+        Files.delete(digest2Sig);
+
+        assertEquals(Arrays.asList(
+            "NVa8p6whkc0So4nxGOB4tZPU/PRI6oci8N07BaZlzqZ/BTMyNAttsaICH15msrk8ETJ7U5wPPHSR",
+            "kRbpQmcWDKAxUS2veTqv5XP3DgT1qGpkCAFWjno4WXh/i1IFt6p5VYao0hh2Tai3ha015I0B3rmz",
+            "qVT6BS/AQpg1W5fVrCLLARBTpFD0OVtT56iyNp+Vyq2co7RnBUk7omKNzDH+rGbylrqH95ljzTn6",
+            "DSmiSNhiXJzhroJ9lzMKgDxRGyFNDoXUytjnzfP73wBqKCIMZ4d9XYF4pPbO9dJM8TbI7JphH0lj",
+            "mWdPDUdAUaG7FAdXxtI3yHQE78UHTH2jGHfs5w=="
+        ), digestSigLines);
+
+        assertEquals(Arrays.asList(
+            "DBcOqsMjyE2syPIqJzJuYLf5gj41sSz5trsRzeLdJNN8H2eyXFU8BatFvpLY2OiLr+SZrnFZMARi",
+            "rcGTk6n8IdxiJJD4qK9PRqw0jPbh7EYfP/f0D48n4QsgnTiRekCND4RvMaqxXjVopnjrh5NQr/ZM",
+            "IV6V8bl9HkeiVSOkw/gwRZOG9ljElqEZ4NzIeo79y4XljPGjQW9CoYz5cAfVyW9OHkbFi+Gp4u0l",
+            "fQTjI0XHNTFBv1Ccs7hhy18C7t99dKUKVYIgZMAzqSmrodltCY6JxLqVbdAvnW5Z3A45lZD9PHCL",
+            "Ne5NivlUmq9V6tczcqcurL3mzWMinFEpuTLNtA=="
+        ), digest2SigLines);
     }
 }

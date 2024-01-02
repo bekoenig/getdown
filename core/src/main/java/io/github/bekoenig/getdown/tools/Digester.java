@@ -16,13 +16,13 @@ import java.security.PrivateKey;
 import java.security.Signature;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import io.github.bekoenig.getdown.data.Application;
 import io.github.bekoenig.getdown.data.Digest;
 import io.github.bekoenig.getdown.data.EnvConfig;
 import io.github.bekoenig.getdown.data.Resource;
-import io.github.bekoenig.getdown.util.Base64;
 import io.github.bekoenig.getdown.util.Config;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -129,7 +129,9 @@ public class Digester
             }
 
             // Write out the signature
-            String signed = Base64.encodeToString(sig.sign(), Base64.DEFAULT);
+            String signed = Base64.getEncoder().encodeToString(sig.sign())
+                // Wrap lines after 76 characters (http://www.ietf.org/rfc/rfc2045.txt)
+                .replaceAll("(.{76})", "$1" + System.lineSeparator());
             signatureOutput.write(signed.getBytes(UTF_8));
         }
     }
