@@ -27,17 +27,17 @@ package com.samskivert.swing;
 public interface LabelStyleConstants
 {
     /** Constant denoting normal text style. */
-    public static final int NORMAL = 0;
+    int NORMAL = 0;
 
     /** Constant denoting bold text style. */
-    public static final int BOLD = 1 << 0;
+    int BOLD = 1 << 0;
 
     /** Constant denoting outline text style. */
-    public static final int OUTLINE = 1 << 1;
+    int OUTLINE = 1 << 1;
 
     /** Constant denoting shadow text style. */
-    public static final int SHADOW = 1 << 2;
+    int SHADOW = 1 << 2;
 
     /** Constant denoting underline text style. */
-    public static final int UNDERLINE = 1 << 3;
+    int UNDERLINE = 1 << 3;
 }

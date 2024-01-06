@@ -20,7 +20,6 @@
 
 package com.samskivert.swing;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
@@ -28,8 +27,6 @@ import java.awt.Graphics;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-import com.samskivert.swing.util.SwingUtil;
 
 /**
  * A Swing component that displays a {@link Label}.
@@ -44,36 +41,6 @@ public class MultiLineLabel extends JComponent
     public static final int NONE = GOLDEN+1;
 
     /**
-     * Constructs an empty multi line label.
-     */
-    public MultiLineLabel ()
-    {
-        this("");
-    }
-
-    /**
-     * Constructs a multi line label that displays the supplied text with center-alignment. The
-     * default layout is all on one line.
-     *
-     * @see #setLayout
-     */
-    public MultiLineLabel (String text)
-    {
-        this(text, CENTER);
-    }
-
-    /**
-     * Constructs a multi line label that displays the supplied text with the specified
-     * alignment. The default layout is all on one line.
-     *
-     * @see #setLayout
-     */
-    public MultiLineLabel (String text, int align)
-    {
-        this(text, align, NONE, 0);
-    }
-
-    /**
      * Constructs a multi line label that displays the supplied text with the specified
      * alignment. The default layout is all on one line.
      *
@@ -84,33 +51,6 @@ public class MultiLineLabel extends JComponent
         _label = createLabel(text);
         _label.setAlignment(align);
         noteConstraints(constrain, size);
-    }
-
-    /**
-     * @deprecated see {@link SwingUtil#getDefaultTextAntialiasing} on how to control text
-     * antialiasing.
-     */
-    @Deprecated
-    public void setAntiAliased (boolean antialiased)
-    {
-    }
-
-    /**
-     * Sets the constraints to be used when laying out the label.
-     *
-     * @param constrain {@link #HORIZONTAL} or {@link #VERTICAL} or {@link #GOLDEN} if the label
-     * should be laid out in a rectangle whose bounds approximate the golden ratio.
-     * @param size the width or height respectively to be targeted by the label or 0 if the label
-     * should react the first time it is laid out and use the dimension available at that
-     * point. <em>Note:</em> this requires that the label invalidate itself during its first
-     * validation which will cause it to change size visibly in the user interface. This argument
-     * is ignored if <code>constrain</code> is {@link #GOLDEN}.
-     */
-    public void setLayout (int constrain, int size)
-    {
-        noteConstraints(constrain, size);
-        _dirty = true;
-        repaint();
     }
 
     /** Helper function. */
@@ -144,71 +84,6 @@ public class MultiLineLabel extends JComponent
         default:
             throw new IllegalArgumentException("Invalid constraint orientation " + constrain);
         }
-    }
-
-    /**
-     * Sets the text displayed by this label.
-     */
-    public void setText (String text)
-    {
-        if (_label.setText(text)) {
-            _dirty = true;
-            // clear out our constrained size where appropriate
-            if (_constrain == HORIZONTAL || _constrain == VERTICAL) {
-                _constrainedSize = 0;
-                _label.clearTargetDimens();
-            }
-            revalidate();
-            repaint();
-        }
-    }
-
-    /**
-     * Returns the text displayed by this label.
-     */
-    public String getText ()
-    {
-        return _label.getText();
-    }
-
-    /**
-     * Sets the alternate color used to display the label text.
-     */
-    public void setAlternateColor (Color color)
-    {
-        _label.setAlternateColor(color);
-        _dirty = true;
-        repaint();
-    }
-
-    /**
-     * Sets the alignment of the text displayed by this label.
-     */
-    public void setAlignment (int align)
-    {
-        _label.setAlignment(align);
-        _dirty = true;
-        repaint();
-    }
-
-    /**
-     * Sets the off-axis alignment of the text displayed by this label.
-     */
-    public void setOffAxisAlignment (int align)
-    {
-        _offalign = align;
-        _dirty = true;
-        repaint();
-    }
-
-    /**
-     * Sets the text style used to render this label.
-     */
-    public void setStyle (int style)
-    {
-        _label.setStyle(style);
-        _dirty = true;
-        repaint();
     }
 
     @Override
@@ -285,11 +160,7 @@ public class MultiLineLabel extends JComponent
         // skipped over; dooh! instead we delay a call to revalidate so that the current validation
         // traversal will be completed before we mark ourselves and our parents as invalid
         if (delayedRevalidate) {
-            Runnable callRevalidate = new Runnable() {
-                public void run() {
-                    revalidate();
-                }
-            };
+            Runnable callRevalidate = this::revalidate;
             SwingUtilities.invokeLater(callRevalidate);
         }
 

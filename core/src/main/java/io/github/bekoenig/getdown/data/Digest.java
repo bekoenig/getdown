@@ -16,7 +16,6 @@ import io.github.bekoenig.getdown.util.Config;
 import io.github.bekoenig.getdown.util.MessageUtil;
 import io.github.bekoenig.getdown.util.ProgressObserver;
 import io.github.bekoenig.getdown.util.StringUtil;
-import io.github.bekoenig.getdown.Log;
 
 import static io.github.bekoenig.getdown.Log.log;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -66,15 +65,13 @@ public class Digest
 
         Set<Resource> pending = new HashSet<>(resources);
         for (final Resource rsrc : resources) {
-            exec.execute(new Runnable() {
-                public void run () {
-                    try {
-                        MessageDigest md = getMessageDigest(fversion);
-                        digests.put(rsrc, rsrc.computeDigest(fversion, md, null));
-                        completed.add(rsrc);
-                    } catch (Throwable t) {
-                        completed.add(new IOException("Error computing digest for: " + rsrc, t));
-                    }
+            exec.execute(() -> {
+                try {
+                    MessageDigest md = getMessageDigest(fversion);
+                    digests.put(rsrc, rsrc.computeDigest(fversion, md, null));
+                    completed.add(rsrc);
+                } catch (Throwable t) {
+                    completed.add(new IOException("Error computing digest for: " + rsrc, t));
                 }
             });
         }
@@ -83,7 +80,7 @@ public class Digest
         exec.shutdown();
 
         try {
-            while (pending.size() > 0) {
+            while (!pending.isEmpty()) {
                 Object done = completed.poll(600, TimeUnit.SECONDS);
                 if (done instanceof IOException) {
                     throw (IOException)done;

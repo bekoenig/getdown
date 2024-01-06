@@ -21,7 +21,6 @@
 package com.samskivert.swing;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -76,24 +75,6 @@ public class Label implements SwingConstants, LabelStyleConstants
     }
 
     /**
-     * Escape any special tags so that they won't be interpreted by the label.
-     */
-    public static String escapeColors (String txt)
-    {
-        if (txt == null) return null;
-        return COLOR_PATTERN.matcher(txt).replaceAll("#''$1");
-    }
-
-    /**
-     * Un-escape special tags so that they again look correct. Called by rendering components that
-     * do not understand the color tags to filter colors and unescape any escaped colors.
-     */
-    public static String unescapeColors (String txt)
-    {
-        return unescapeColors(filterColors(txt), true);
-    }
-
-    /**
      * Un-escape escaped tags so that they look as the users intended.
      */
     private static String unescapeColors (String txt, boolean restore)
@@ -101,14 +82,6 @@ public class Label implements SwingConstants, LabelStyleConstants
         if (txt == null) return null;
         String prefix = restore ? "#" : "%";
         return ESCAPED_PATTERN.matcher(txt).replaceAll(prefix + "$1");
-    }
-
-    /**
-     * Constructs a blank label.
-     */
-    public Label ()
-    {
-        this("");
     }
 
     /**
@@ -137,14 +110,6 @@ public class Label implements SwingConstants, LabelStyleConstants
         setTextColor(textColor);
         setAlternateColor(altColor);
         setFont(font);
-    }
-
-    /**
-     * Returns the text displayed by this label.
-     */
-    public String getText ()
-    {
-        return _text;
     }
 
     /**
@@ -180,7 +145,7 @@ public class Label implements SwingConstants, LabelStyleConstants
             _rawText = unescapeColors(_rawText, false);
         }
 
-        invalidate("setText");
+        invalidate();
         return true;
     }
 
@@ -194,15 +159,7 @@ public class Label implements SwingConstants, LabelStyleConstants
     public void setFont (Font font)
     {
         _font = font;
-        invalidate("setFont");
-    }
-
-    /**
-     * Returns the color used to render the text.
-     */
-    public Color getTextColor ()
-    {
-        return _textColor;
+        invalidate();
     }
 
     /**
@@ -212,14 +169,6 @@ public class Label implements SwingConstants, LabelStyleConstants
     public void setTextColor (Color color)
     {
         _textColor = color;
-    }
-
-    /**
-     * Returns the alternate color used to render the text's outline or shadow, if any.
-     */
-    public Color getAlternateColor ()
-    {
-        return _alternateColor;
     }
 
     /**
@@ -264,7 +213,7 @@ public class Label implements SwingConstants, LabelStyleConstants
     public void setStyle (int style)
     {
         _style = style;
-        invalidate("setStyle");
+        invalidate();
     }
 
     /**
@@ -279,7 +228,7 @@ public class Label implements SwingConstants, LabelStyleConstants
         // use -1 as an indicator that we should be golden
         _constraints.width = -1;
         _constraints.height = -1;
-        invalidate("setGoldenLayout");
+        invalidate();
     }
 
     /**
@@ -299,7 +248,7 @@ public class Label implements SwingConstants, LabelStyleConstants
         }
         _constraints.width = targetWidth;
         _constraints.height = 0;
-        invalidate("setTargetWidth");
+        invalidate();
     }
 
     /**
@@ -321,24 +270,7 @@ public class Label implements SwingConstants, LabelStyleConstants
         }
         _constraints.width = 0;
         _constraints.height = targetHeight;
-        invalidate("setTargetHeight");
-    }
-
-    /**
-     * Clears out previously configured target dimensions for this label.
-     */
-    public void clearTargetDimens ()
-    {
-        _constraints.width = 0;
-        _constraints.height = 0;
-    }
-
-    /**
-     * Returns the number of lines used by this label.
-     */
-    public int getLineCount ()
-    {
-        return _layouts.length;
+        invalidate();
     }
 
     /**
@@ -347,26 +279,6 @@ public class Label implements SwingConstants, LabelStyleConstants
     public Dimension getSize ()
     {
         return _size;
-    }
-
-    /**
-     * Returns true if this label has been laid out, false if not.
-     */
-    public boolean isLaidOut ()
-    {
-        return (_layouts != null);
-    }
-
-    /**
-     * Calls {@link #layout(Graphics2D)} with the graphics context for the given component.
-     */
-    public void layout (Component comp)
-    {
-        Graphics2D gfx = (Graphics2D)comp.getGraphics();
-        if (gfx != null) {
-            layout(gfx);
-            gfx.dispose();
-        }
     }
 
     /**
@@ -448,8 +360,8 @@ public class Label implements SwingConstants, LabelStyleConstants
             Rectangle2D bounds = getBounds(layout);
             // for some reason JDK1.3 on Linux chokes on setSize(double,double)
             _size.setSize(Math.ceil(getWidth(bounds)), Math.ceil(getHeight(layout)));
-            layouts = new ArrayList<Tuple<TextLayout,Rectangle2D>>();
-            layouts.add(new Tuple<TextLayout,Rectangle2D>(layout, bounds));
+            layouts = new ArrayList<>();
+            layouts.add(new Tuple<>(layout, bounds));
         }
 
         // create our layouts array
@@ -483,7 +395,7 @@ public class Label implements SwingConstants, LabelStyleConstants
     {
         // start with a size of zero
         double width = 0, height = 0;
-        List<Tuple<TextLayout,Rectangle2D>> layouts = new ArrayList<Tuple<TextLayout,Rectangle2D>>();
+        List<Tuple<TextLayout,Rectangle2D>> layouts = new ArrayList<>();
 
         try {
             // obtain our new dimensions by using a line break iterator to lay out our text one
@@ -502,7 +414,7 @@ public class Label implements SwingConstants, LabelStyleConstants
                 Rectangle2D bounds = getBounds(layout);
                 width = Math.max(width, getWidth(bounds));
                 height += getHeight(layout);
-                layouts.add(new Tuple<TextLayout,Rectangle2D>(layout, bounds));
+                layouts.add(new Tuple<>(layout, bounds));
             }
 
             // fill in the computed size; for some reason JDK1.3 on Linux chokes on
@@ -627,7 +539,7 @@ public class Label implements SwingConstants, LabelStyleConstants
     {
         // first set up any attributes that apply to the entire text
         Font font = (_font == null) ? gfx.getFont() : _font;
-        HashMap<TextAttribute,Object> map = new HashMap<TextAttribute,Object>();
+        HashMap<TextAttribute,Object> map = new HashMap<>();
         map.put(TextAttribute.FONT, font);
         if ((_style & UNDERLINE) != 0) {
             map.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_LOW_ONE_PIXEL);
@@ -725,10 +637,9 @@ public class Label implements SwingConstants, LabelStyleConstants
      * Called when the label is changed in such a way that it must be relaid out before again being
      * rendered.
      */
-    protected void invalidate (String where)
+    protected void invalidate ()
     {
         _layouts = null;
-//         _invalidator = where;
     }
 
     /** The text of the label. */

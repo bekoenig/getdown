@@ -15,7 +15,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -225,21 +224,19 @@ public class GetdownApp
                 super.fail(message);
                 // super.fail causes the UI to be created (if needed) on the next UI tick, so we
                 // want to wait until that happens before we attempt to redecorate the window
-                EventQueue.invokeLater(new Runnable() {
-                    @Override public void run () {
-                        // if the frame was set to be undecorated, make window decoration available
-                        // to allow the user to close the window
-                        if (_frame != null && _frame.isUndecorated()) {
-                            _frame.dispose();
-                            Color bg = _frame.getBackground();
-                            if (bg != null && bg.getAlpha() < 255) {
-                                // decorated windows do not allow alpha backgrounds
-                                _frame.setBackground(
-                                    new Color(bg.getRed(), bg.getGreen(), bg.getBlue()));
-                            }
-                            _frame.setUndecorated(false);
-                            showContainer();
+                EventQueue.invokeLater(() -> {
+                    // if the frame was set to be undecorated, make window decoration available
+                    // to allow the user to close the window
+                    if (_frame != null && _frame.isUndecorated()) {
+                        _frame.dispose();
+                        Color bg = _frame.getBackground();
+                        if (bg != null && bg.getAlpha() < 255) {
+                            // decorated windows do not allow alpha backgrounds
+                            _frame.setBackground(
+                                new Color(bg.getRed(), bg.getGreen(), bg.getBlue()));
                         }
+                        _frame.setUndecorated(false);
+                        showContainer();
                     }
                 });
             }

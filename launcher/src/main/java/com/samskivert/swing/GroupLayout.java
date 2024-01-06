@@ -122,56 +122,6 @@ public abstract class GroupLayout
     /** The default gap between components, in pixels. */
     public static final int DEFAULT_GAP = 5;
 
-    public void setPolicy (Policy policy)
-    {
-        _policy = policy;
-    }
-
-    public Policy getPolicy ()
-    {
-        return _policy;
-    }
-
-    public void setOffAxisPolicy (Policy offpolicy)
-    {
-        _offpolicy = offpolicy;
-    }
-
-    public Policy getOffAxisPolicy ()
-    {
-        return _offpolicy;
-    }
-
-    public void setGap (int gap)
-    {
-        _gap = gap;
-    }
-
-    public int getGap ()
-    {
-        return _gap;
-    }
-
-    public void setJustification (Justification justification)
-    {
-        _justification = justification;
-    }
-
-    public Justification getJustification ()
-    {
-        return _justification;
-    }
-
-    public void setOffAxisJustification (Justification justification)
-    {
-        _offjust = justification;
-    }
-
-    public Justification getOffAxisJustification ()
-    {
-        return _offjust;
-    }
-
     public void addLayoutComponent (String name, Component comp)
     {
         // nothing to do here
@@ -189,7 +139,7 @@ public abstract class GroupLayout
         if (constraints != null) {
             if (constraints instanceof Constraints) {
                 if (_constraints == null) {
-                    _constraints = new HashMap<Component,Constraints>();
+                    _constraints = new HashMap<>();
                 }
                 _constraints.put(comp, (Constraints)constraints);
 
@@ -318,16 +268,6 @@ public abstract class GroupLayout
     }
 
     /**
-     * Creates a {@link JPanel} that is configured with a center-justified {@link HGroupLayout}
-     * with a configuration conducive to containing a row of buttons. Any supplied buttons are
-     * added to the box.
-     */
-    public static JPanel makeButtonBox (Component... buttons)
-    {
-        return makeButtonBox(GroupLayout.CENTER, buttons);
-    }
-
-    /**
      * Creates a {@link JPanel} that is configured with an {@link HGroupLayout} with a
      * configuration conducive to containing a row of buttons. Any supplied buttons are added to
      * the box.
@@ -340,108 +280,6 @@ public abstract class GroupLayout
             box.setOpaque(false);
         }
         return box;
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * HGroupLayout} with the default configuration.
-     */
-    public static JPanel makeHBox ()
-    {
-        return new JPanel(new HGroupLayout());
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * HGroupLayout} with a configuration that stretches in both
-     * directions, with the specified gap.
-     */
-    public static JPanel makeHStretchBox (int gap)
-    {
-        return new JPanel(new HGroupLayout(STRETCH, STRETCH, gap, CENTER));
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * HGroupLayout} with the specified on-axis policy (default
-     * configuration otherwise).
-     */
-    public static JPanel makeHBox (Policy policy)
-    {
-        return new JPanel(new HGroupLayout(policy));
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * HGroupLayout} with the specified on-axis policy and justification
-     * (default configuration otherwise).
-     */
-    public static JPanel makeHBox (Policy policy, Justification justification)
-    {
-        return new JPanel(new HGroupLayout(policy, justification));
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * HGroupLayout} with the specified on-axis policy, justification and
-     * off-axis policy (default configuration otherwise).
-     */
-    public static JPanel makeHBox (Policy policy, Justification justification,
-                                   Policy offAxisPolicy)
-    {
-        return new JPanel(new HGroupLayout(policy, offAxisPolicy,
-                                           DEFAULT_GAP, justification));
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * VGroupLayout} with the default configuration.
-     */
-    public static JPanel makeVBox ()
-    {
-        return new JPanel(new VGroupLayout());
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * VGroupLayout} with the specified on-axis policy (default
-     * configuration otherwise).
-     */
-    public static JPanel makeVBox (Policy policy)
-    {
-        return new JPanel(new VGroupLayout(policy));
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * VGroupLayout} with the specified on-axis policy and justification
-     * (default configuration otherwise).
-     */
-    public static JPanel makeVBox (Policy policy, Justification justification)
-    {
-        return new JPanel(new VGroupLayout(policy, justification));
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * VGroupLayout} with the specified on-axis policy, justification and
-     * off-axis policy (default configuration otherwise).
-     */
-    public static JPanel makeVBox (Policy policy, Justification justification,
-                                   Policy offAxisPolicy)
-    {
-        return new JPanel(new VGroupLayout(policy, offAxisPolicy,
-                                           DEFAULT_GAP, justification));
-    }
-
-    /**
-     * Creates a {@link JPanel} that is configured with an {@link
-     * VGroupLayout} with a configuration that stretches in both
-     * directions, with the specified gap.
-     */
-    public static JPanel makeVStretchBox (int gap)
-    {
-        return new JPanel(new VGroupLayout(STRETCH, STRETCH, gap, CENTER));
     }
 
     protected Policy _policy = NONE;

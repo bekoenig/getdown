@@ -788,7 +788,7 @@ public class Application
 
         // determine our application class name (use app-specific class _if_ one is provided)
         _class = config.getString("class");
-        if (appPrefix.length() > 0) {
+        if (!appPrefix.isEmpty()) {
             _class = config.getString(appPrefix + "class", _class);
         }
         if (_class == null) {
@@ -797,7 +797,7 @@ public class Application
 
         // transfer our JVM arguments (we include both "global" args and app_id-prefixed args)
         addAll(config.getMultiValue("jvmarg"), _jvmargs);
-        if (appPrefix.length() > 0) {
+        if (!appPrefix.isEmpty()) {
             addAll(config.getMultiValue(appPrefix + "jvmarg"), _jvmargs);
         }
 
@@ -831,7 +831,7 @@ public class Application
             try {
                 List<String[]> args = Config.parsePairs(pairFile, Config.createOpts(false));
                 for (String[] pair : args) {
-                    if (pair[1].length() == 0) {
+                    if (pair[1].isEmpty()) {
                         collector.add(pair[0]);
                     } else {
                         collector.add(pair[0] + "=" + pair[1]);
@@ -1345,15 +1345,8 @@ public class Application
         final ProgressObserver fobs = obs;
         // as long as we forward aggregated progress updates to the UI thread, having multiple
         // threads update a progress aggregator is "mostly" thread-safe
-        final ProgressAggregator pagg = new ProgressAggregator(new ProgressObserver() {
-            public void progress (final int percent) {
-                actions.add(new Runnable() {
-                    public void run () {
-                        fobs.progress(percent);
-                    }
-                });
-            }
-        }, sizes);
+        final ProgressAggregator pagg = new ProgressAggregator(
+            percent -> actions.add(() -> fobs.progress(percent)), sizes);
 
         final int[] fAlreadyValid = alreadyValid;
         final Set<Resource> toInstallAsync = new ConcurrentSkipListSet<>(toInstall);
@@ -1363,16 +1356,14 @@ public class Application
         for (int ii = 0; ii < sizes.length; ii++) {
             final Resource rsrc = rsrcs.get(ii);
             final int index = ii;
-            exec.execute(new Runnable() {
-                public void run () {
-                    verifyResource(rsrc, pagg.startElement(index), fAlreadyValid,
-                                   unpackedAsync, toInstallAsync, toDownloadAsync);
-                    actions.add(new Runnable() {
-                        public void run () {
-                            completed[0] += 1;
-                        }
-                    });
-                }
+            exec.execute(() -> {
+                verifyResource(rsrc, pagg.startElement(index), fAlreadyValid,
+                               unpackedAsync, toInstallAsync, toDownloadAsync);
+                actions.add(new Runnable() {
+                    public void run () {
+                        completed[0] += 1;
+                    }
+                });
             });
         }
 
@@ -1563,7 +1554,6 @@ public class Application
 
     /**
      * Downloads the digest files and validates their signature.
-     * @throws IOException
      */
     protected void downloadDigestFiles ()
         throws IOException
@@ -1658,7 +1648,7 @@ public class Application
     {
         File target = getLocalPath(path + "_new");
 
-        URL targetURL = null;
+        URL targetURL;
         try {
             targetURL = getRemoteURL(path);
         } catch (Exception e) {
@@ -1829,5 +1819,5 @@ public class Application
     protected static final String ENV_VAR_PREFIX = "%ENV.";
     protected static final Pattern ENV_VAR_PATTERN = Pattern.compile("%ENV\\.(.*?)%");
 
-    protected static enum RevalidatePolicy { ALWAYS, AFTER_UPDATE }
+    protected enum RevalidatePolicy { ALWAYS, AFTER_UPDATE }
 }

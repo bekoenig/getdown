@@ -5,7 +5,6 @@
 
 package io.github.bekoenig.getdown.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -84,12 +83,4 @@ public final class StreamUtil {
         return out;
     }
 
-    /**
-     * Reads the contents of the supplied stream into a byte array.
-     */
-    public static byte[] toByteArray (InputStream stream)
-        throws IOException
-    {
-        return copy(stream, new ByteArrayOutputStream()).toByteArray();
-    }
 }

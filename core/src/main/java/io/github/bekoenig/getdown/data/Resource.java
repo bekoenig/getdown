@@ -60,14 +60,13 @@ public class Resource implements Comparable<Resource>
         // if this is a jar, we need to compute the digest in a "timestamp and file order" agnostic
         // manner to properly correlate jardiff patched jars with their unpatched originals
         if (isZip){
-            File tmpJarFile = null;
             ZipFile zip = null;
             try {
                 // if this is a compressed zip file, uncompress it to compute the zip file digest
                 zip = new ZipFile(target);
 
                 List<? extends ZipEntry> entries = Collections.list(zip.entries());
-                Collections.sort(entries, ENTRY_COMP);
+                entries.sort(ENTRY_COMP);
 
                 int eidx = 0;
                 for (ZipEntry entry : entries) {
@@ -95,9 +94,6 @@ public class Resource implements Comparable<Resource>
                     } catch (IOException ioe) {
                         log.warning("Error closing", "path", target, "zip", zip, "error", ioe);
                     }
-                }
-                if (tmpJarFile != null) {
-                    FileUtil.deleteHarder(tmpJarFile);
                 }
             }
 
@@ -372,11 +368,7 @@ public class Resource implements Comparable<Resource>
     protected final boolean _isZip;
 
     /** Used to sort the entries in a jar file. */
-    protected static final Comparator<ZipEntry> ENTRY_COMP = new Comparator<ZipEntry>() {
-        @Override public int compare (ZipEntry e1, ZipEntry e2) {
-            return e1.getName().compareTo(e2.getName());
-        }
-    };
+    protected static final Comparator<ZipEntry> ENTRY_COMP = Comparator.comparing(ZipEntry::getName);
 
     protected static final int DIGEST_BUFFER_SIZE = 5 * 1025;
 }

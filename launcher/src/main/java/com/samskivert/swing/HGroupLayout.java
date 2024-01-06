@@ -24,34 +24,11 @@ import java.awt.*;
 
 public class HGroupLayout extends GroupLayout
 {
-    public HGroupLayout (Policy policy, Policy offpolicy, int gap, Justification justification)
-    {
-        _policy = policy;
-        _offpolicy = offpolicy;
-        _gap = gap;
-        _justification = justification;
-    }
-
-    public HGroupLayout (Policy policy, int gap, Justification justification)
-    {
-        _policy = policy;
-        _gap = gap;
-        _justification = justification;
-    }
 
     public HGroupLayout (Policy policy, Justification justification)
     {
         _policy = policy;
         _justification = justification;
-    }
-
-    public HGroupLayout (Policy policy)
-    {
-        _policy = policy;
-    }
-
-    public HGroupLayout ()
-    {
     }
 
     @Override

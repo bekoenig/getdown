@@ -44,14 +44,12 @@ public final class StatusPanel extends JComponent
         // Add a bit of "throbbing" to the display by updating the number of dots displayed after
         // our status. This lets users know things are still working.
         _timer = new Timer(1000,
-            new ActionListener() {
-                public void actionPerformed (ActionEvent event) {
+                event -> {
                     if (_status != null && !_displayError) {
                         _statusDots = (_statusDots % 3) + 1; // 1, 2, 3, 1, 2, 3, etc.
                         updateStatusLabel();
                     }
-                }
-            });
+                });
     }
 
     public void init (UpdateInterface ifc, RotatingBackgrounds bg, Image barimg)
@@ -153,16 +151,6 @@ public final class StatusPanel extends JComponent
     {
         _status = xlate(status);
         _displayError = displayError;
-        updateStatusLabel();
-    }
-
-    /**
-     * Stop the throbbing.
-     */
-    public void stopThrob ()
-    {
-        _timer.stop();
-        _statusDots = 3;
         updateStatusLabel();
     }
 

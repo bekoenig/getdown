@@ -60,10 +60,8 @@ public class JarDiffPatcher implements JarDiffCodes
             // Files to implicit move
             Set<String> oldjarNames  = new HashSet<>();
             Enumeration<? extends ZipEntry> oldEntries = oldJar.entries();
-            if (oldEntries != null) {
-                while  (oldEntries.hasMoreElements()) {
-                    oldjarNames.add(oldEntries.nextElement().getName());
-                }
+            while (oldEntries.hasMoreElements()) {
+                oldjarNames.add(oldEntries.nextElement().getName());
             }
 
             // size depends on the three parameters below, which is basically the
@@ -205,7 +203,7 @@ public class JarDiffPatcher implements JarDiffCodes
                     throw new IOException("error.badmove: " + line);
                 }
 
-            } else if (line.length() > 0) {
+            } else if (!line.isEmpty()) {
                 throw new IOException("error.badcommand: " + line);
             }
         }

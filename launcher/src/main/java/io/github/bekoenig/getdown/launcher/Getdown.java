@@ -361,7 +361,7 @@ public abstract class Getdown
                 _app.verifyResources(_progobs, alreadyValid, unpacked,
                                      _toInstallResources, toDownload);
 
-                if (toDownload.size() > 0) {
+                if (!toDownload.isEmpty()) {
                     // we have resources to download, also note them as to-be-installed
                     _toInstallResources.addAll(toDownload);
 
@@ -588,11 +588,7 @@ public abstract class Getdown
             // show the patch notes button, if applicable
             if (!StringUtil.isBlank(_ifc.patchNotesUrl)) {
                 createInterfaceAsync(false);
-                EventQueue.invokeLater(new Runnable() {
-                    public void run () {
-                        _patchNotes.setVisible(true);
-                    }
-                });
+                EventQueue.invokeLater(() -> _patchNotes.setVisible(true));
             }
 
             // download the patch files...
@@ -776,11 +772,7 @@ public abstract class Getdown
                 } else {
                     // spawn a daemon thread that will catch the early bits of stderr in case the
                     // launch fails
-                    Thread t = new Thread() {
-                        @Override public void run () {
-                            copyStream(stderr, System.err);
-                        }
-                    };
+                    Thread t = new Thread(() -> copyStream(stderr, System.err));
                     t.setDaemon(true);
                     t.start();
                 }
@@ -819,30 +811,28 @@ public abstract class Getdown
             return;
         }
 
-        EventQueue.invokeLater(new Runnable() {
-            public void run () {
-                if (_container == null || reinit) {
-                    if (_container == null) {
-                        _container = createContainer();
-                    } else {
-                        _container.removeAll();
-                    }
-                    configureContainer();
-                    _layers = new JLayeredPane();
-                    _container.add(_layers, BorderLayout.CENTER);
-                    _patchNotes = new JButton(new AbstractAction(_msgs.getString("m.patch_notes")) {
-                        @Override public void actionPerformed (ActionEvent event) {
-                            showDocument(_ifc.patchNotesUrl);
-                        }
-                    });
-                    _patchNotes.setFont(StatusPanel.FONT);
-                    _layers.add(_patchNotes);
-                    _status = new StatusPanel(_msgs);
-                    _layers.add(_status);
-                    initInterface();
+        EventQueue.invokeLater(() -> {
+            if (_container == null || reinit) {
+                if (_container == null) {
+                    _container = createContainer();
+                } else {
+                    _container.removeAll();
                 }
-                showContainer();
+                configureContainer();
+                _layers = new JLayeredPane();
+                _container.add(_layers, BorderLayout.CENTER);
+                _patchNotes = new JButton(new AbstractAction(_msgs.getString("m.patch_notes")) {
+                    @Override public void actionPerformed (ActionEvent event) {
+                        showDocument(_ifc.patchNotesUrl);
+                    }
+                });
+                _patchNotes.setFont(StatusPanel.FONT);
+                _layers.add(_patchNotes);
+                _status = new StatusPanel(_msgs);
+                _layers.add(_status);
+                initInterface();
             }
+            showContainer();
         });
     }
 
@@ -976,22 +966,20 @@ public abstract class Getdown
             createInterfaceAsync(false);
         }
 
-        EventQueue.invokeLater(new Runnable() {
-            public void run () {
-                if (_status == null) {
-                    if (message != null) {
-                        log.info("Dropping status '" + message + "'.");
-                    }
-                    return;
-                }
+        EventQueue.invokeLater(() -> {
+            if (_status == null) {
                 if (message != null) {
-                    _status.setStatus(message, _dead);
+                    log.info("Dropping status '" + message + "'.");
                 }
-                if (_dead) {
-                    _status.setProgress(0, -1L);
-                } else if (percent >= 0) {
-                    _status.setProgress(percent, remaining);
-                }
+                return;
+            }
+            if (message != null) {
+                _status.setStatus(message, _dead);
+            }
+            if (_dead) {
+                _status.setProgress(0, -1L);
+            } else if (percent >= 0) {
+                _status.setProgress(percent, remaining);
             }
         });
     }
@@ -1113,11 +1101,8 @@ public abstract class Getdown
     }
 
     /** Used to pass progress on to our user interface. */
-    protected final ProgressObserver _progobs = new ProgressObserver() {
-        public void progress (int percent) {
-            setStatusAsync(null, stepToGlobalPercent(percent), -1L, false);
-        }
-    };
+    protected final ProgressObserver _progobs = percent -> setStatusAsync(null,
+        stepToGlobalPercent(percent), -1L, false);
 
     protected final Application _app;
     protected Application.UpdateInterface _ifc = new Application.UpdateInterface(Config.EMPTY);

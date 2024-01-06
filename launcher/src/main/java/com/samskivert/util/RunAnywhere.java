@@ -31,7 +31,7 @@ public class RunAnywhere
      * Returns true if we're running in a JVM that identifies its
      * operating system as MacOS.
      */
-    public static final boolean isMacOS ()
+    public static boolean isMacOS()
     {
         return _isMacOS;
     }
@@ -44,8 +44,7 @@ public class RunAnywhere
         try {
             String osname = System.getProperty("os.name");
             osname = (osname == null) ? "" : osname;
-            _isMacOS = (osname.indexOf("Mac OS") != -1 ||
-                        osname.indexOf("MacOS") != -1);
+            _isMacOS = osname.contains("Mac OS") || osname.contains("MacOS");
         } catch (Exception e) {
             // dang, can't grab system properties; we'll just pretend
             // we're not on any of these OSes
