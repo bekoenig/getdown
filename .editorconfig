@@ -15,7 +15,6 @@ indent_size=4
 # <blank line>
 # import javax.*
 # <blank line>
-# import com.samskivert.*
 # import io.github.bekoenig.*
 # import all other imports
 # import static all other imports

@@ -18,7 +18,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package com.samskivert.swing;
+package io.github.bekoenig.getdown.launcher.swing;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -45,11 +45,11 @@ import java.util.regex.Pattern;
 
 import javax.swing.SwingConstants;
 
-import com.samskivert.util.RunAnywhere;
-import com.samskivert.util.StringUtil;
-import com.samskivert.util.Tuple;
+import io.github.bekoenig.getdown.launcher.swing.util.RunAnywhere;
+import io.github.bekoenig.getdown.launcher.swing.util.StringUtil;
+import io.github.bekoenig.getdown.launcher.swing.util.Tuple;
 
-import com.samskivert.swing.util.SwingUtil;
+import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

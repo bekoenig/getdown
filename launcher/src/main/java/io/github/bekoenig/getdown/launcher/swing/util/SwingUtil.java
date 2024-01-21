@@ -18,7 +18,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package com.samskivert.swing.util;
+package io.github.bekoenig.getdown.launcher.swing.util;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;

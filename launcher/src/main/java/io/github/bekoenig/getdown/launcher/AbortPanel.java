@@ -18,9 +18,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.samskivert.swing.GroupLayout;
-import com.samskivert.swing.Spacer;
-import com.samskivert.swing.VGroupLayout;
+import io.github.bekoenig.getdown.launcher.swing.GroupLayout;
+import io.github.bekoenig.getdown.launcher.swing.Spacer;
+import io.github.bekoenig.getdown.launcher.swing.VGroupLayout;
 
 import io.github.bekoenig.getdown.util.MessageUtil;
 import org.slf4j.Logger;

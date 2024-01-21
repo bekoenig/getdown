@@ -18,15 +18,17 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package com.samskivert.swing;
+package io.github.bekoenig.getdown.launcher.swing;
 
 import java.awt.*;
 
-public class VGroupLayout extends GroupLayout
+public class HGroupLayout extends GroupLayout
 {
 
-    public VGroupLayout ()
+    public HGroupLayout (Policy policy, Justification justification)
     {
+        _policy = policy;
+        _justification = justification;
     }
 
     @Override
@@ -36,15 +38,15 @@ public class VGroupLayout extends GroupLayout
         Dimension dims = new Dimension();
 
         if (_policy == STRETCH) {
-            dims.height = info.maxfreehei * (info.count - info.numfix) + info.fixhei;
+            dims.width = info.maxfreewid * (info.count - info.numfix) + info.fixwid;
         } else if (_policy == EQUALIZE) {
-            dims.height = info.maxhei * info.count;
+            dims.width = info.maxwid * info.count;
         } else { // NONE or CONSTRAIN
-            dims.height = info.tothei;
+            dims.width = info.totwid;
         }
 
-        dims.height += (info.count - 1) * _gap;
-        dims.width = info.maxwid;
+        dims.width += (info.count - 1) * _gap;
+        dims.height = info.maxhei;
 
         // account for the insets
         Insets insets = parent.getInsets();
@@ -67,7 +69,7 @@ public class VGroupLayout extends GroupLayout
 
         int nk = parent.getComponentCount();
         int sx, sy;
-        int tothei, totgap = _gap * (info.count-1);
+        int totwid, totgap = _gap * (info.count-1);
         int freecount = info.count - info.numfix;
 
         // when stretching, there is the possibility that a pixel or more
@@ -76,40 +78,40 @@ public class VGroupLayout extends GroupLayout
         int freefrac = 0;
 
         // do the on-axis policy calculations
-        int defhei = 0;
+        int defwid = 0;
         if (_policy == STRETCH) {
             if (freecount > 0) {
-                int freehei = b.height - info.fixhei - totgap;
-                defhei = freehei / info.totweight;
-                freefrac = freehei % info.totweight;
-                tothei = b.height;
+                int freewid = b.width - info.fixwid - totgap;
+                defwid = freewid / info.totweight;
+                freefrac = freewid % info.totweight;
+                totwid = b.width;
             } else {
-                tothei = info.fixhei + totgap;
+                totwid = info.fixwid + totgap;
             }
 
         } else if (_policy == EQUALIZE) {
-            defhei = info.maxhei;
-            tothei = info.fixhei + defhei * freecount + totgap;
+            defwid = info.maxwid;
+            totwid = info.fixwid + defwid * freecount + totgap;
 
-        } else {
-            tothei = info.tothei + totgap;
+        } else { // NONE or CONSTRAIN
+            totwid = info.totwid + totgap;
         }
 
         // do the off-axis policy calculations
-        int defwid = 0;
+        int defhei = 0;
         if (_offpolicy == STRETCH) {
-            defwid = b.width;
+            defhei = b.height;
         } else if (_offpolicy == EQUALIZE) {
-            defwid = info.maxwid;
+            defhei = info.maxhei;
         }
 
         // do the justification-related calculations
         if (_justification == LEFT || _justification == TOP) {
-            sy = insets.top;
+            sx = insets.left;
         } else if (_justification == CENTER) {
-            sy = insets.top + (b.height - tothei)/2;
+            sx = insets.left + (b.width - totwid)/2;
         } else { // RIGHT or BOTTOM
-            sy = insets.top + b.height - tothei;
+            sx = insets.left + b.width - totwid;
         }
 
         // do the layout
@@ -124,32 +126,32 @@ public class VGroupLayout extends GroupLayout
             int newwid, newhei;
 
             if (_policy == NONE || c.isFixed()) {
-                newhei = info.dimens[i].height;
+                newwid = info.dimens[i].width;
             } else {
-                newhei = freefrac + ((_policy == STRETCH) ? defhei * c.getWeight() : defhei);
+                newwid = freefrac + ((_policy == STRETCH) ? defwid * c.getWeight() : defwid);
                 // clear out the extra pixels the first time they're used
                 freefrac = 0;
             }
 
             if (_offpolicy == NONE) {
-                newwid = info.dimens[i].width;
+                newhei = info.dimens[i].height;
             } else if (_offpolicy == CONSTRAIN) {
-                newwid = Math.min(info.dimens[i].width, b.width);
+                newhei = Math.min(info.dimens[i].height, b.height);
             } else {
-                newwid = defwid;
+                newhei = defhei;
             }
 
             // determine our off-axis position
             if (_offjust == LEFT || _offjust == TOP) {
-                sx = insets.left;
+                sy = insets.top;
             } else if (_offjust == RIGHT || _offjust == BOTTOM) {
-                sx = insets.left + b.width - newwid;
+                sy = insets.top + b.height - newhei;
             } else { // CENTER
-                sx = insets.left + (b.width - newwid)/2;
+                sy = insets.top + (b.height - newhei)/2;
             }
 
             child.setBounds(sx, sy, newwid, newhei);
-            sy += child.getSize().height + _gap;
+            sx += child.getSize().width + _gap;
         }
     }
 }

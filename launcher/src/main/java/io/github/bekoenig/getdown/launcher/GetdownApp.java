@@ -26,7 +26,7 @@ import javax.swing.WindowConstants;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import com.samskivert.swing.util.SwingUtil;
+import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
 import io.github.bekoenig.getdown.data.EnvConfig;
 import io.github.bekoenig.getdown.data.SysProps;
 import io.github.bekoenig.getdown.util.LaunchUtil;

@@ -18,23 +18,26 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package com.samskivert.util;
+package io.github.bekoenig.getdown.launcher.swing;
 
 /**
- * String related utility functions.
+ * Defines text style constants for use with the {@link Label} and {@link
+ * MultiLineLabel}.
  */
-public class StringUtil
+public interface LabelStyleConstants
 {
-    /**
-     * @return true if the string is null or consists only of whitespace, false otherwise.
-     */
-    public static boolean isBlank (String value)
-    {
-        for (int ii = 0, ll = (value == null) ? 0 : value.length(); ii < ll; ii++) {
-            if (!Character.isWhitespace(value.charAt(ii))) {
-                return false;
-            }
-        }
-        return true;
-    }
+    /** Constant denoting normal text style. */
+    int NORMAL = 0;
+
+    /** Constant denoting bold text style. */
+    int BOLD = 1 << 0;
+
+    /** Constant denoting outline text style. */
+    int OUTLINE = 1 << 1;
+
+    /** Constant denoting shadow text style. */
+    int SHADOW = 1 << 2;
+
+    /** Constant denoting underline text style. */
+    int UNDERLINE = 1 << 3;
 }

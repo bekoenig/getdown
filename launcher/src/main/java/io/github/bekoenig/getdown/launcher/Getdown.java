@@ -32,7 +32,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
-import com.samskivert.swing.util.SwingUtil;
+import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
 import io.github.bekoenig.getdown.data.Application;
 import io.github.bekoenig.getdown.data.Application.UpdateInterface.Step;
 import io.github.bekoenig.getdown.data.Build;

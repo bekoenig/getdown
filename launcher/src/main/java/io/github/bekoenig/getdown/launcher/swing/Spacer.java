@@ -18,26 +18,31 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package com.samskivert.swing;
+package io.github.bekoenig.getdown.launcher.swing;
+
+import java.awt.Dimension;
+import javax.swing.JPanel;
 
 /**
- * Defines text style constants for use with the {@link Label} and {@link
- * MultiLineLabel}.
+ * A widget whose sole purpose is to introduce blank space between other
+ * widgets. A sorry lot, but he gets the job done.
  */
-public interface LabelStyleConstants
+public class Spacer extends JPanel
 {
-    /** Constant denoting normal text style. */
-    int NORMAL = 0;
+    /**
+     * Constructs a spacer with the specified width and height.
+     */
+    public Spacer (int width, int height)
+    {
+        this(new Dimension(width, height));
+    }
 
-    /** Constant denoting bold text style. */
-    int BOLD = 1 << 0;
-
-    /** Constant denoting outline text style. */
-    int OUTLINE = 1 << 1;
-
-    /** Constant denoting shadow text style. */
-    int SHADOW = 1 << 2;
-
-    /** Constant denoting underline text style. */
-    int UNDERLINE = 1 << 3;
+    /**
+     * Constructs a spacer with the specified width and height.
+     */
+    public Spacer (Dimension d)
+    {
+        setPreferredSize(d);
+        setOpaque(false);
+    }
 }

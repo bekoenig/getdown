@@ -18,31 +18,23 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package com.samskivert.swing;
-
-import java.awt.Dimension;
-import javax.swing.JPanel;
+package io.github.bekoenig.getdown.launcher.swing.util;
 
 /**
- * A widget whose sole purpose is to introduce blank space between other
- * widgets. A sorry lot, but he gets the job done.
+ * String related utility functions.
  */
-public class Spacer extends JPanel
+public class StringUtil
 {
     /**
-     * Constructs a spacer with the specified width and height.
+     * @return true if the string is null or consists only of whitespace, false otherwise.
      */
-    public Spacer (int width, int height)
+    public static boolean isBlank (String value)
     {
-        this(new Dimension(width, height));
-    }
-
-    /**
-     * Constructs a spacer with the specified width and height.
-     */
-    public Spacer (Dimension d)
-    {
-        setPreferredSize(d);
-        setOpaque(false);
+        for (int ii = 0, ll = (value == null) ? 0 : value.length(); ii < ll; ii++) {
+            if (!Character.isWhitespace(value.charAt(ii))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

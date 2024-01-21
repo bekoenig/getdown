@@ -20,10 +20,10 @@ import java.util.ResourceBundle;
 import javax.swing.JComponent;
 import javax.swing.Timer;
 
-import com.samskivert.swing.Label;
-import com.samskivert.swing.LabelStyleConstants;
-import com.samskivert.swing.util.SwingUtil;
-import com.samskivert.util.Throttle;
+import io.github.bekoenig.getdown.launcher.swing.Label;
+import io.github.bekoenig.getdown.launcher.swing.LabelStyleConstants;
+import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
+import io.github.bekoenig.getdown.launcher.swing.util.Throttle;
 import io.github.bekoenig.getdown.data.Application.UpdateInterface;
 import io.github.bekoenig.getdown.util.MessageUtil;
 import io.github.bekoenig.getdown.util.Rectangle;
