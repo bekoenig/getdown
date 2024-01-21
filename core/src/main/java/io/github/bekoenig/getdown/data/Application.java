@@ -26,8 +26,8 @@ import java.util.regex.Pattern;
 
 import io.github.bekoenig.getdown.net.Connector;
 import io.github.bekoenig.getdown.util.*;
-
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses and provide access to the information contained in the {@code getdown.txt}
@@ -35,6 +35,8 @@ import static io.github.bekoenig.getdown.Log.log;
  */
 public class Application
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+
     /** The name of our configuration file. */
     public static final String CONFIG_FILE = "getdown.txt";
 
@@ -197,7 +199,7 @@ public class Application
                     try {
                         stepPercentages.put(step, intsToList(StringUtil.parseIntArray(spec)));
                     } catch (Exception e) {
-                        log.warning("Failed to parse percentages for " + step + ": " + spec);
+                        LOGGER.warn("Failed to parse percentages for {}: {}", step, spec);
                     }
                 }
             }
@@ -250,16 +252,26 @@ public class Application
             }
             // otherwise, issue a warning that we found no getdown file
             else {
-                log.info("Found no getdown.txt file", "appdir", envc.appDir);
+                LOGGER.atInfo()
+                    .setMessage("Found no getdown.txt file")
+                    .addKeyValue("appdir", envc.appDir)
+                    .log();
             }
         } catch (Exception e) {
-            log.warning("Failure reading config file", "file", config, e);
+            LOGGER.atWarn()
+                .setMessage("Failure reading config file")
+                .addKeyValue("file", config)
+                .setCause(e)
+                .log();
         }
 
         // if we failed to read our config file, check for an appbase specified via a system
         // property; we can use that to bootstrap ourselves back into operation
         if (config == null) {
-            log.info("Using 'appbase' from bootstrap config", "appbase", envc.appBase);
+            LOGGER.atInfo()
+                .setMessage("Using 'appbase' from bootstrap config")
+                .addKeyValue("appbase", envc.appBase)
+                .log();
             Map<String, Object> cdata = new HashMap<>();
             cdata.put("appbase", envc.appBase);
             config = new Config(cdata);
@@ -466,8 +478,11 @@ public class Application
     public Resource getPatchResource (String auxgroup)
     {
         if (_targetVersion <= _version) {
-            log.warning("Requested patch resource for up-to-date or non-versioned application",
-                "cvers", _version, "tvers", _targetVersion);
+            LOGGER.atWarn()
+                .setMessage("Requested patch resource for up-to-date or non-versioned application")
+                .addKeyValue("cvers", _version)
+                .addKeyValue("tvers", _targetVersion)
+                .log();
             return null;
         }
 
@@ -477,8 +492,13 @@ public class Application
             URL remote = new URL(createVAppBase(_targetVersion), encodePath(pfile));
             return new Resource(pfile, remote, getLocalPath(pfile), Resource.NORMAL);
         } catch (Exception e) {
-            log.warning("Failed to create patch resource path",
-                "pfile", pfile, "appbase", _appbase, "tvers", _targetVersion, "error", e);
+            LOGGER.atWarn()
+                .setMessage("Failed to create patch resource path")
+                .addKeyValue("pfile", pfile)
+                .addKeyValue("appbase", _appbase)
+                .addKeyValue("tvers", _targetVersion)
+                .addKeyValue("error", e)
+                .log();
             return null;
         }
     }
@@ -510,8 +530,14 @@ public class Application
             return new Resource(vmfile, remote, getLocalPath(vmfile),
                                 EnumSet.of(Resource.Attr.UNPACK, Resource.Attr.CLEAN));
         } catch (Exception e) {
-            log.warning("Failed to create VM resource", "vmfile", vmfile, "appbase", _appbase,
-                "tvers", _targetVersion, "javaloc", _javaLocation, "error", e);
+            LOGGER.atWarn()
+                .setMessage("Failed to create VM resource")
+                .addKeyValue("vmfile", vmfile)
+                .addKeyValue("appbase", _appbase)
+                .addKeyValue("tvers", _targetVersion)
+                .addKeyValue("javaloc", _javaLocation)
+                .addKeyValue("error", e)
+                .log();
             return null;
         }
     }
@@ -527,8 +553,13 @@ public class Application
             URL remote = new URL(createVAppBase(_targetVersion), encodePath(file));
             return new Resource(file, remote, getLocalPath(file), Resource.NORMAL);
         } catch (Exception e) {
-            log.warning("Failed to create full resource path",
-                "file", file, "appbase", _appbase, "tvers", _targetVersion, "error", e);
+            LOGGER.atWarn()
+                .setMessage("Failed to create full resource path")
+                .addKeyValue("file", file)
+                .addKeyValue("appbase", _appbase)
+                .addKeyValue("tvers", _targetVersion)
+                .addKeyValue("error", e)
+                .log();
             return null;
         }
     }
@@ -547,7 +578,12 @@ public class Application
             return _trackingURL == null ? null :
                 HostWhitelist.verify(new URL(_trackingURL + encodePath(event + suffix + ga)));
         } catch (MalformedURLException mue) {
-            log.warning("Invalid tracking URL", "path", _trackingURL, "event", event, "error", mue);
+            LOGGER.atWarn()
+                .setMessage("Invalid tracking URL")
+                .addKeyValue("path", _trackingURL)
+                .addKeyValue("event", event)
+                .addKeyValue("error", mue)
+                .log();
             return null;
         }
     }
@@ -647,7 +683,7 @@ public class Application
             try {
                 _latest = HostWhitelist.verify(new URL(latest));
             } catch (MalformedURLException mue) {
-                log.warning("Invalid URL for latest attribute.", mue);
+                LOGGER.warn("Invalid URL for latest attribute.", mue);
             }
         }
 
@@ -838,7 +874,7 @@ public class Application
                     }
                 }
             } catch (Throwable t) {
-                log.warning("Failed to parse '" + pairFile + "': " + t);
+                LOGGER.warn("Failed to parse '{}'", pairFile, t);
             }
         }
     }
@@ -874,33 +910,43 @@ public class Application
             // parse the version out of the java.version (or custom) system property
             long version = SysProps.parseJavaVersion(_javaVersionProp, _javaVersionRegex);
 
-            log.info("Checking Java version", "current", version,
-                     "wantMin", _javaMinVersion, "wantMax", _javaMaxVersion);
+            LOGGER.atInfo()
+                .setMessage("Checking Java version")
+                .addKeyValue("current", version)
+                .addKeyValue("wantMin", _javaMinVersion)
+                .addKeyValue("wantMax", _javaMaxVersion)
+                .log();
 
             // if we have an unpacked VM, check the 'release' file for its version
             Resource vmjar = getJavaVMResource();
             if (vmjar != null && vmjar.isMarkedValid()) {
                 File relfile = new File(_javaLocalDir, "release");
                 if (!relfile.exists()) {
-                    log.warning("Unpacked JVM missing 'release' file. Assuming valid version.");
+                    LOGGER.warn("Unpacked JVM missing 'release' file. Assuming valid version.");
                     return true;
                 }
 
                 long vmvers = VersionUtil.readReleaseVersion(relfile, _javaVersionRegex);
                 if (vmvers == 0L) {
-                    log.warning("Unable to read version from 'release' file. Assuming valid.");
+                    LOGGER.warn("Unable to read version from 'release' file. Assuming valid.");
                     return true;
                 }
 
                 version = vmvers;
-                log.info("Checking version of unpacked JVM [vers=" + version + "].");
+                LOGGER.atInfo()
+                    .setMessage("Checking version of unpacked JVM.")
+                    .addKeyValue("vers", version)
+                    .log();
             }
 
             if (_javaExactVersionRequired) {
                 if (version == _javaMinVersion) return true;
                 else {
-                    log.warning("An exact Java VM version is required.", "current", version,
-                                "required", _javaMinVersion);
+                    LOGGER.atWarn()
+                        .setMessage("An exact Java VM version is required.")
+                        .addKeyValue("current", version)
+                        .addKeyValue("required", _javaMinVersion)
+                        .log();
                     return false;
                 }
             }
@@ -912,8 +958,11 @@ public class Application
         } catch (RuntimeException re) {
             // if we can't parse the java version we're in weird land and should probably just try
             // our luck with what we've got rather than try to download a new jvm
-            log.warning("Unable to parse VM version, hoping for the best",
-                        "error", re, "needed", _javaMinVersion);
+            LOGGER.atWarn()
+                .setMessage("Unable to parse VM version, hoping for the best")
+                .addKeyValue("error", re)
+                .addKeyValue("needed", _javaMinVersion)
+                .log();
             return true;
         }
     }
@@ -976,9 +1025,9 @@ public class Application
             // the application as is; next time the app runs when connected to the internet, it
             // will have to rediscover that it needs updating and reattempt to update itself
             if (_allowOffline) {
-                log.warning("Failed to update digest files.  Attempting offline operaton.", ex);
+                LOGGER.warn("Failed to update digest files.  Attempting offline operaton.", ex);
                 if (!FileUtil.deleteHarder(getLocalPath(VERSION_FILE))) {
-                    log.warning("Deleting version.txt failed.  This probably isn't going to work.");
+                    LOGGER.warn("Deleting version.txt failed.  This probably isn't going to work.");
                 }
             } else {
                 throw ex;
@@ -1070,7 +1119,7 @@ public class Application
 
         String[] envp = createEnvironment();
         String[] sargs = args.toArray(new String[args.size()]);
-        log.info("Running " + StringUtil.join(sargs, "\n  "));
+        LOGGER.info("Running {}", StringUtil.join(sargs, "\n  "));
 
         return Runtime.getRuntime().exec(sargs, envp, getAppDir());
     }
@@ -1086,7 +1135,7 @@ public class Application
         List<String> envvar = new ArrayList<>();
         fillAssignmentListFromPairs("env.txt", envvar);
         if (envvar.isEmpty()) {
-            log.info("Didn't find any custom environment variables, not setting any.");
+            LOGGER.info("Didn't find any custom environment variables, not setting any.");
             return null;
         }
 
@@ -1098,7 +1147,7 @@ public class Application
             envAssignments.add(environmentEntry.getKey() + "=" + environmentEntry.getValue());
         }
         String[] envp = envAssignments.toArray(new String[envAssignments.size()]);
-        log.info("Environment " + StringUtil.join(envp, "\n "));
+        LOGGER.info("Environment {}", StringUtil.join(envp, "\n "));
         return envp;
     }
 
@@ -1120,8 +1169,8 @@ public class Application
         };
         Thread.currentThread().setContextClassLoader(loader);
 
-        log.info("Configured URL class loader:");
-        for (URL url : jarUrls) log.info("  " + url);
+        LOGGER.info("Configured URL class loader:");
+        for (URL url : jarUrls) LOGGER.info("  " + url);
 
         // configure any system properties that we can
         for (String jvmarg : _jvmargs) {
@@ -1129,7 +1178,7 @@ public class Application
                 jvmarg = processArg(jvmarg.substring(2));
                 int eqidx = jvmarg.indexOf('=');
                 if (eqidx == -1) {
-                    log.warning("Bogus system property: '" + jvmarg + "'?");
+                    LOGGER.warn("Bogus system property: '{}'?", jvmarg);
                 } else {
                     System.setProperty(jvmarg.substring(0, eqidx), jvmarg.substring(eqidx+1));
                 }
@@ -1155,13 +1204,13 @@ public class Application
         for (int ii = 0; ii < args.length; ii++) args[ii] = processArg(_appargs.get(ii));
 
         try {
-            log.info("Loading " + _class);
+            LOGGER.info("Loading {}", _class);
             Class<?> appclass = loader.loadClass(_class);
             Method main = appclass.getMethod("main", EMPTY_STRING_ARRAY.getClass());
-            log.info("Invoking main({" + StringUtil.join(args, ", ") + "})");
+            LOGGER.info("Invoking main({{}})", StringUtil.join(args, ", "));
             main.invoke(null, new Object[] { args });
         } catch (Exception e) {
-            log.warning("Failure invoking app main", e);
+            LOGGER.warn("Failure invoking app main", e);
         }
     }
 
@@ -1207,15 +1256,15 @@ public class Application
     public boolean verifyMetadata (StatusDisplay status)
         throws IOException
     {
-        log.info("Verifying application: " + _vappbase);
-        log.info("Version: " + _version);
-        log.info("Class: " + _class);
+        LOGGER.info("Verifying application: {}", _vappbase);
+        LOGGER.info("Version: {}", _version);
+        LOGGER.info("Class: {}", _class);
 
         // this will read in the contents of the digest file and validate itself
         try {
             _digest = new Digest(getAppDir(), _strictComments);
         } catch (IOException ioe) {
-            log.info("Failed to load digest: " + ioe.getMessage() + ". Attempting recovery...");
+            LOGGER.info("Failed to load digest. Attempting recovery...", ioe);
         }
 
         // if we have no version, then we are running in unversioned mode so we need to download
@@ -1229,13 +1278,12 @@ public class Application
                 downloadDigestFiles();
                 _digest = new Digest(getAppDir(), _strictComments);
                 if (!olddig.equals(_digest.getMetaDigest())) {
-                    log.info("Unversioned digest changed. Revalidating...");
+                    LOGGER.info("Unversioned digest changed. Revalidating...");
                     status.updateStatus("m.validating");
                     clearValidationMarkers();
                 }
             } catch (IOException ioe) {
-                log.warning("Failed to refresh non-versioned digest: " +
-                            ioe.getMessage() + ". Proceeding...");
+                LOGGER.warn("Failed to refresh non-versioned digest. Proceeding...", ioe);
             }
         }
 
@@ -1263,7 +1311,7 @@ public class Application
             if (_digest.validateResource(crsrc, null)) {
                 init(true);
             } else {
-                log.warning(CONFIG_FILE + " failed to validate even after redownloading. " +
+                LOGGER.warn(CONFIG_FILE + " failed to validate even after redownloading. " +
                             "Blindly forging onward.");
             }
         }
@@ -1298,7 +1346,7 @@ public class Application
                         }
                     }
                 } catch (Exception e) {
-                    log.warning("Unable to retrieve version from latest config file.", e);
+                    LOGGER.warn("Unable to retrieve version from latest config file.", e);
                 }
             }
         }
@@ -1384,8 +1432,13 @@ public class Application
         unpacked.addAll(unpackedAsync);
 
         long complete = System.currentTimeMillis();
-        log.info("Verified resources", "count", rsrcs.size(), "alreadyValid", alreadyValid[0],
-                 "size", (totalSize/1024) + "k", "duration", (complete-start) + "ms");
+        LOGGER.atInfo()
+            .setMessage("Verified resources")
+            .addKeyValue("count", rsrcs.size())
+            .addKeyValue("alreadyValid", alreadyValid[0])
+            .addKeyValue("size", (totalSize / 1024) + "k")
+            .addKeyValue("duration", (complete - start) + "ms")
+            .log();
     }
 
     private void verifyResource (Resource rsrc, ProgressObserver obs, int[] alreadyValid,
@@ -1413,8 +1466,11 @@ public class Application
             }
 
         } catch (Exception e) {
-            log.info("Failure verifying resource. Requesting redownload...",
-                     "rsrc", rsrc, "error", e);
+            LOGGER.atInfo()
+                .setMessage("Failure verifying resource. Requesting redownload...")
+                .addKeyValue("rsrc", rsrc)
+                .addKeyValue("error", e)
+                .log();
 
         } finally {
             obs.progress(100);
@@ -1451,7 +1507,11 @@ public class Application
             try {
                 rsrc.unpack();
             } catch (IOException ioe) {
-                log.warning("Failure unpacking resource", "rsrc", rsrc, ioe);
+                LOGGER.atWarn()
+                    .setMessage("Failure unpacking resource")
+                    .addKeyValue("rsrc", rsrc)
+                    .setCause(ioe)
+                    .log();
             }
             pobs.progress(100);
         }
@@ -1514,19 +1574,27 @@ public class Application
         try {
             _lockChannel = new RandomAccessFile(getLocalPath("gettingdown.lock"), "rw").getChannel();
         } catch (FileNotFoundException e) {
-            log.warning("Unable to create lock file", "message", e.getMessage(), e);
+            LOGGER.atWarn()
+                .setMessage("Unable to create lock file")
+                .addKeyValue("message", e.getMessage())
+                .setCause(e)
+                .log();
             return false;
         }
         try {
             _lock = _lockChannel.tryLock();
         } catch (IOException e) {
-            log.warning("Unable to create lock", "message", e.getMessage(), e);
+            LOGGER.atWarn()
+                .setMessage("Unable to create lock")
+                .addKeyValue("message", e.getMessage())
+                .setCause(e)
+                .log();
             return false;
         } catch (OverlappingFileLockException e) {
-            log.warning("The lock is held elsewhere in this JVM", e);
+            LOGGER.warn("The lock is held elsewhere in this JVM", e);
             return false;
         }
-        log.info("Able to lock for updates: " + (_lock != null));
+        LOGGER.info("Able to lock for updates: {}", (_lock != null));
         return _lock != null;
     }
 
@@ -1536,16 +1604,24 @@ public class Application
     public synchronized void releaseLock ()
     {
         if (_lock != null) {
-            log.info("Releasing lock");
+            LOGGER.info("Releasing lock");
             try {
                 _lock.release();
             } catch (IOException e) {
-                log.warning("Unable to release lock", "message", e.getMessage(), e);
+                LOGGER.atWarn()
+                    .setMessage("Unable to release lock")
+                    .addKeyValue("message", e.getMessage())
+                    .setCause(e)
+                    .log();
             }
             try {
                 _lockChannel.close();
             } catch (IOException e) {
-                log.warning("Unable to close lock channel", "message", e.getMessage(), e);
+                LOGGER.atWarn()
+                    .setMessage("Unable to close lock channel")
+                    .addKeyValue("message", e.getMessage())
+                    .setCause(e)
+                    .log();
             }
             _lockChannel = null;
             _lock = null;
@@ -1580,7 +1656,10 @@ public class Application
 
         if (sigVersion > 0) {
             if (_envc.certs.isEmpty()) {
-                log.info("No signing certs, not verifying digest.txt", "path", path);
+                LOGGER.atInfo()
+                    .setMessage("No signing certs, not verifying digest.txt")
+                    .addKeyValue("path", path)
+                    .log();
 
             } else {
                 File signatureFile = downloadFile(path + SIGNATURE_SUFFIX);
@@ -1616,15 +1695,21 @@ public class Application
                 }
 
                 if (!sig.verify(Base64.getDecoder().decode(signature))) {
-                    log.info("Signature does not match", "cert", cert.getPublicKey());
+                    LOGGER.atInfo()
+                        .setMessage("Signature does not match")
+                        .addKeyValue("cert", cert.getPublicKey())
+                        .log();
                     continue;
                 } else {
-                    log.info("Signature matches", "cert", cert.getPublicKey());
+                    LOGGER.atInfo()
+                        .setMessage("Signature matches")
+                        .addKeyValue("cert", cert.getPublicKey())
+                        .log();
                     validated++;
                 }
 
             } catch (IOException ioe) {
-                log.warning("Failure validating signature of " + target + ": " + ioe);
+                LOGGER.warn("Failure validating signature of {}", target, ioe);
 
             } catch (GeneralSecurityException gse) {
                 // no problem!
@@ -1652,12 +1737,16 @@ public class Application
         try {
             targetURL = getRemoteURL(path);
         } catch (Exception e) {
-            log.warning("Requested to download invalid control file",
-                "appbase", _vappbase, "path", path, "error", e);
+            LOGGER.atWarn()
+                .setMessage("Requested to download invalid control file")
+                .addKeyValue("appbase", _vappbase)
+                .addKeyValue("path", path)
+                .addKeyValue("error", e)
+                .log();
             throw new IOException("Invalid path '" + path + "'.", e);
         }
 
-        log.info("Attempting to refetch '" + path + "' from '" + targetURL + "'.");
+        LOGGER.info("Attempting to refetch '{}' from '{}'.", path, targetURL);
         conn.download(targetURL, target); // stream the URL into our temporary file
         return target;
     }
@@ -1708,7 +1797,7 @@ public class Application
             try {
                 list.add(createResource(rsrc, attrs));
             } catch (Exception e) {
-                log.warning("Invalid resource '" + rsrc + "'. " + e);
+                LOGGER.warn("Invalid resource '{}'.", rsrc, e);
             }
         }
     }
@@ -1749,7 +1838,7 @@ public class Application
             // + into %20 because web servers don't like + in paths or file names, blah
             return URLEncoder.encode(path, "UTF-8").replace("%2F", "/").replace("+", "%20");
         } catch (UnsupportedEncodingException ue) {
-            log.warning("Failed to URL encode " + path + ": " + ue);
+            LOGGER.warn("Failed to URL encode {}", path, ue);
             return path;
         }
     }

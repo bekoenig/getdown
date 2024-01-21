@@ -5,7 +5,8 @@
 
 package io.github.bekoenig.getdown.util;
 
-import io.github.bekoenig.getdown.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,14 +14,14 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.util.Locale;
 
-import static io.github.bekoenig.getdown.Log.log;
-
 /**
  * Useful routines for launching Java applications from within other Java
  * applications.
  */
 public final class LaunchUtil
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LaunchUtil.class);
+
     /** The default directory into which a local VM installation should be unpacked. */
     public static final String LOCAL_JAVA_DIR = "java_vm";
 
@@ -68,12 +69,12 @@ public final class LaunchUtil
         String javaDir = StringUtil.isBlank(javaLocalDir) ? LOCAL_JAVA_DIR : javaLocalDir;
         String javaBin = getJVMBinaryPath(new File(appdir, javaDir), false);
         String[] args = { javaBin, "-jar", pro.toString(), appdir.getPath() };
-        log.info("Running " + StringUtil.join(args, "\n  "));
+        LOGGER.info("Running {}", StringUtil.join(args, "\n  "));
         try {
             Runtime.getRuntime().exec(args, null);
             return true;
         } catch (IOException ioe) {
-            log.warning("Failed to run getdown", ioe);
+            LOGGER.warn("Failed to run getdown", ioe);
             return false;
         }
     }
@@ -96,8 +97,11 @@ public final class LaunchUtil
 
         // then throw up our hands and hope for the best
         if (vmpath == null) {
-            log.warning("Unable to find java [local=" + javaLocalDir +
-                        ", java.home=" + System.getProperty("java.home") + "]!");
+            LOGGER.atWarn()
+                .setMessage("Unable to find java!")
+                .addKeyValue("local", javaLocalDir)
+                .addKeyValue("java.home", System.getProperty("java.home"))
+                .log();
             vmpath = "java";
         }
 
@@ -112,7 +116,7 @@ public final class LaunchUtil
                     vmpath = "/usr/bin/java";
                 }
             } catch (IOException ioe) {
-                log.warning("Failed to check Mac OS canonical VM path.", ioe);
+                LOGGER.warn("Failed to check Mac OS canonical VM path.", ioe);
             }
         }
 
@@ -135,7 +139,7 @@ public final class LaunchUtil
             return;
         }
 
-        log.info("Updating Getdown with " + newgd + "...");
+        LOGGER.info("Updating Getdown with {}...", newgd);
 
         // clear out any old getdown
         if (oldgd.exists()) {
@@ -151,24 +155,24 @@ public final class LaunchUtil
                     // downloading another copy next time
                     FileUtil.copy(curgd, newgd);
                 } catch (IOException e) {
-                    log.warning("Error copying updated Getdown back: " + e);
+                    LOGGER.warn("Error copying updated Getdown back", e);
                 }
                 return;
             }
 
-            log.warning("Unable to renameTo(" + oldgd + ").");
+            LOGGER.warn("Unable to renameTo({}).", oldgd);
             // try to unfuck ourselves
             if (!oldgd.renameTo(curgd)) {
-                log.warning("Oh God, why dost thee scorn me so.");
+                LOGGER.warn("Oh God, why dost thee scorn me so.");
             }
         }
 
         // that didn't work, let's try copying it
-        log.info("Attempting to upgrade by copying over " + curgd + "...");
+        LOGGER.info("Attempting to upgrade by copying over {}...", curgd);
         try {
             FileUtil.copy(newgd, curgd);
         } catch (IOException ioe) {
-            log.warning("Mayday! Brute force copy method also failed.", ioe);
+            LOGGER.warn("Mayday! Brute force copy method also failed.", ioe);
         }
     }
 

@@ -5,28 +5,15 @@
 
 package io.github.bekoenig.getdown.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
-
-import static io.github.bekoenig.getdown.Log.log;
 
 public final class StreamUtil {
-    /**
-     * Convenient close for a stream. Use in a finally clause and love life.
-     */
-    public static void close (InputStream in)
-    {
-        if (in != null) {
-            try {
-                in.close();
-            } catch (IOException ioe) {
-                log.warning("Error closing input stream", "stream", in, "cause", ioe);
-            }
-        }
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(StreamUtil.class);
 
     /**
      * Convenient close for a stream. Use in a finally clause and love life.
@@ -37,35 +24,11 @@ public final class StreamUtil {
             try {
                 out.close();
             } catch (IOException ioe) {
-                log.warning("Error closing output stream", "stream", out, "cause", ioe);
-            }
-        }
-    }
-
-    /**
-     * Convenient close for a Reader. Use in a finally clause and love life.
-     */
-    public static void close (Reader in)
-    {
-        if (in != null) {
-            try {
-                in.close();
-            } catch (IOException ioe) {
-                log.warning("Error closing reader", "reader", in, "cause", ioe);
-            }
-        }
-    }
-
-    /**
-     * Convenient close for a Writer. Use in a finally clause and love life.
-     */
-    public static void close (Writer out)
-    {
-        if (out != null) {
-            try {
-                out.close();
-            } catch (IOException ioe) {
-                log.warning("Error closing writer", "writer", out, "cause", ioe);
+                LOGGER.atWarn()
+                    .setMessage("Error closing output stream")
+                    .addKeyValue("stream", out)
+                    .addKeyValue("cause", ioe)
+                    .log();
             }
         }
     }

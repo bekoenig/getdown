@@ -16,7 +16,8 @@ import java.util.zip.ZipFile;
 import io.github.bekoenig.getdown.util.FileUtil;
 import io.github.bekoenig.getdown.util.ProgressObserver;
 import io.github.bekoenig.getdown.util.StreamUtil;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Applies a unified patch file to an application directory, providing
@@ -26,6 +27,8 @@ import static io.github.bekoenig.getdown.Log.log;
  */
 public class Patcher
 {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     /** A suffix appended to file names to indicate that a file should be newly created. */
     public static final String CREATE = ".create";
 
@@ -62,24 +65,24 @@ public class Patcher
                 // depending on the suffix, we do The Right Thing (tm)
                 if (path.endsWith(CREATE)) {
                     path = strip(path, CREATE);
-                    log.info("Creating " + path + "...");
+                    logger.info("Creating {}...", path);
                     createFile(file, entry, new File(appdir, path));
 
                 } else if (path.endsWith(PATCH)) {
                     path = strip(path, PATCH);
-                    log.info("Patching " + path + "...");
+                    logger.info("Patching {}...", path);
                     patchFile(file, entry, appdir, path);
 
                 } else if (path.endsWith(DELETE)) {
                     path = strip(path, DELETE);
-                    log.info("Removing " + path + "...");
+                    logger.info("Removing {}...", path);
                     File target = new File(appdir, path);
                     if (!FileUtil.deleteHarder(target)) {
-                        log.warning("Failure deleting '" + target + "'.");
+                        logger.warn("Failure deleting '{}'.", target);
                     }
 
                 } else {
-                    log.warning("Skipping bogus patch file entry: " + path);
+                    logger.warn("Skipping bogus patch file entry: {}", path);
                 }
 
                 // note that we've completed this entry
@@ -103,7 +106,7 @@ public class Patcher
         // make sure the file's parent directory exists
         File pdir = target.getParentFile();
         if (!pdir.exists() && !pdir.mkdirs()) {
-            log.warning("Failed to create parent for '" + target + "'.");
+            logger.warn("Failed to create parent for '{}'.", target);
         }
 
         try (InputStream in = file.getInputStream(entry);
@@ -117,7 +120,7 @@ public class Patcher
             }
 
         } catch (IOException ioe) {
-            log.warning("Error creating '" + target + "': " + ioe);
+            logger.warn("Error creating '{}'", target, ioe);
         }
     }
 
@@ -140,7 +143,7 @@ public class Patcher
 
             // move the current version of the jar to .old
             if (!FileUtil.renameTo(target, otarget)) {
-                log.warning("Failed to .oldify '" + target + "'.");
+                logger.warn("Failed to .oldify '{}'.", target);
                 return;
             }
 
@@ -158,9 +161,9 @@ public class Patcher
 
         } catch (IOException ioe) {
             if (patcher == null) {
-                log.warning("Failed to write patch file '" + patch + "': " + ioe);
+                logger.warn("Failed to write patch file '{}'", patch, ioe);
             } else {
-                log.warning("Error patching '" + target + "': " + ioe);
+                logger.warn("Error patching '{}'", target, ioe);
             }
 
         } finally {

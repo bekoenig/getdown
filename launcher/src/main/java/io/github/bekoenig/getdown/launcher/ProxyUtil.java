@@ -39,10 +39,11 @@ import io.github.bekoenig.getdown.spi.ProxyAuth;
 import io.github.bekoenig.getdown.util.Config;
 import io.github.bekoenig.getdown.util.LaunchUtil;
 import io.github.bekoenig.getdown.util.StringUtil;
-
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ProxyUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyUtil.class);
 
     public static boolean autoDetectProxy (Application app)
     {
@@ -98,11 +99,14 @@ public final class ProxyUtil {
                     host = rhost;
                     port = rport;
                 } else {
-                    log.info("Detected no proxy settings in the registry.");
+                    LOGGER.info("Detected no proxy settings in the registry.");
                 }
 
             } catch (Throwable t) {
-                log.info("Failed to find proxy settings in Windows registry", "error", t);
+                LOGGER.atInfo()
+                    .setMessage("Failed to find proxy settings in Windows registry")
+                    .addKeyValue("error", t)
+                    .log();
             }
         }
 
@@ -124,7 +128,7 @@ public final class ProxyUtil {
 
     public static boolean canLoadWithoutProxy (URL rurl, int timeoutSeconds)
     {
-        log.info("Attempting to fetch without proxy: " + rurl);
+        LOGGER.info("Attempting to fetch without proxy: {}", rurl);
         try {
             URLConnection conn = Connector.DEFAULT.open(rurl, timeoutSeconds, timeoutSeconds);
             // if the appbase is not an HTTP/S URL (like file:), then we don't need a proxy
@@ -140,7 +144,10 @@ public final class ProxyUtil {
                 int rcode = hcon.getResponseCode();
                 if (rcode == HttpURLConnection.HTTP_PROXY_AUTH ||
                     rcode == HttpURLConnection.HTTP_FORBIDDEN) {
-                    log.warning("Got an 'HTTP credentials needed' response", "code", rcode);
+                    LOGGER.atWarn()
+                        .setMessage("Got an 'HTTP credentials needed' response")
+                        .addKeyValue("code", rcode)
+                        .log();
                 } else {
                     return true;
                 }
@@ -148,8 +155,8 @@ public final class ProxyUtil {
                 hcon.disconnect();
             }
         } catch (IOException ioe) {
-            log.info("Failed to HEAD " + rurl + ": " + ioe);
-            log.info("We probably need a proxy, but auto-detection failed.");
+            LOGGER.info("Failed to HEAD {}", rurl, ioe);
+            LOGGER.info("We probably need a proxy, but auto-detection failed.");
         }
         return false;
     }
@@ -180,7 +187,7 @@ public final class ProxyUtil {
                 Config pconf = Config.parseConfig(pfile, Config.createOpts(false));
                 return new String[] { pconf.getString("host"), pconf.getString("port") };
             } catch (IOException ioe) {
-                log.warning("Failed to read '" + pfile + "': " + ioe);
+                LOGGER.warn("Failed to read '{}'", pfile, ioe);
             }
         }
         return new String[] { null, null};
@@ -196,7 +203,7 @@ public final class ProxyUtil {
                 pout.println("port = " + port);
             }
         } catch (IOException ioe) {
-            log.warning("Error creating proxy file '" + pfile + "': " + ioe);
+            LOGGER.warn("Error creating proxy file '{}'", pfile, ioe);
         }
     }
 
@@ -215,11 +222,16 @@ public final class ProxyUtil {
         boolean haveCreds = !StringUtil.isBlank(username) && !StringUtil.isBlank(password);
 
         if (StringUtil.isBlank(host)) {
-            log.info("Using no proxy");
+            LOGGER.info("Using no proxy");
             app.conn = new Connector();
         } else {
             int pp = StringUtil.isBlank(port) ? 80 : Integer.parseInt(port);
-            log.info("Using proxy", "host", host, "port", pp, "haveCreds", haveCreds);
+            LOGGER.atInfo()
+                .setMessage("Using proxy")
+                .addKeyValue("host", host)
+                .addKeyValue("port", pp)
+                .addKeyValue("haveCreds", haveCreds)
+                .log();
             app.conn = new Connector(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, pp)));
         }
 
@@ -260,7 +272,7 @@ public final class ProxyUtil {
             engine.setBindings(globals, ScriptContext.GLOBAL_SCOPE);
             URL utils = ProxyUtil.class.getResource("PacUtils.js");
             if (utils == null) {
-                log.error("Unable to load PacUtils.js");
+                LOGGER.error("Unable to load PacUtils.js");
                 return new String[0];
             }
             engine.eval(new InputStreamReader(utils.openStream()));
@@ -275,7 +287,7 @@ public final class ProxyUtil {
             }
             return proxies;
         } catch (Exception | NoClassDefFoundError e) {
-            log.warning("Failed to resolve PAC proxy", e);
+            LOGGER.warn("Failed to resolve PAC proxy", e);
         }
         return new String[0];
     }

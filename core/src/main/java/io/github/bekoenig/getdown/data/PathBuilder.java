@@ -16,10 +16,13 @@ import java.util.zip.ZipFile;
 import io.github.bekoenig.getdown.cache.GarbageCollector;
 import io.github.bekoenig.getdown.cache.ResourceCache;
 import io.github.bekoenig.getdown.util.FileUtil;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PathBuilder
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathBuilder.class);
+
     /** Name of directory to store cached code files in. */
     public static final String CODE_CACHE_DIR = ".cache";
 
@@ -129,8 +132,11 @@ public class PathBuilder
                     FileUtil.unpackJar(new ZipFile(cachedFile), cachedParent, false);
                     unpackedIndicator.createNewFile();
                 } catch (IOException ioe) {
-                    log.warning("Failed to unpack native jar",
-                                "file", cachedFile.getAbsolutePath(), ioe);
+                    LOGGER.atWarn()
+                        .setMessage("Failed to unpack native jar")
+                        .addKeyValue("file", cachedFile.getAbsolutePath())
+                        .setCause(ioe)
+                        .log();
                     // Keep going and unpack the other jars...
                 }
             }

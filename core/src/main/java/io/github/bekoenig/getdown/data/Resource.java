@@ -15,13 +15,16 @@ import java.util.zip.ZipFile;
 import io.github.bekoenig.getdown.util.FileUtil;
 import io.github.bekoenig.getdown.util.ProgressObserver;
 import io.github.bekoenig.getdown.util.StringUtil;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Models a single file resource used by an {@link Application}.
  */
 public class Resource implements Comparable<Resource>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
+
     /** Defines special attributes for resources. */
     public enum Attr {
         /** Indicates that the resource should be unpacked. */
@@ -92,7 +95,12 @@ public class Resource implements Comparable<Resource>
                     try {
                         zip.close();
                     } catch (IOException ioe) {
-                        log.warning("Error closing", "path", target, "zip", zip, "error", ioe);
+                        LOGGER.atWarn()
+                            .setMessage("Error closing")
+                            .addKeyValue("path", target)
+                            .addKeyValue("zip", zip)
+                            .addKeyValue("error", ioe)
+                            .log();
                     }
                 }
             }
@@ -268,7 +276,7 @@ public class Resource implements Comparable<Resource>
     public void clearMarker ()
     {
         if (_marker.exists() && !FileUtil.deleteHarder(_marker)) {
-            log.warning("Failed to erase marker file '" + _marker + "'.");
+            LOGGER.warn("Failed to erase marker file '{}'.", _marker);
         }
     }
 
@@ -278,7 +286,7 @@ public class Resource implements Comparable<Resource>
      */
     public void install (boolean validate) throws IOException {
         File source = getLocalNew(), dest = getLocal();
-        log.info("- " + source);
+        LOGGER.info("- {}", source);
         if (!FileUtil.renameTo(source, dest)) {
             throw new IOException("Failed to rename " + source + " to " + dest);
         }
@@ -323,7 +331,7 @@ public class Resource implements Comparable<Resource>
     {
         clearMarker();
         if (_local.exists() && !FileUtil.deleteHarder(_local)) {
-            log.warning("Failed to erase resource '" + _local + "'.");
+            LOGGER.warn("Failed to erase resource '{}'.", _local);
         }
     }
 

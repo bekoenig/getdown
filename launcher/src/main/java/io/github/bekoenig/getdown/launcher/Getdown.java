@@ -23,14 +23,7 @@ import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -56,7 +49,8 @@ import io.github.bekoenig.getdown.util.ProgressAggregator;
 import io.github.bekoenig.getdown.util.ProgressObserver;
 import io.github.bekoenig.getdown.util.StringUtil;
 import io.github.bekoenig.getdown.util.VersionUtil;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the main control for the Getdown application updater and deployment system.
@@ -64,6 +58,8 @@ import static io.github.bekoenig.getdown.Log.log;
 public abstract class Getdown
     implements Application.StatusDisplay, RotatingBackgrounds.ImageLoader
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetdownApp.class);
+
     /**
      * Starts a thread to run Getdown and ultimately (hopefully) launch the target app.
      */
@@ -88,7 +84,7 @@ public abstract class Getdown
             // If we're running in a headless environment and have not otherwise customized
             // silence, operate without a UI and do launch the app.
             if (!_silent && GraphicsEnvironment.isHeadless()) {
-                log.info("Running in headless JVM, will attempt to operate without UI.");
+                LOGGER.info("Running in headless JVM, will attempt to operate without UI.");
                 _silent = true;
                 _launchInSilent = true;
             }
@@ -129,15 +125,15 @@ public abstract class Getdown
     public void install () throws IOException
     {
         if (SysProps.noInstall()) {
-            log.info("Skipping install due to 'no_install' sysprop.");
+            LOGGER.info("Skipping install due to 'no_install' sysprop.");
         } else if (isUpdateAvailable()) {
-            log.info("Installing " + _toInstallResources.size() + " downloaded resources:");
+            LOGGER.info("Installing {} downloaded resources:", _toInstallResources.size());
             for (Resource resource : _toInstallResources) {
                 resource.install(true);
             }
             _toInstallResources.clear();
             _readyToInstall = false;
-            log.info("Install completed.");
+            LOGGER.info("Install completed.");
 
             // do resource cleanup
             final List<String> cleanupPatterns = _app.cleanupPatterns();
@@ -145,7 +141,7 @@ public abstract class Getdown
                 cleanupResources(cleanupPatterns);
             }
         } else {
-            log.info("Nothing to install.");
+            LOGGER.info("Nothing to install.");
         }
     }
 
@@ -154,7 +150,11 @@ public abstract class Getdown
      */
     public void configProxy (String host, String port, String username, String password)
     {
-        log.info("User configured proxy", "host", host, "port", port);
+        LOGGER.atInfo()
+            .setMessage("User configured proxy")
+            .addKeyValue("host", host)
+            .addKeyValue("port", port)
+            .log();
         ProxyUtil.configProxy(_app, host, port, username, password);
 
         // clear out our UI
@@ -178,7 +178,11 @@ public abstract class Getdown
             return;
         }
 
-        log.info("Getdown starting", "version", Build.version(), "built", Build.time());
+        LOGGER.atInfo()
+            .setMessage("Getdown starting")
+            .addKeyValue("version", Build.version())
+            .addKeyValue("built", Build.time())
+            .log();
 
         // determine whether or not we can write to our install directory
         File instdir = _app.getLocalPath("");
@@ -200,7 +204,7 @@ public abstract class Getdown
 
     protected boolean detectProxy () {
         // first we have to initialize our application to get the appbase URL, etc.
-        log.info("Checking whether we need to use a proxy...");
+        LOGGER.info("Checking whether we need to use a proxy...");
         try {
             readConfig(true);
         } catch (IOException ioe) {
@@ -220,7 +224,7 @@ public abstract class Getdown
             return tryNoProxy ? ProxyUtil.autoDetectProxy(_app) : false;
         }
 
-        log.info("No proxy appears to be needed.");
+        LOGGER.info("No proxy appears to be needed.");
         if (!tryNoProxy)  {
             // we got through, so we appear not to require a proxy; make a blank proxy config so
             // that we don't go through this whole detection process again next time
@@ -237,7 +241,7 @@ public abstract class Getdown
 
     protected void requestProxyInfo (boolean reinitAuth) {
         if (_silent) {
-            log.warning("Need a proxy, but we don't want to bother anyone. Exiting.");
+            LOGGER.warn("Need a proxy, but we don't want to bother anyone. Exiting.");
             return;
         }
 
@@ -275,7 +279,7 @@ public abstract class Getdown
                     rsrc.install(false); // install but don't validate yet
                 }
             } catch (IOException ioe) {
-                log.warning("Failed to predownload resources. Continuing...", ioe);
+                LOGGER.warn("Failed to predownload resources. Continuing...", ioe);
             }
         }
     }
@@ -290,7 +294,7 @@ public abstract class Getdown
             try {
                 readConfig(true);
             } catch (IOException ioe) {
-                log.warning("Failed to initialize: " + ioe);
+                LOGGER.warn("Failed to initialize", ioe);
                 _app.attemptRecovery(this);
                 // and re-initalize
                 readConfig(true);
@@ -304,7 +308,7 @@ public abstract class Getdown
             // update the config modtime so a sleeping getdown will notice the change
             File config = _app.getLocalPath(Application.CONFIG_FILE);
             if (!config.setLastModified(System.currentTimeMillis())) {
-                log.warning("Unable to set modtime on config file, will be unable to check for " +
+                LOGGER.warn("Unable to set modtime on config file, will be unable to check for " +
                             "another instance of getdown running while this one waits.");
             }
             if (_delay > 0) {
@@ -312,17 +316,17 @@ public abstract class Getdown
                 _app.releaseLock();
                 // Store the config modtime before waiting the delay amount of time
                 long lastConfigModtime = config.lastModified();
-                log.info("Waiting " + _delay + " minutes before beginning actual work.");
+                LOGGER.info("Waiting {} minutes before beginning actual work.", _delay);
                 TimeUnit.MINUTES.sleep(_delay);
                 if (lastConfigModtime < config.lastModified()) {
-                    log.warning("getdown.txt was modified while getdown was waiting.");
+                    LOGGER.warn("getdown.txt was modified while getdown was waiting.");
                     throw new MultipleGetdownRunning();
                 }
             }
 
             // if no_update was specified, directly start the app without updating
             if (_noUpdate) {
-                log.info("Launching without update!");
+                LOGGER.info("Launching without update!");
                 launch();
                 return;
             }
@@ -347,7 +351,7 @@ public abstract class Getdown
                 setStep(Step.VERIFY_METADATA);
                 setStatusAsync("m.validating", -1, -1L, false);
                 if (_app.verifyMetadata(this)) {
-                    log.info("Application requires update.");
+                    LOGGER.info("Application requires update.");
                     update();
 
                     // loop back again and reverify the metadata
@@ -372,8 +376,9 @@ public abstract class Getdown
                         reportTrackingEvent("app_start", -1);
 
                         // redownload any that are corrupt or invalid...
-                        log.info(toDownload.size() + " of " + _app.getAllActiveResources().size() +
-                                 " rsrcs require update (" + alreadyValid[0] + " assumed valid).");
+                        LOGGER.info("{} of {} rsrcs require update ({} assumed valid).",
+                            toDownload.size(), _app.getAllActiveResources().size(),
+                            alreadyValid[0]);
                         setStep(Step.REDOWNLOAD_RESOURCES);
                         download(toDownload);
 
@@ -392,7 +397,7 @@ public abstract class Getdown
                 if (!_app.haveValidJavaVersion()) {
                     // download and install the necessary version of java, then loop back again and
                     // reverify everything; if we can't download java; we'll throw an exception
-                    log.info("Attempting to update Java VM...");
+                    LOGGER.info("Attempting to update Java VM...");
                     setStep(Step.UPDATE_JAVA);
                     _enableTracking = true; // always track JVM downloads
                     try {
@@ -416,14 +421,18 @@ public abstract class Getdown
                     }
 
                     if (version < aversion) {
-                        log.info("Performing unpack", "version", version, "aversion", aversion);
+                        LOGGER.atInfo()
+                            .setMessage("Performing unpack")
+                            .addKeyValue("version", version)
+                            .addKeyValue("aversion", aversion)
+                            .log();
                         setStep(Step.UNPACK);
                         updateStatus("m.validating");
                         _app.unpackResources(_progobs, unpacked);
                         try {
                             VersionUtil.writeVersion(ufile, aversion);
                         } catch (IOException ioe) {
-                            log.warning("Failed to update unpacked version", ioe);
+                            LOGGER.warn("Failed to update unpacked version", ioe);
                         }
                     }
                 }
@@ -443,7 +452,7 @@ public abstract class Getdown
                 return;
             }
 
-            log.warning("Pants! We couldn't get the job done.");
+            LOGGER.warn("Pants! We couldn't get the job done.");
             throw new IOException("m.unable_to_repair");
 
         } catch (Exception e) {
@@ -456,7 +465,7 @@ public abstract class Getdown
                 requestProxyInfo(true);
                 break;
             default:
-                log.warning("getdown() failed.", e);
+                LOGGER.warn("getdown() failed.", e);
                 fail(e);
                 _app.releaseLock();
                 break;
@@ -498,7 +507,11 @@ public abstract class Getdown
             imgpath = _app.getLocalPath(path);
             return ImageIO.read(imgpath);
         } catch (IOException ioe2) {
-            log.warning("Failed to load image", "path", imgpath, "error", ioe2);
+            LOGGER.atWarn()
+                .setMessage("Failed to load image")
+                .addKeyValue("path", imgpath)
+                .addKeyValue("error", ioe2)
+                .log();
             return null;
         }
     }
@@ -522,7 +535,7 @@ public abstract class Getdown
         File javaDll = new File(javaLocalDir, "bin" + File.separator + "java.dll");
         if (javaDll.exists()) {
             if (!javaDll.renameTo(javaDll)) {
-                log.info("Cannot update local Java VM as it is in use.");
+                LOGGER.info("Cannot update local Java VM as it is in use.");
                 return;
             }
         }
@@ -551,10 +564,13 @@ public abstract class Getdown
         String vmpath = LaunchUtil.getJVMBinaryPath(javaLocalDir, false);
         String[] command = { vmpath, "-Xshare:dump" };
         try {
-            log.info("Regenerating classes.jsa for " + vmpath + "...");
+            LOGGER.info("Regenerating classes.jsa for {}...", vmpath);
             Runtime.getRuntime().exec(command);
         } catch (Exception e) {
-            log.warning("Failed to regenerate .jsa dump file", "error", e);
+            LOGGER.atWarn()
+                .setMessage("Failed to regenerate .jsa dump file")
+                .addKeyValue("error", e)
+                .log();
         }
 
         reportTrackingEvent("jvm_complete", -1);
@@ -613,12 +629,16 @@ public abstract class Getdown
                     Patcher patcher = new Patcher();
                     patcher.patch(prsrc.getLocal().getParentFile(), prsrc.getLocal(), pobs);
                 } catch (Exception e) {
-                    log.warning("Failed to apply patch", "prsrc", prsrc, e);
+                    LOGGER.atWarn()
+                        .setMessage("Failed to apply patch")
+                        .addKeyValue("prsrc", prsrc)
+                        .setCause(e)
+                        .log();
                 }
 
                 // clean up the patch file
                 if (!FileUtil.deleteHarder(prsrc.getLocal())) {
-                    log.warning("Failed to delete '" + prsrc + "'.");
+                    LOGGER.warn("Failed to delete '{}'.", prsrc);
                 }
             }
         }
@@ -666,11 +686,18 @@ public abstract class Getdown
 
             @Override protected void downloadFailed (Resource rsrc, Exception e) {
                 updateStatus(MessageUtil.tcompose("m.failure", e.getMessage()));
-                log.warning("Download failed", "rsrc", rsrc, e);
+                LOGGER.atWarn()
+                    .setMessage("Download failed")
+                    .addKeyValue("rsrc", rsrc)
+                    .setCause(e)
+                    .log();
             }
 
             @Override protected void resourceMissing (Resource rsrc) {
-                log.warning("Resource missing (got 404)", "rsrc", rsrc);
+                LOGGER.atWarn()
+                    .setMessage("Resource missing (got 404)")
+                    .addKeyValue("rsrc", rsrc)
+                    .log();
             }
 
             /** The last percentage at which we checked for another getdown running, or -1 for not
@@ -747,7 +774,7 @@ public abstract class Getdown
                     }
 
                     if (error) {
-                        log.info("Failed to launch with optimum arguments; falling back.");
+                        LOGGER.info("Failed to launch with optimum arguments; falling back.");
                         proc = _app.createProcess(false);
                     }
                 } else {
@@ -767,7 +794,7 @@ public abstract class Getdown
                     disposeContainer();
                     _container = null;
                     copyStream(stderr, System.err);
-                    log.info("Process exited: " + proc.waitFor());
+                    LOGGER.info("Process exited: {}", proc.waitFor());
 
                 } else {
                     // spawn a daemon thread that will catch the early bits of stderr in case the
@@ -795,7 +822,7 @@ public abstract class Getdown
             exit(0);
 
         } catch (Exception e) {
-            log.warning("launch() failed.", e);
+            LOGGER.warn("launch() failed.", e);
         }
     }
 
@@ -866,7 +893,7 @@ public abstract class Getdown
     {
         if (_ifc.rotatingBackgrounds != null) {
             if (_ifc.backgroundImage != null) {
-                log.warning("ui.background_image and ui.rotating_background were both specified. " +
+                LOGGER.warn("ui.background_image and ui.rotating_background were both specified. " +
                             "The rotating images are being used.");
             }
             return new RotatingBackgrounds(_ifc.rotatingBackgrounds, _ifc.errorBackground,
@@ -969,7 +996,7 @@ public abstract class Getdown
         EventQueue.invokeLater(() -> {
             if (_status == null) {
                 if (message != null) {
-                    log.info("Dropping status '" + message + "'.");
+                    LOGGER.info("Dropping status '{}'.", message);
                 }
                 return;
             }
@@ -1059,7 +1086,12 @@ public abstract class Getdown
                 out.flush();
             }
         } catch (IOException ioe) {
-            log.warning("Failure copying", "in", in, "out", out, "error", ioe);
+            LOGGER.atWarn()
+                .setMessage("Failure copying")
+                .addKeyValue("in", in)
+                .addKeyValue("out", out)
+                .addKeyValue("error", ioe)
+                .log();
         }
     }
 
@@ -1084,15 +1116,22 @@ public abstract class Getdown
                     ucon.connect();
                     try {
                         if (ucon.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                            log.warning("Failed to report tracking event",
-                                        "url", url, "rcode", ucon.getResponseCode());
+                            LOGGER.atWarn()
+                                .setMessage("Failed to report tracking event")
+                                .addKeyValue("url", url)
+                                .addKeyValue("rcode", ucon.getResponseCode())
+                                .log();
                         }
                     } finally {
                         ucon.disconnect();
                     }
 
                 } catch (IOException ioe) {
-                    log.warning("Failed to report tracking event", "url", url, "error", ioe);
+                    LOGGER.atWarn()
+                        .setMessage("Failed to report tracking event")
+                        .addKeyValue("url", url)
+                        .addKeyValue("error", ioe)
+                        .log();
                 }
             }
         };

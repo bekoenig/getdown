@@ -15,7 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.github.bekoenig.getdown.data.SysProps;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -23,6 +25,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public final class VersionUtil
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VersionUtil.class);
+
     /**
      * Reads a version number from a file.
      */
@@ -36,7 +40,7 @@ public final class VersionUtil
                 fileVersion = Long.parseLong(vstr);
             }
         } catch (Exception e) {
-            log.info("Unable to read version file: " + e.getMessage());
+            LOGGER.info("Unable to read version file", e);
         }
 
         return fileVersion;
@@ -50,7 +54,7 @@ public final class VersionUtil
         try (PrintStream out = new PrintStream(Files.newOutputStream(vfile.toPath()))) {
             out.println(version);
         } catch (Exception e) {
-            log.warning("Unable to write version file: " + e.getMessage());
+            LOGGER.warn("Unable to write version file", e);
         }
     }
 
@@ -88,13 +92,20 @@ public final class VersionUtil
             }
 
             if (relvers == null) {
-                log.warning("No JAVA_VERSION line in 'release' file", "file", relfile);
+                LOGGER.atWarn()
+                    .setMessage("No JAVA_VERSION line in 'release' file")
+                    .addKeyValue("file", relfile)
+                    .log();
                 return 0L;
             }
             return parseJavaVersion(versRegex, relvers);
 
         } catch (Exception e) {
-            log.warning("Failed to read version from 'release' file", "file", relfile, e);
+            LOGGER.atWarn()
+                .setMessage("Failed to read version from 'release' file")
+                .addKeyValue("file", relfile)
+                .setCause(e)
+                .log();
             return 0L;
         }
     }

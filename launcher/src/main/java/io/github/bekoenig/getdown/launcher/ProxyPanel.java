@@ -27,7 +27,8 @@ import com.samskivert.swing.GroupLayout;
 import com.samskivert.swing.Spacer;
 import com.samskivert.swing.VGroupLayout;
 import io.github.bekoenig.getdown.util.MessageUtil;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Displays an interface with which the user can configure their proxy
@@ -35,6 +36,8 @@ import static io.github.bekoenig.getdown.Log.log;
  */
 public final class ProxyPanel extends JPanel implements ActionListener
 {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     public ProxyPanel (Getdown getdown, ResourceBundle msgs, boolean updateAuth)
     {
         _getdown = getdown;
@@ -166,7 +169,7 @@ public final class ProxyPanel extends JPanel implements ActionListener
         try {
             return _msgs.getString(key);
         } catch (MissingResourceException mre) {
-            log.warning("Missing translation message '" + key + "'.");
+            logger.warn("Missing translation message '{}'.", key);
             return key;
         }
     }

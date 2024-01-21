@@ -5,7 +5,8 @@
 
 package io.github.bekoenig.getdown.util;
 
-import io.github.bekoenig.getdown.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,8 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static io.github.bekoenig.getdown.Log.log;
-
 /**
  * Handles parsing and runtime access for Getdown's config files (mainly {@code getdown.txt}).
  * These files contain zero or more mappings for a particular string key. Config values can be
@@ -31,6 +30,8 @@ import static io.github.bekoenig.getdown.Log.log;
  */
 public class Config
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
+
     /** Empty configuration. */
     public static final Config EMPTY = new Config(new HashMap<String, Object>());
 
@@ -96,15 +97,24 @@ public class Config
             if (pair[1].startsWith("[")) {
                 int qidx = pair[1].indexOf(']');
                 if (qidx == -1) {
-                    log.warning("Bogus platform specifier", "key", pair[0], "value", pair[1]);
+                    LOGGER.atWarn()
+                        .setMessage("Bogus platform specifier")
+                        .addKeyValue("key", pair[0])
+                        .addKeyValue("value", pair[1])
+                        .log();
                     continue; // omit the pair entirely
                 }
                 // if we're checking qualifiers and the os doesn't match this qualifier, skip it
                 String quals = pair[1].substring(1, qidx);
                 if (opts.osname != null && !checkQualifiers(quals, opts.osname, opts.osarch)) {
-                    log.debug("Skipping", "quals", quals,
-                              "osname", opts.osname, "osarch", opts.osarch,
-                              "key", pair[0], "value", pair[1]);
+                    LOGGER.atDebug()
+                        .setMessage("Skipping")
+                        .addKeyValue("quals", quals)
+                        .addKeyValue("osname", opts.osname)
+                        .addKeyValue("osarch", opts.osarch)
+                        .addKeyValue("key", pair[0])
+                        .addKeyValue("value", pair[1])
+                        .log();
                     continue;
                 }
                 // otherwise filter out the qualifier text
@@ -143,7 +153,7 @@ public class Config
             if (v != null && v.length == 4) {
                 return new Rectangle(v[0], v[1], v[2], v[3]);
             }
-            log.warning("Ignoring invalid rect '" + name + "' config '" + value + "'.");
+            LOGGER.warn("Ignoring invalid rect '{}' config '{}'.", name, value);
         }
         return null;
     }
@@ -160,7 +170,11 @@ public class Config
                 int alpha = hexValue.length() > 6 ? 0 : 0xFF000000;
                 return Integer.parseInt(hexValue, 16) | alpha;
             } catch (NumberFormatException e) {
-                log.warning("Ignoring invalid color", "hexValue", hexValue, "exception", e);
+                LOGGER.atWarn()
+                    .setMessage("Ignoring invalid color")
+                    .addKeyValue("hexValue", hexValue)
+                    .addKeyValue("exception", e)
+                    .log();
             }
         }
         return null;
@@ -273,7 +287,7 @@ public class Config
         try {
             return Enum.valueOf(eclass, value.toUpperCase());
         } catch (Exception e) {
-            log.warning("Invalid value for '" + name + "' config: '" + value + "'.");
+            LOGGER.warn("Invalid value for '{}' config: '{}'.", name, value);
             return defval;
         }
     }
@@ -310,7 +324,7 @@ public class Config
         try {
             return value == null ? def : Integer.parseInt(value);
         } catch (Exception e) {
-            log.warning("Ignoring invalid int '" + name + "' config '" + value + "',");
+            LOGGER.warn("Ignoring invalid int '{}' config '{}',", name, value);
             return def;
         }
     }
@@ -325,7 +339,7 @@ public class Config
         try {
             return value == null ? def : Long.parseLong(value);
         } catch (Exception e) {
-            log.warning("Ignoring invalid long '" + name + "' config '" + value + "',");
+            LOGGER.warn("Ignoring invalid long '{}' config '{}',", name, value);
             return def;
         }
     }
@@ -361,7 +375,11 @@ public class Config
             try {
                 HostWhitelist.verify(new URL(value));
             } catch (MalformedURLException e) {
-                log.warning("Invalid URL.", "url", value, e);
+                LOGGER.atWarn()
+                    .setMessage("Invalid URL.")
+                    .addKeyValue("url", value)
+                    .setCause(e)
+                    .log();
                 value = null;
             }
         }
@@ -383,8 +401,11 @@ public class Config
     {
         if (quals.startsWith("!")) {
             if (quals.contains(",")) { // sanity check
-                log.warning("Multiple qualifiers cannot be used when one of the qualifiers " +
-                            "is negative", "quals", quals);
+                LOGGER.atWarn()
+                    .setMessage("Multiple qualifiers cannot be used when one of the qualifiers " +
+                        "is negative")
+                    .addKeyValue("quals", quals)
+                    .log();
                 return false;
             }
             return !checkQualifier(quals.substring(1), osname, osarch);

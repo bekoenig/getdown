@@ -5,13 +5,16 @@
 
 package io.github.bekoenig.getdown.launcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Image;
 import java.util.List;
 
-import static io.github.bekoenig.getdown.Log.log;
-
 public final class RotatingBackgrounds
 {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     public interface ImageLoader {
         /** Loads and returns the image with the supplied path. */
         Image loadImage (String path);
@@ -52,7 +55,7 @@ public final class RotatingBackgrounds
             String background = backgrounds.get(ii);
             String[] pieces = background.split(";");
             if (pieces.length != 2) {
-                log.warning("Unable to parse background image '" + background + "'");
+                logger.warn("Unable to parse background image '{}'", background);
                 makeEmpty();
                 return;
             }
@@ -60,7 +63,7 @@ public final class RotatingBackgrounds
             try {
                 minDisplayTime[ii] = Integer.parseInt(pieces[1]);
             } catch (NumberFormatException e) {
-                log.warning("Unable to parse background image display time '" + background + "'");
+                logger.warn("Unable to parse background image display time '{}'", background);
                 makeEmpty();
                 return;
             }

@@ -5,20 +5,22 @@
 
 package io.github.bekoenig.getdown.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.zip.*;
 
-import io.github.bekoenig.getdown.Log;
-import static io.github.bekoenig.getdown.Log.log;
-
 /**
  * File related utilities.
  */
 public final class FileUtil
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
+
     /**
      * Gets the specified source file to the specified destination file by hook or crook. Windows
      * has all sorts of problems which we work around in this method.
@@ -37,12 +39,12 @@ public final class FileUtil
         if (dest.exists()) {
             File temp = new File(dest.getPath() + "_old");
             if (temp.exists() && !deleteHarder(temp)) {
-                log.warning("Failed to delete old intermediate file " + temp + ".");
+                LOGGER.warn("Failed to delete old intermediate file {}.", temp);
                 // the subsequent code will probably fail
             }
             if (dest.renameTo(temp) && source.renameTo(dest)) {
                 if (!deleteHarder(temp)) {
-                    log.warning("Failed to delete intermediate file " + temp + ".");
+                    LOGGER.warn("Failed to delete intermediate file {}.", temp);
                 }
                 return true;
             }
@@ -52,12 +54,12 @@ public final class FileUtil
         try {
             copy(source, dest);
         } catch (IOException ioe) {
-            log.warning("Failed to copy " + source + " to " + dest + ": " + ioe);
+            LOGGER.warn("Failed to copy {} to {}", source, dest, ioe);
             return false;
         }
 
         if (!deleteHarder(source)) {
-            log.warning("Failed to delete " + source + " after brute force copy to " + dest + ".");
+            LOGGER.warn("Failed to delete {} after brute force copy to {}.", source, dest);
         }
         return true;
     }
@@ -140,7 +142,11 @@ public final class FileUtil
             // entries that allow us to create our directories first
             if (entry.isDirectory()) {
                 if (!efile.exists() && !efile.mkdir()) {
-                    log.warning("Failed to create jar entry path", "jar", jar, "entry", entry);
+                    LOGGER.atWarn()
+                        .setMessage("Failed to create jar entry path")
+                        .addKeyValue("jar", jar)
+                        .addKeyValue("entry", entry)
+                        .log();
                 }
                 continue;
             }
@@ -149,7 +155,11 @@ public final class FileUtil
             // prior to getting down and funky
             File parent = new File(efile.getParent());
             if (!parent.exists() && !parent.mkdirs()) {
-                log.warning("Failed to create jar entry parent", "jar", jar, "parent", parent);
+                LOGGER.atWarn()
+                    .setMessage("Failed to create jar entry parent")
+                    .addKeyValue("jar", jar)
+                    .addKeyValue("parent", parent)
+                    .log();
                 continue;
             }
 
@@ -157,8 +167,7 @@ public final class FileUtil
                  InputStream jin = jar.getInputStream(entry)) {
                 StreamUtil.copy(jin, fout);
             } catch (Exception e) {
-                throw new IOException(
-                    Log.format("Failure unpacking", "jar", jar, "entry", efile), e);
+                throw new IOException("Failure unpacking [jar=" + jar + ", entry=" + efile + "]", e);
             }
         }
     }
@@ -180,11 +189,18 @@ public final class FileUtil
         try {
             if (file.exists()) {
                 if (!file.setExecutable(true, false)) {
-                    log.warning("Failed to mark as executable", "file", file);
+                    LOGGER.atWarn()
+                        .setMessage("Failed to mark as executable")
+                        .addKeyValue("file", file)
+                        .log();
                 }
             }
         } catch (Exception e) {
-            log.warning("Failed to mark as executable", "file", file, "error", e);
+            LOGGER.atWarn()
+                .setMessage("Failed to mark as executable")
+                .addKeyValue("file", file)
+                .addKeyValue("error", e)
+                .log();
         }
     }
 
@@ -250,8 +266,12 @@ public final class FileUtil
                 }
             });
         } catch (Exception e) {
-            log.warning(String.format("Failed to get file list with path %s with glob %s",
-                basePath, globPattern), "error", e);
+            LOGGER.atWarn()
+                .setMessage("Failed to get file list with path {} with glob {}")
+                .addArgument(basePath)
+                .addArgument(globPattern)
+                .addKeyValue("error", e)
+                .log();
             return Collections.emptySet();
         }
 

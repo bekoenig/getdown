@@ -50,8 +50,8 @@ import com.samskivert.util.StringUtil;
 import com.samskivert.util.Tuple;
 
 import com.samskivert.swing.util.SwingUtil;
-
-import static com.samskivert.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The label is a multipurpose text display mechanism that can display small amounts of text
@@ -62,6 +62,8 @@ import static com.samskivert.Log.log;
  */
 public class Label implements SwingConstants, LabelStyleConstants
 {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     /** The pattern used to mark the start/end of color blocks. */
     public static final Pattern COLOR_PATTERN = Pattern.compile("#([Xx]|[0-9A-Fa-f]{6}+)");
 
@@ -427,7 +429,11 @@ public class Label implements SwingConstants, LabelStyleConstants
             }
 
         } catch (Throwable t) {
-            log.warning("Label layout failed", "text", _text, t);
+            logger.atWarn()
+                .setMessage("Label layout failed")
+                .addKeyValue("text", _text)
+                .setCause(t)
+                .log();
         }
 
         return layouts;
@@ -440,8 +446,11 @@ public class Label implements SwingConstants, LabelStyleConstants
     {
         // nothing to do if we haven't been laid out
         if (_layouts == null) {
-            log.warning(hashCode() + " Unlaid-out label asked to render", "text", _text
-                        /*, "last", _invalidator */);
+            logger.atWarn()
+                .setMessage("{} Unlaid-out label asked to render")
+                .addArgument(hashCode())
+                .addKeyValue("text", _text)
+                .log();
             return;
         }
 

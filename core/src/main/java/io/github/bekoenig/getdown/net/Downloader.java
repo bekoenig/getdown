@@ -22,8 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import io.github.bekoenig.getdown.data.Resource;
-
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles the download of a collection of files, first issuing HTTP head requests to obtain size
@@ -34,6 +34,8 @@ import static io.github.bekoenig.getdown.Log.log;
  */
 public class Downloader
 {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     public Downloader (Connector conn)
     {
         _conn = conn;
@@ -58,8 +60,12 @@ public class Downloader
         }
 
         long totalSize = sum(_sizes.values());
-        log.info("Downloading " + resources.size() + " resources",
-                 "totalBytes", totalSize, "maxConcurrent", maxConcurrent);
+        logger.atInfo()
+            .setMessage("Downloading {} resources")
+            .addArgument(resources.size())
+            .addKeyValue("totalBytes", totalSize)
+            .addKeyValue("maxConcurrent", maxConcurrent)
+            .log();
 
         // make a note of the time at which we started the download
         _start = System.currentTimeMillis();
@@ -70,7 +76,7 @@ public class Downloader
             // make sure the resource's target directory exists
             File parent = new File(rsrc.getLocal().getParent());
             if (!parent.exists() && !parent.mkdirs()) {
-                log.warning("Failed to create target directory for resource '" + rsrc + "'.");
+                logger.warn("Failed to create target directory for resource '{}'.", rsrc);
             }
 
             exec.execute(new Runnable() {
@@ -251,7 +257,11 @@ public class Downloader
         if (true) {
             // download the resource from the specified URL
             long actualSize = conn.getContentLength();
-            log.info("Downloading resource", "url", rsrc.getRemote(), "size", actualSize);
+            logger.atInfo()
+                .setMessage("Downloading resource")
+                .addKeyValue("url", rsrc.getRemote())
+                .addKeyValue("size", actualSize)
+                .log();
             long currentSize = 0L;
             byte[] buffer = new byte[4*4096];
             try (InputStream in = conn.getInputStream();
@@ -277,7 +287,11 @@ public class Downloader
             }
 
         } else {
-            log.info("Downloading resource", "url", rsrc.getRemote(), "size", "unknown");
+            logger.atInfo()
+                .setMessage("Downloading resource")
+                .addKeyValue("url", rsrc.getRemote())
+                .addKeyValue("size", "unknown")
+                .log();
             File localNew = rsrc.getLocalNew();
             try (ReadableByteChannel rbc = Channels.newChannel(conn.getInputStream());
                  FileOutputStream fos = new FileOutputStream(localNew)) {

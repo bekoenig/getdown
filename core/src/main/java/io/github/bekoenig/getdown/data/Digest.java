@@ -16,8 +16,9 @@ import io.github.bekoenig.getdown.util.Config;
 import io.github.bekoenig.getdown.util.MessageUtil;
 import io.github.bekoenig.getdown.util.ProgressObserver;
 import io.github.bekoenig.getdown.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static io.github.bekoenig.getdown.Log.log;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -26,6 +27,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class Digest
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Digest.class);
+
     /** The current version of the digest protocol. */
     public static final int VERSION = 2;
 
@@ -113,7 +116,11 @@ public class Digest
         }
 
         long elapsed = System.currentTimeMillis() - start;
-        log.debug("Computed digests [rsrcs=" + resources.size() + ", time=" + elapsed + "ms]");
+        LOGGER.atDebug()
+            .setMessage("Computed digests")
+            .addKeyValue("rsrcs", resources.size())
+            .addKeyValue("time", elapsed + "ms")
+            .log();
     }
 
     /**
@@ -195,10 +202,18 @@ public class Digest
             if (chash.equals(ehash)) {
                 return true;
             }
-            log.info("Resource failed digest check",
-                     "rsrc", resource, "computed", chash, "expected", ehash);
+            LOGGER.atInfo()
+                .setMessage("Resource failed digest check")
+                .addKeyValue("rsrc", resource)
+                .addKeyValue("computed", chash)
+                .addKeyValue("expected", ehash)
+                .log();
         } catch (Throwable t) {
-            log.info("Resource failed digest check", "rsrc", resource, "error", t);
+            LOGGER.atInfo()
+                .setMessage("Resource failed digest check")
+                .addKeyValue("rsrc", resource)
+                .addKeyValue("error", t)
+                .log();
         }
         return false;
     }

@@ -11,8 +11,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -29,7 +27,8 @@ import com.samskivert.util.Throttle;
 import io.github.bekoenig.getdown.data.Application.UpdateInterface;
 import io.github.bekoenig.getdown.util.MessageUtil;
 import io.github.bekoenig.getdown.util.Rectangle;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Displays download and patching status.
@@ -37,6 +36,8 @@ import static io.github.bekoenig.getdown.Log.log;
 public final class StatusPanel extends JComponent
     implements ImageObserver
 {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     public StatusPanel (ResourceBundle msgs)
     {
         _msgs = msgs;
@@ -351,7 +352,7 @@ public final class StatusPanel extends JComponent
         try {
             return _msgs.getString(key);
         } catch (MissingResourceException mre) {
-            log.warning("Missing translation message '" + key + "'.");
+            logger.warn("Missing translation message '{}'.", key);
             return key;
         }
     }

@@ -13,11 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,18 +23,24 @@ import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import com.samskivert.swing.util.SwingUtil;
 import io.github.bekoenig.getdown.data.EnvConfig;
 import io.github.bekoenig.getdown.data.SysProps;
 import io.github.bekoenig.getdown.util.LaunchUtil;
 import io.github.bekoenig.getdown.util.StringUtil;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main application entry point for Getdown.
  */
 public class GetdownApp
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetdownApp.class);
+
     /**
      * The main entry point of the Getdown launcher application.
      */
@@ -46,7 +48,7 @@ public class GetdownApp
         try {
             start(argv);
         } catch (Exception e) {
-            log.warning("main() failed.", e);
+            LOGGER.warn("main() failed.", e);
         }
     }
 
@@ -66,39 +68,48 @@ public class GetdownApp
 
         // pipe our output into a file in the application directory
         if (!SysProps.noLogRedir() && !SysProps.debug()) {
-            File logFile = new File(envc.appDir, "launcher.log");
+            LoggerContext loggerFactory = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerFactory.reset();
+            loggerFactory.putProperty("appdir", envc.appDir.getPath());
+
+            InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("io/github/bekoenig/getdown/logback-appdir.xml");
+
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(loggerFactory);
             try {
-                PrintStream logOut = new PrintStream(
-                    new BufferedOutputStream(Files.newOutputStream(logFile.toPath())), true);
-                System.setOut(logOut);
-                System.setErr(logOut);
-            } catch (IOException ioe) {
-                log.warning("Unable to redirect output to '" + logFile + "': " + ioe);
+                configurator.doConfigure(inputStream);
+            } catch (JoranException je) {
+                throw new RuntimeException("Failed to configure logging for appdir");
             }
         }
+
+        // log all uncaught exceptions
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
+            LOGGER.error("Exception in thread \"{}\"", thread.getName(), throwable));
 
         // report any notes from reading our env config, and abort if necessary
         boolean abort = false;
         for (EnvConfig.Note note : notes) {
             switch (note.level) {
-            case INFO: log.info(note.message); break;
-            case WARN: log.warning(note.message); break;
-            case ERROR: log.error(note.message); abort = true; break;
+            case INFO: LOGGER.info(note.message); break;
+            case WARN: LOGGER.warn(note.message); break;
+            case ERROR: LOGGER.error(note.message); abort = true; break;
             }
         }
         if (abort) System.exit(-1);
 
         // record a few things for posterity
-        log.info("------------------ VM Info ------------------");
-        log.info("-- OS Name: " + System.getProperty("os.name"));
-        log.info("-- OS Arch: " + System.getProperty("os.arch"));
-        log.info("-- OS Vers: " + System.getProperty("os.version"));
-        log.info("-- Java Vers: " + System.getProperty("java.version"));
-        log.info("-- Java Home: " + System.getProperty("java.home"));
-        log.info("-- User Name: " + System.getProperty("user.name"));
-        log.info("-- User Home: " + System.getProperty("user.home"));
-        log.info("-- Cur dir: " + System.getProperty("user.dir"));
-        log.info("---------------------------------------------");
+        LOGGER.info("------------------ VM Info ------------------");
+        LOGGER.info("-- OS Name: {}", System.getProperty("os.name"));
+        LOGGER.info("-- OS Arch: {}", System.getProperty("os.arch"));
+        LOGGER.info("-- OS Vers: {}", System.getProperty("os.version"));
+        LOGGER.info("-- Java Vers: {}", System.getProperty("java.version"));
+        LOGGER.info("-- Java Home: {}", System.getProperty("java.home"));
+        LOGGER.info("-- User Name: {}", System.getProperty("user.name"));
+        LOGGER.info("-- User Home: {}", System.getProperty("user.home"));
+        LOGGER.info("-- Cur dir: {}", System.getProperty("user.dir"));
+        LOGGER.info("---------------------------------------------");
 
         Getdown getdown = new Getdown(envc) {
             @Override
@@ -141,7 +152,11 @@ public class GetdownApp
                 try {
                     _frame.setBackground(new Color(_ifc.background, true));
                 } catch (Exception e) {
-                    log.warning("Failed to set background", "bg", _ifc.background, e);
+                    LOGGER.atWarn()
+                        .setMessage("Failed to set background")
+                        .addKeyValue("bg", _ifc.background)
+                        .setCause(e)
+                        .log();
                 }
 
                 if (_ifc.iconImages != null) {
@@ -149,13 +164,19 @@ public class GetdownApp
                     for (String path : _ifc.iconImages) {
                         Image img = loadImage(path);
                         if (img == null) {
-                            log.warning("Error loading icon image", "path", path);
+                            LOGGER.atWarn()
+                                .setMessage("Error loading icon image")
+                                .addKeyValue("path", path)
+                                .log();
                         } else {
                             icons.add(img);
                         }
                     }
                     if (icons.isEmpty()) {
-                        log.warning("Failed to load any icons", "iconImages", _ifc.iconImages);
+                        LOGGER.atWarn()
+                            .setMessage("Failed to load any icons")
+                            .addKeyValue("iconImages", _ifc.iconImages)
+                            .log();
                     } else {
                         _frame.setIconImages(icons);
                     }
@@ -183,7 +204,10 @@ public class GetdownApp
             protected void showDocument (String url) {
                 if (!StringUtil.couldBeValidUrl(url)) {
                     // command injection would be possible if we allowed e.g. spaces and double quotes
-                    log.warning("Invalid document URL.", "url", url);
+                    LOGGER.atWarn()
+                        .setMessage("Invalid document URL.")
+                        .addKeyValue("url", url)
+                        .log();
                     return;
                 }
                 String[] cmdarray;
@@ -204,7 +228,11 @@ public class GetdownApp
                 try {
                     Runtime.getRuntime().exec(cmdarray);
                 } catch (Exception e) {
-                    log.warning("Failed to open browser.", "cmdarray", cmdarray, e);
+                    LOGGER.atWarn()
+                        .setMessage("Failed to open browser.")
+                        .addKeyValue("cmdarray", cmdarray)
+                        .setCause(e)
+                        .log();
                 }
             }
 

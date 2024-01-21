@@ -37,37 +37,4 @@ public class StringUtil
         }
         return true;
     }
-
-    /**
-     * Splits the supplied string into components based on the specified separator string.
-     */
-    public static String[] split (String source, String sep)
-    {
-        // handle the special case of a zero-component source
-        if (isBlank(source)) {
-            return new String[0];
-        }
-
-        int tcount = 0, tpos = -1, tstart = 0;
-
-        // count up the number of tokens
-        while ((tpos = source.indexOf(sep, tpos+1)) != -1) {
-            tcount++;
-        }
-
-        String[] tokens = new String[tcount+1];
-        tpos = -1; tcount = 0;
-
-        // do the split
-        while ((tpos = source.indexOf(sep, tpos+1)) != -1) {
-            tokens[tcount] = source.substring(tstart, tpos);
-            tstart = tpos+1;
-            tcount++;
-        }
-
-        // grab the last token
-        tokens[tcount] = source.substring(tstart);
-
-        return tokens;
-    }
 }

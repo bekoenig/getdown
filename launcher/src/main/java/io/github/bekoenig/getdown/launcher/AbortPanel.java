@@ -23,7 +23,8 @@ import com.samskivert.swing.Spacer;
 import com.samskivert.swing.VGroupLayout;
 
 import io.github.bekoenig.getdown.util.MessageUtil;
-import static io.github.bekoenig.getdown.Log.log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Displays a confirmation that the user wants to abort installation.
@@ -31,6 +32,8 @@ import static io.github.bekoenig.getdown.Log.log;
 public final class AbortPanel extends JFrame
     implements ActionListener
 {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     public AbortPanel (Getdown getdown, ResourceBundle msgs)
     {
         _getdown = getdown;
@@ -90,7 +93,7 @@ public final class AbortPanel extends JFrame
         try {
             return _msgs.getString(key);
         } catch (MissingResourceException mre) {
-            log.warning("Missing translation message '" + key + "'.");
+            logger.warn("Missing translation message '{}'.", key);
             return key;
         }
     }
