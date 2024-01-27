@@ -66,15 +66,6 @@ public final class StringUtil {
      */
     public static String[] parseStringArray (String source)
     {
-        return parseStringArray(source, false);
-    }
-
-    /**
-     * Like {@link #parseStringArray(String)} but can be instructed to invoke {@link String#intern}
-     * on the strings being parsed into the array.
-     */
-    public static String[] parseStringArray (String source, boolean intern)
-    {
         int tcount = 0, tpos = -1, tstart = 0;
 
         // empty strings result in zero length arrays
@@ -91,15 +82,13 @@ public final class StringUtil {
         }
 
         String[] tokens = new String[tcount+1];
-        tpos = -1; tcount = 0;
+        tpos = -1;
+        tcount = 0;
 
         // do the split
         while ((tpos = source.indexOf(',', tpos+1)) != -1) {
             tokens[tcount] = source.substring(tstart, tpos);
             tokens[tcount] = tokens[tcount].trim().replace("%COMMA%", ",");
-            if (intern) {
-                tokens[tcount] = tokens[tcount].intern();
-            }
             tstart = tpos+1;
             tcount++;
         }
