@@ -68,11 +68,12 @@ public final class VersionUtil
         if (!m.matches()) return 0L;
 
         long vers = 0L;
-        for (int ii = 1; ii <= m.groupCount(); ii++) {
-            String valstr = m.group(ii);
-            int value = (valstr == null) ? 0 : parseInt(valstr);
+        for (int group = 1; group <= m.groupCount(); group++) {
             vers *= 100;
-            vers += value;
+            String valstr = m.group(group);
+            if (valstr != null) {
+                vers += Integer.parseInt(valstr.replaceAll("\\D", ""));
+            }
         }
         return vers;
     }
@@ -84,7 +85,7 @@ public final class VersionUtil
     {
         try (BufferedReader in =
              new BufferedReader(new InputStreamReader(Files.newInputStream(relfile.toPath()), UTF_8))) {
-            String line = null, relvers = null;
+            String line, relvers = null;
             while ((line = in.readLine()) != null) {
                 if (line.startsWith("JAVA_VERSION=")) {
                     relvers = line.substring("JAVA_VERSION=".length()).replace('"', ' ').trim();
@@ -110,15 +111,4 @@ public final class VersionUtil
         }
     }
 
-    private static int parseInt (String str) {
-        int value = 0;
-        for (int ii = 0, ll = str.length(); ii < ll; ii++) {
-            char c = str.charAt(ii);
-            if (c >= '0' && c <= '9') {
-                value *= 10;
-                value += (c - '0');
-            }
-        }
-        return value;
-    }
 }
