@@ -53,8 +53,8 @@ public class Config
     public static ParseOpts createOpts (boolean checkPlatform) {
         ParseOpts opts = new ParseOpts();
         if (checkPlatform) {
-            opts.osname = StringUtil.deNull(System.getProperty("os.name")).toLowerCase(Locale.ROOT);
-            opts.osarch = StringUtil.deNull(System.getProperty("os.arch")).toLowerCase(Locale.ROOT);
+            opts.osname = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+            opts.osarch = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
         }
         return opts;
     }

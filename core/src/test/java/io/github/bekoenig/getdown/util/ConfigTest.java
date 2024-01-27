@@ -45,6 +45,40 @@ public class ConfigTest
         }
     }
 
+    @Test public void testCreateOps_withCheckPlatform ()
+    {
+        String originalOsName = System.getProperty("os.name");
+        String originalOsArch = System.getProperty("os.arch");
+
+        System.setProperty("os.name", "linux");
+        System.setProperty("os.arch", "x86_64");
+        Config.ParseOpts opts1 = Config.createOpts(true);
+        assertEquals("linux", opts1.osname);
+        assertEquals("x86_64", opts1.osarch);
+
+        System.setProperty("os.name", "linux");
+        System.clearProperty("os.arch");
+        Config.ParseOpts opts2 = Config.createOpts(true);
+        assertEquals("linux", opts2.osname);
+        assertEquals("", opts2.osarch);
+
+        System.clearProperty("os.name");
+        System.setProperty("os.arch", "x86_64");
+        Config.ParseOpts opts3 = Config.createOpts(true);
+        assertEquals("", opts3.osname);
+        assertEquals("x86_64", opts3.osarch);
+
+        System.clearProperty("os.name");
+        System.clearProperty("os.arch");
+        Config.ParseOpts opts4 = Config.createOpts(true);
+        assertEquals("", opts4.osname);
+        assertEquals("", opts4.osarch);
+
+        // Restore original state
+        System.setProperty("os.name", originalOsName);
+        System.setProperty("os.arch", originalOsArch);
+    }
+
     @Test public void testQualifiedPairs () throws IOException
     {
         Pair linux = new Pair("one", "[linux] two");

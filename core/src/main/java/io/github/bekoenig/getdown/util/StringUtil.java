@@ -110,14 +110,6 @@ public final class StringUtil {
     }
 
     /**
-     * @return the supplied string if it is non-null, "" if it is null.
-     */
-    public static String deNull (String value)
-    {
-        return (value == null) ? "" : value;
-    }
-
-    /**
      * Generates a string from the supplied bytes that is the HEX encoded representation of those
      * bytes.  Returns the empty string for a {@code null} or empty byte array.
      *
