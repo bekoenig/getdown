@@ -69,7 +69,10 @@ public final class LaunchUtil
         String javaDir = StringUtil.isBlank(javaLocalDir) ? LOCAL_JAVA_DIR : javaLocalDir;
         String javaBin = getJVMBinaryPath(new File(appdir, javaDir), false);
         String[] args = { javaBin, "-jar", pro.toString(), appdir.getPath() };
-        LOGGER.info("Running {}", StringUtil.join(args, "\n  "));
+        LOGGER.atInfo()
+            .setMessage("Running {}")
+            .addArgument(() -> StringUtil.join(args, "\n  "))
+            .log();
         try {
             Runtime.getRuntime().exec(args, null);
             return true;

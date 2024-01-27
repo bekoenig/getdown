@@ -1119,7 +1119,10 @@ public class Application
 
         String[] envp = createEnvironment();
         String[] sargs = args.toArray(new String[args.size()]);
-        LOGGER.info("Running {}", StringUtil.join(sargs, "\n  "));
+        LOGGER.atInfo()
+            .setMessage("Running {}")
+            .addArgument(() -> StringUtil.join(sargs, "\n  "))
+            .log();
 
         return Runtime.getRuntime().exec(sargs, envp, getAppDir());
     }
@@ -1147,7 +1150,10 @@ public class Application
             envAssignments.add(environmentEntry.getKey() + "=" + environmentEntry.getValue());
         }
         String[] envp = envAssignments.toArray(new String[envAssignments.size()]);
-        LOGGER.info("Environment {}", StringUtil.join(envp, "\n "));
+        LOGGER.atInfo()
+            .setMessage("Environment {}")
+            .addArgument(() -> StringUtil.join(envp, "\n "))
+            .log();
         return envp;
     }
 
@@ -1207,7 +1213,10 @@ public class Application
             LOGGER.info("Loading {}", _class);
             Class<?> appclass = loader.loadClass(_class);
             Method main = appclass.getMethod("main", EMPTY_STRING_ARRAY.getClass());
-            LOGGER.info("Invoking main({{}})", StringUtil.join(args, ", "));
+            LOGGER.atInfo()
+                .setMessage("Invoking main({{}})")
+                .addArgument(() -> StringUtil.join(args, ", "))
+                .log();
             main.invoke(null, new Object[] { args });
         } catch (Exception e) {
             LOGGER.warn("Failure invoking app main", e);
