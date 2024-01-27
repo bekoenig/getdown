@@ -5,7 +5,6 @@
 
 package io.github.bekoenig.getdown.util;
 
-import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,7 +78,7 @@ public final class StringUtil {
         int tcount = 0, tpos = -1, tstart = 0;
 
         // empty strings result in zero length arrays
-        if (source.length() == 0) {
+        if (source.isEmpty()) {
             return new String[0];
         }
 
