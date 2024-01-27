@@ -5,7 +5,10 @@
 
 package io.github.bekoenig.getdown.util;
 
+import java.util.Objects;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class StringUtil {
 
@@ -151,26 +154,11 @@ public final class StringUtil {
      * Joins the supplied array of strings into a single string separated by the supplied
      * separator.
      */
-    public static String join (Object[] values, String separator)
+    public static String join (String[] values, String separator)
     {
-        return join(values, separator, false);
-    }
-
-    /**
-     * Helper function for the various {@code join} methods.
-     */
-    private static String join(Object[] values, String separator, boolean escape)
-    {
-        StringBuilder buf = new StringBuilder();
-        int vlength = values.length;
-        for (int i = 0; i < vlength; i++) {
-            if (i > 0) {
-                buf.append(separator);
-            }
-            String value = (values[i] == null) ? "" : values[i].toString();
-            buf.append((escape) ? value.replace(",", ",,") : value);
-        }
-        return buf.toString();
+        return Stream.of(values)
+            .map(x -> x != null ? x : "")
+            .collect(Collectors.joining(separator));
     }
 
     /** Used by {@link #hexlate}. */

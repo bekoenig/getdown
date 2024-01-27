@@ -8,8 +8,8 @@ package io.github.bekoenig.getdown.util;
 import org.junit.Test;
 
 import static io.github.bekoenig.getdown.util.StringUtil.couldBeValidUrl;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static io.github.bekoenig.getdown.util.StringUtil.join;
+import static org.junit.Assert.*;
 
 /**
  * Tests {@link StringUtil}.
@@ -24,5 +24,13 @@ public class StringUtilTest
 
         assertFalse(couldBeValidUrl("http://www.foo.com & echo hello"));
         assertFalse(couldBeValidUrl("http://www.foo.com\""));
+    }
+
+    @Test public void testJoin() {
+        assertThrows(NullPointerException.class, () -> join(null, "\n "));
+        assertEquals("", join(new String[]{ }, "\n "));
+        assertEquals("a,ccc,b", join(new String[]{ "a", "ccc", "b"}, ","));
+        assertEquals("a,,b", join(new String[]{ "a", null, "b"}, ","));
+        assertEquals("a\n b\n \n c", join(new String[]{"a", "b", null, "c" }, "\n "));
     }
 }
