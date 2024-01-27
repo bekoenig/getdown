@@ -46,10 +46,10 @@ import java.util.regex.Pattern;
 import javax.swing.SwingConstants;
 
 import io.github.bekoenig.getdown.launcher.swing.util.RunAnywhere;
-import io.github.bekoenig.getdown.launcher.swing.util.StringUtil;
 import io.github.bekoenig.getdown.launcher.swing.util.Tuple;
 
 import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
+import io.github.bekoenig.getdown.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
