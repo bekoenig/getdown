@@ -6,6 +6,13 @@
 package io.github.bekoenig.getdown.cache;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Stream;
 
 import io.github.bekoenig.getdown.data.Resource;
 import io.github.bekoenig.getdown.util.FileUtil;
@@ -21,30 +28,51 @@ public class GarbageCollector
      */
     public static void collect (File cacheDir, final long retentionPeriodMillis)
     {
-        FileUtil.walkTree(cacheDir, new FileUtil.Visitor() {
-            @Override public void visit (File file) {
-                File cachedFile = getCachedFile(file);
-                File lastAccessedFile = getLastAccessedFile(file);
-                if (!cachedFile.exists() || !lastAccessedFile.exists()) {
-                    if (cachedFile.exists()) {
-                        FileUtil.deleteHarder(cachedFile);
-                    } else {
-                        FileUtil.deleteHarder(lastAccessedFile);
-                    }
-                } else if (shouldDelete(lastAccessedFile, retentionPeriodMillis)) {
-                    FileUtil.deleteHarder(lastAccessedFile);
-                    FileUtil.deleteHarder(cachedFile);
+        try {
+            Files.walkFileTree(cacheDir.toPath(), new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                    return FileVisitResult.CONTINUE;
                 }
 
-                File folder = file.getParentFile();
-                if (folder != null) {
-                    String[] children = folder.list();
-                    if (children != null && children.length == 0) {
-                        FileUtil.deleteHarder(folder);
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
+                    File file = path.toFile();
+                    File cachedFile = getCachedFile(file);
+                    File lastAccessedFile = getLastAccessedFile(file);
+                    if (!cachedFile.exists() || !lastAccessedFile.exists()) {
+                        if (cachedFile.exists()) {
+                            FileUtil.deleteHarder(cachedFile);
+                        } else {
+                            FileUtil.deleteHarder(lastAccessedFile);
+                        }
+                    } else if (shouldDelete(lastAccessedFile, retentionPeriodMillis)) {
+                        FileUtil.deleteHarder(lastAccessedFile);
+                        FileUtil.deleteHarder(cachedFile);
                     }
+
+                    return FileVisitResult.CONTINUE;
                 }
-            }
-        });
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    try (Stream<Path> list = Files.list(dir)) {
+                        if (!list.findAny().isPresent()) {
+                            FileUtil.deleteHarder(dir.toFile());
+                        }
+                    }
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

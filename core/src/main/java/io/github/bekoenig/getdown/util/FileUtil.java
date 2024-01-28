@@ -205,36 +205,6 @@ public final class FileUtil
     }
 
     /**
-     * Used by {@link #walkTree}.
-     */
-    public interface Visitor
-    {
-        void visit (File file);
-    }
-
-    /**
-     * Walks all files in {@code root}, calling {@code visitor} on each file in the tree.
-     */
-    public static void walkTree (File root, Visitor visitor)
-    {
-        File[] children = root.listFiles();
-        if (children == null) return;
-        Deque<File> stack = new ArrayDeque<>(Arrays.asList(children));
-        while (!stack.isEmpty()) {
-            File currentFile = stack.pop();
-            if (currentFile.exists()) {
-                visitor.visit(currentFile);
-                File[] currentChildren = currentFile.listFiles();
-                if (currentChildren != null) {
-                    for (File file : currentChildren) {
-                        stack.push(file);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Returns files as Paths from path {@code basePath}, filtered Glob pattern {@code globPattern}.
      */
     public static Set<Path> getFilePathsByGlob(String basePath, String globPattern) {

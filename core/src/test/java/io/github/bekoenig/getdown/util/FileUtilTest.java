@@ -40,21 +40,5 @@ public class FileUtilTest
         assertTrue(target.exists());
     }
 
-    @Test public void shouldRecursivelyWalkOverFilesAndFolders () throws IOException
-    {
-        _folder.newFile("a.txt");
-        new File(_folder.newFolder("b"), "b.txt").createNewFile();
-
-        class CountingVisitor implements FileUtil.Visitor {
-            int fileCount = 0;
-            @Override public void visit(File file) {
-                fileCount++;
-            }
-        }
-        CountingVisitor visitor = new CountingVisitor();
-        FileUtil.walkTree(_folder.getRoot(), visitor);
-        assertEquals(3, visitor.fileCount);
-    }
-
     @Rule public final TemporaryFolder _folder = new TemporaryFolder();
 }
