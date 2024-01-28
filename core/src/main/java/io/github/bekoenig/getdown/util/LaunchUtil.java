@@ -239,8 +239,7 @@ public final class LaunchUtil
 
     static {
         try {
-            String osname = System.getProperty("os.name");
-            osname = (osname == null) ? "" : osname;
+            String osname = System.getProperty("os.name", "");
             _isWindows = (osname.contains("Windows"));
             _isMacOS = (osname.contains("Mac OS") || osname.contains("MacOS"));
             _isLinux = (osname.contains("Linux"));
