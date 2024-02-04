@@ -16,7 +16,6 @@
     <dependency>
       <groupId>io.github.bekoenig.getdown</groupId>
       <artifactId>getdown-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.ant</groupId>
