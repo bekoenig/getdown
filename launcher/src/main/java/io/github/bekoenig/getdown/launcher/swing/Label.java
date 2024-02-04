@@ -483,10 +483,6 @@ public class Label implements SwingConstants, LabelStyleConstants
             // shift over any lines that start with a font that extends into negative x-land
             rx += _leaders[i];
 
-//             System.out.println(i + " x: " + x + " y: " + y + " rx: " + rx + " a: " + _align +
-//                                " width: " + _size.width + " lx: " + lbounds.getX() +
-//                                " lwidth: " + getWidth(lbounds) + " extra: " + extra);
-
             Color textColor;
 
             if ((_style & OUTLINE) != 0) {

@@ -41,6 +41,9 @@
 
 package io.github.bekoenig.getdown.tools;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -66,13 +69,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class JarDiff implements JarDiffCodes
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JarDiff.class);
     private static final int DEFAULT_READ_SIZE = 2048;
     private static final byte[] newBytes = new byte[DEFAULT_READ_SIZE];
     private static final byte[] oldBytes = new byte[DEFAULT_READ_SIZE];
-
-    // The JARDiff.java is the stand-alone jardiff.jar tool. Thus, we do not depend on Globals.java
-    // and other stuff here. Instead, we use an explicit _debug flag.
-    private static boolean _debug;
 
     /**
      * Creates a patch from the two passed in files, writing the result to {@code os}.
@@ -100,9 +100,7 @@ public class JarDiff implements JarDiffCodes
                 String oldname = oldArchive.getBestMatch(newArchive, newEntry);
                 if (oldname == null) {
                     // New or modified entry
-                    if (_debug) {
-                        System.out.println("NEW: "+ newname);
-                    }
+                    LOGGER.debug("NEW: {}", newname);
                     newEntries.add(newname);
                 } else {
                     // Content already exist - need to do a move
@@ -110,9 +108,7 @@ public class JarDiff implements JarDiffCodes
                     // Should do implicit move? Yes, if names are the same, and
                     // no move command already exist from oldArchive
                     if (oldname.equals(newname) && !moveSrc.contains(oldname)) {
-                        if (_debug) {
-                            System.out.println(newname + " added to implicit set!");
-                        }
+                        LOGGER.debug("{} added to implicit set!", newname);
                         implicit.add(newname);
                     } else {
                         // The 1.0.1/1.0 JarDiffPatcher cannot handle
@@ -126,27 +122,18 @@ public class JarDiff implements JarDiffCodes
                                          moveSrc.contains(oldname) )) {
                             // generate non-minimal jardiff
                             // for backward compatibility
-                            if (_debug) {
-                                System.out.println("NEW: "+ newname);
-                            }
+                            LOGGER.debug("NEW: {}", newname);
                             newEntries.add(newname);
                         } else {
                             // Use newname as key, since they are unique
-                            if (_debug) {
-                                System.err.println("moved.put " + newname + " " + oldname);
-                            }
+                            LOGGER.debug("moved.put {} {}", newname, oldname);
                             moved.put(newname, oldname);
                             moveSrc.add(oldname);
                         }
                         // Check if this disables an implicit 'move <oldname> <oldname>'
                         if (implicit.contains(oldname) && minimal) {
-
-                            if (_debug) {
-                                System.err.println("implicit.remove " + oldname);
-
-                                System.err.println("moved.put " + oldname + " " + oldname);
-
-                            }
+                            LOGGER.debug("implicit.remove {}", oldname);
+                            LOGGER.debug("moved.put {} {}", oldname, oldname);
                             implicit.remove(oldname);
                             moved.put(oldname, oldname);
                             moveSrc.add(oldname);
@@ -162,25 +149,20 @@ public class JarDiff implements JarDiffCodes
                 String oldName = oldEntry.getName();
                 if (!implicit.contains(oldName) && !moveSrc.contains(oldName)
                     && !newEntries.contains(oldName)) {
-                    if (_debug) {
-                        System.err.println("deleted.add " + oldName);
-                    }
+                    LOGGER.debug("deleted.add {}", oldName);
                     deleted.add(oldName);
                 }
             }
 
-            //DEBUG
-            if (_debug) {
-                //DEBUG:  print out moved map
-                System.out.println("MOVED MAP!!!");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("MOVED MAP!!!");
                 for (Map.Entry<String,String> entry : moved.entrySet()) {
-                    System.out.println(entry);
+                    LOGGER.debug(entry.toString());
                 }
 
-                //DEBUG:  print out IMOVE map
-                System.out.println("IMOVE MAP!!!");
+                LOGGER.debug("IMOVE MAP!!!");
                 for (String newName : implicit) {
-                    System.out.println("key is " + newName);
+                    LOGGER.debug("key is {}", newName);
                 }
             }
 
@@ -191,9 +173,7 @@ public class JarDiff implements JarDiffCodes
 
             // Put in New and Modified entries
             for (String newName : newEntries) {
-                if (_debug) {
-                    System.out.println("New File: " + newName);
-                }
+                LOGGER.debug("New File: {}", newName);
                 writeEntry(jos, newArchive.getEntryByName(newName), newArchive);
             }
 
@@ -324,10 +304,7 @@ public class JarDiff implements JarDiffCodes
                 oldSize = oldIS.read(oldBytes);
 
                 if (newSize != oldSize) {
-                    if (_debug) {
-                        System.out.println("\tread sizes differ: " + newSize +
-                                           " " + oldSize + " total " + total);
-                    }
+                    LOGGER.debug("\tread sizes differ: {} {} total {}", newSize, oldSize, total);
                     retVal = true;
                     break;
                 }
@@ -335,10 +312,7 @@ public class JarDiff implements JarDiffCodes
                     while (--newSize >= 0) {
                         total++;
                         if (newBytes[newSize] != oldBytes[newSize]) {
-                            if (_debug) {
-                                System.out.println("\tbytes differ at " +
-                                                   total);
-                            }
+                            LOGGER.debug("\tbytes differ at {}", total);
                             retVal = true;
                             break;
                         }
@@ -412,17 +386,13 @@ public class JarDiff implements JarDiffCodes
             _nameToEntryMap = new HashMap<>();
             _crcToEntryMap = new HashMap<>();
             _entries = new ArrayList<>();
-            if (_debug) {
-                System.out.println("indexing: " + _archive.getName());
-            }
+            LOGGER.debug("indexing: {}" , _archive.getName());
             if (entries != null) {
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
                     long crc = entry.getCrc();
                     Long crcL = crc;
-                    if (_debug) {
-                        System.out.println("\t" + entry.getName() + " CRC " + crc);
-                    }
+                    LOGGER.debug("\t{} CRC {}", entry.getName(), crc);
 
                     _nameToEntryMap.put(entry.getName(), entry);
                     _entries.add(entry);

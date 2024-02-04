@@ -61,7 +61,7 @@ public class GetdownApp
         List<EnvConfig.Note> notes = new ArrayList<>();
         EnvConfig envc = EnvConfig.create(argv, notes);
         if (envc == null) {
-            if (!notes.isEmpty()) for (EnvConfig.Note n : notes) System.err.println(n.message);
+            if (!notes.isEmpty()) for (EnvConfig.Note n : notes) LOGGER.error(n.message);
             else System.err.println("Usage: java -jar getdown.jar [app_dir] [app_id] [app args]");
             System.exit(-1);
         }

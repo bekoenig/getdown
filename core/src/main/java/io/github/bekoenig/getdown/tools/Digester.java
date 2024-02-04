@@ -24,6 +24,8 @@ import io.github.bekoenig.getdown.data.Digest;
 import io.github.bekoenig.getdown.data.EnvConfig;
 import io.github.bekoenig.getdown.data.Resource;
 import io.github.bekoenig.getdown.util.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -32,6 +34,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class Digester
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Digester.class);
+
     /**
      * A command line entry point for the digester.
      */
@@ -72,7 +76,7 @@ public class Digester
         throws IOException
     {
         File target = new File(appdir, Digest.digestFile(version));
-        System.out.println("Generating digest file '" + target + "'...");
+        LOGGER.info("Generating digest file '{}'...", target);
 
         // create our application and instruct it to parse its business
         EnvConfig envc = new EnvConfig(appdir);

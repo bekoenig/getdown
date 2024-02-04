@@ -26,6 +26,8 @@ import io.github.bekoenig.getdown.data.EnvConfig;
 import io.github.bekoenig.getdown.data.Resource;
 import io.github.bekoenig.getdown.util.FileUtil;
 import io.github.bekoenig.getdown.util.StreamUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates patch files between two particular revisions of an
@@ -35,6 +37,8 @@ import io.github.bekoenig.getdown.util.StreamUtil;
  */
 public class Differ
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Differ.class);
+
     /**
      * Creates a single patch file that contains the differences between
      * the two specified application directories. The patch file will be
@@ -111,7 +115,7 @@ public class Differ
                     String ndig = rsrc.computeDigest(version, md, null);
                     if (odig.equals(ndig)) {
                         if (verbose) {
-                            System.out.println("Unchanged: " + rsrc.getPath());
+                            LOGGER.info("Unchanged: {}", rsrc.getPath());
                         }
                         // by leaving it out, it will be left as is during the
                         // patching process
@@ -121,7 +125,7 @@ public class Differ
                     // otherwise potentially create a jar diff
                     if (rsrc.getPath().endsWith(".jar")) {
                         if (verbose) {
-                            System.out.println("JarDiff: " + rsrc.getPath());
+                            LOGGER.info("JarDiff: {}", rsrc.getPath());
                         }
                         // here's a juicy one: JarDiff blindly pulls ZipEntry
                         // objects out of one jar file and stuffs them into
@@ -144,7 +148,7 @@ public class Differ
                 }
 
                 if (verbose) {
-                    System.out.println("Addition: " + rsrc.getPath());
+                    LOGGER.info("Addition: {}", rsrc.getPath());
                 }
                 jout.putNextEntry(new ZipEntry(rsrc.getPath() + Patcher.CREATE));
                 pipe(rsrc.getLocal(), jout);
@@ -154,12 +158,12 @@ public class Differ
             for (Resource rsrc : orsrcs) {
                 // add an entry with the resource name and the deletion suffix
                 if (verbose) {
-                    System.out.println("Removal: " + rsrc.getPath());
+                    LOGGER.info("Removal: {}", rsrc.getPath());
                 }
                 jout.putNextEntry(new ZipEntry(rsrc.getPath() + Patcher.DELETE));
             }
 
-            System.out.println("Created patch file: " + patch);
+            LOGGER.info("Created patch file: {}", patch);
 
         } catch (IOException ioe) {
             FileUtil.deleteHarder(patch);
