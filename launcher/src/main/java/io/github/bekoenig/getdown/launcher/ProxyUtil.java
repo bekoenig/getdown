@@ -5,34 +5,9 @@
 
 package io.github.bekoenig.getdown.launcher;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.util.Iterator;
-import java.util.ServiceLoader;
-
-import javax.script.Bindings;
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
 import ca.beq.util.win32.registry.RegistryKey;
 import ca.beq.util.win32.registry.RegistryValue;
 import ca.beq.util.win32.registry.RootKey;
-
 import io.github.bekoenig.getdown.data.Application;
 import io.github.bekoenig.getdown.net.Connector;
 import io.github.bekoenig.getdown.spi.ProxyAuth;
@@ -42,11 +17,17 @@ import io.github.bekoenig.getdown.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.script.*;
+import java.io.*;
+import java.net.*;
+import java.nio.file.Files;
+import java.util.Iterator;
+import java.util.ServiceLoader;
+
 public final class ProxyUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyUtil.class);
 
-    public static boolean autoDetectProxy (Application app)
-    {
+    public static boolean autoDetectProxy(Application app) {
         String host = null, port = null;
 
         // check for a proxy configured via system properties
@@ -67,7 +48,7 @@ public final class ProxyUtil {
                 RegistryKey.initialize();
                 RegistryKey r = new RegistryKey(RootKey.HKEY_CURRENT_USER, PROXY_REGISTRY);
                 for (Iterator<?> iter = r.values(); iter.hasNext(); ) {
-                    RegistryValue value = (RegistryValue)iter.next();
+                    RegistryValue value = (RegistryValue) iter.next();
                     if ("ProxyEnable".equals(value.getName())) {
                         enabled = "1".equals(value.getStringValue());
                     }
@@ -126,8 +107,7 @@ public final class ProxyUtil {
         return true;
     }
 
-    public static boolean canLoadWithoutProxy (URL rurl, int timeoutSeconds)
-    {
+    public static boolean canLoadWithoutProxy(URL rurl, int timeoutSeconds) {
         LOGGER.info("Attempting to fetch without proxy: {}", rurl);
         try {
             URLConnection conn = Connector.DEFAULT.open(rurl, timeoutSeconds, timeoutSeconds);
@@ -136,7 +116,7 @@ public final class ProxyUtil {
                 return true;
             }
             // otherwise, try to make a HEAD request for this URL
-            HttpURLConnection hcon = (HttpURLConnection)conn;
+            HttpURLConnection hcon = (HttpURLConnection) conn;
             try {
                 hcon.setRequestMethod("HEAD");
                 hcon.connect();
@@ -161,8 +141,8 @@ public final class ProxyUtil {
         return false;
     }
 
-    public static void configProxy (Application app, String host, String port,
-                                    String username, String password) {
+    public static void configProxy(Application app, String host, String port,
+                                   String username, String password) {
         // save our proxy host and port in a local file
         saveProxy(app, host, port);
 
@@ -180,20 +160,20 @@ public final class ProxyUtil {
         initProxy(app, host, port, username, password);
     }
 
-    public static String[] loadProxy (Application app) {
+    public static String[] loadProxy(Application app) {
         File pfile = app.getLocalPath("proxy.txt");
         if (pfile.exists()) {
             try {
                 Config pconf = Config.parseConfig(pfile, Config.createOpts(false));
-                return new String[] { pconf.getString("host"), pconf.getString("port") };
+                return new String[]{pconf.getString("host"), pconf.getString("port")};
             } catch (IOException ioe) {
                 LOGGER.warn("Failed to read '{}'", pfile, ioe);
             }
         }
-        return new String[] { null, null};
+        return new String[]{null, null};
     }
 
-    public static void saveProxy (Application app, String host, String port) {
+    public static void saveProxy(Application app, String host, String port) {
         File pfile = app.getLocalPath("proxy.txt");
         try (PrintStream pout = new PrintStream(Files.newOutputStream(pfile.toPath()))) {
             if (!StringUtil.isBlank(host)) {
@@ -207,9 +187,8 @@ public final class ProxyUtil {
         }
     }
 
-    public static void initProxy (Application app, String host, String port,
-                                  String username, String password)
-    {
+    public static void initProxy(Application app, String host, String port,
+                                 String username, String password) {
         // check whether we have saved proxy credentials
         String appDir = app.getAppDir().getAbsolutePath();
         ServiceLoader<ProxyAuth> loader = ServiceLoader.load(ProxyAuth.class);
@@ -239,7 +218,8 @@ public final class ProxyUtil {
             final String fuser = username;
             final char[] fpass = password.toCharArray();
             Authenticator.setDefault(new Authenticator() {
-                @Override protected PasswordAuthentication getPasswordAuthentication () {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(fuser, fpass);
                 }
             });
@@ -247,14 +227,15 @@ public final class ProxyUtil {
     }
 
     public static class Resolver {
-        public String dnsResolve (String host) {
+        public String dnsResolve(String host) {
             try {
                 return InetAddress.getByName(host).getHostAddress();
             } catch (UnknownHostException uhe) {
                 return null;
             }
         }
-        public String myIpAddress () {
+
+        public String myIpAddress() {
             try {
                 return InetAddress.getLocalHost().getHostAddress();
             } catch (UnknownHostException uhe) {
@@ -263,7 +244,7 @@ public final class ProxyUtil {
         }
     }
 
-    public static String[] findPACProxiesForURL (Reader pac, URL url) {
+    public static String[] findPACProxiesForURL(Reader pac, URL url) {
         try {
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("javascript");
@@ -278,7 +259,7 @@ public final class ProxyUtil {
             engine.eval(new InputStreamReader(utils.openStream()));
             Object res = engine.eval(pac);
             if (engine instanceof Invocable) {
-                Object[] args = new Object[] { url.toString(), url.getHost() };
+                Object[] args = new Object[]{url.toString(), url.getHost()};
                 res = ((Invocable) engine).invokeFunction("FindProxyForURL", args);
             }
             String[] proxies = res.toString().split(";");
@@ -292,12 +273,12 @@ public final class ProxyUtil {
         return new String[0];
     }
 
-    private static String[] splitHostPort (String hostPort) {
+    private static String[] splitHostPort(String hostPort) {
         int cidx = hostPort.indexOf(":");
         if (cidx == -1) {
-            return new String[] { hostPort, null};
+            return new String[]{hostPort, null};
         } else {
-            return new String[] { hostPort.substring(0, cidx), hostPort.substring(cidx+1) };
+            return new String[]{hostPort.substring(0, cidx), hostPort.substring(cidx + 1)};
         }
     }
 

@@ -5,56 +5,59 @@
 
 package io.github.bekoenig.getdown.cache;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Asserts the correct functionality of the {@link ResourceCache}.
  */
 @RunWith(Parameterized.class)
-public class ResourceCacheTest
-{
+public class ResourceCacheTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {{ ".jar" }, { ".zip" }});
+        return Arrays.asList(new Object[][]{{".jar"}, {".zip"}});
     }
 
     @Parameterized.Parameter
     public String extension;
 
-    @Before public void setupCache () throws IOException {
+    @Before
+    public void setupCache() throws IOException {
         _fileToCache = _folder.newFile("filetocache" + extension);
         _cache = new ResourceCache(_folder.newFolder(".cache"));
     }
 
-    @Test public void shouldCacheFile () throws IOException
-    {
+    @Test
+    public void shouldCacheFile() throws IOException {
         assertEquals("abc123" + extension, cacheFile().getName());
     }
 
-    private File cacheFile() throws IOException
-    {
+    private File cacheFile() throws IOException {
         return _cache.cacheFile(_fileToCache, "abc123", "abc123");
     }
 
-    @Test public void shouldTrackFileUsage () throws IOException
-    {
+    @Test
+    public void shouldTrackFileUsage() throws IOException {
         String name = "abc123" + extension + ResourceCache.LAST_ACCESSED_FILE_SUFFIX;
         File lastAccessedFile = new File(cacheFile().getParentFile(), name);
         assertTrue(lastAccessedFile.exists());
     }
 
-    @Test public void shouldNotCacheTheSameFile () throws Exception
-    {
+    @Test
+    public void shouldNotCacheTheSameFile() throws Exception {
         File cachedFile = cacheFile();
         cachedFile.setLastModified(YESTERDAY);
         long expectedLastModified = cachedFile.lastModified();
@@ -63,8 +66,8 @@ public class ResourceCacheTest
         assertEquals(expectedLastModified, sameCachedFile.lastModified());
     }
 
-    @Test public void shouldRememberWhenFileWasRequested () throws Exception
-    {
+    @Test
+    public void shouldRememberWhenFileWasRequested() throws Exception {
         File cachedFile = cacheFile();
         String name = cachedFile.getName() + ResourceCache.LAST_ACCESSED_FILE_SUFFIX;
         File lastAccessedFile = new File(cachedFile.getParentFile(), name);
@@ -75,7 +78,8 @@ public class ResourceCacheTest
         assertTrue(lastAccessedFile.lastModified() > lastAccessed);
     }
 
-    @Rule public final TemporaryFolder _folder = new TemporaryFolder();
+    @Rule
+    public final TemporaryFolder _folder = new TemporaryFolder();
 
     private File _fileToCache;
     private ResourceCache _cache;

@@ -5,6 +5,9 @@
 
 package io.github.bekoenig.getdown.cache;
 
+import io.github.bekoenig.getdown.data.Resource;
+import io.github.bekoenig.getdown.util.FileUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -14,20 +17,15 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.stream.Stream;
 
-import io.github.bekoenig.getdown.data.Resource;
-import io.github.bekoenig.getdown.util.FileUtil;
-
 /**
  * Collects elements in the {@link ResourceCache cache} which became unused and deletes them
  * afterwards.
  */
-public class GarbageCollector
-{
+public class GarbageCollector {
     /**
      * Collect and delete the garbage in the cache.
      */
-    public static void collect (File cacheDir, final long retentionPeriodMillis)
-    {
+    public static void collect(File cacheDir, final long retentionPeriodMillis) {
         try {
             Files.walkFileTree(cacheDir.toPath(), new FileVisitor<Path>() {
                 @Override
@@ -79,8 +77,7 @@ public class GarbageCollector
      * Collect and delete garbage in the native cache. It tries to find a jar file with a matching
      * last modified file, and deletes the entire directory accordingly.
      */
-    public static void collectNative (File cacheDir, final long retentionPeriodMillis)
-    {
+    public static void collectNative(File cacheDir, final long retentionPeriodMillis) {
         File[] subdirs = cacheDir.listFiles();
         if (subdirs != null) {
             for (File dir : subdirs) {
@@ -105,24 +102,20 @@ public class GarbageCollector
         }
     }
 
-    private static boolean shouldDelete (File lastAccessedFile, long retentionMillis)
-    {
+    private static boolean shouldDelete(File lastAccessedFile, long retentionMillis) {
         return System.currentTimeMillis() - lastAccessedFile.lastModified() > retentionMillis;
     }
 
-    private static File getLastAccessedFile (File file)
-    {
+    private static File getLastAccessedFile(File file) {
         return isLastAccessedFile(file) ? file : new File(
             file.getParentFile(), file.getName() + ResourceCache.LAST_ACCESSED_FILE_SUFFIX);
     }
 
-    private static boolean isLastAccessedFile (File file)
-    {
+    private static boolean isLastAccessedFile(File file) {
         return file.getName().endsWith(ResourceCache.LAST_ACCESSED_FILE_SUFFIX);
     }
 
-    private static File getCachedFile (File file)
-    {
+    private static File getCachedFile(File file) {
         return !isLastAccessedFile(file) ? file : new File(
             file.getParentFile(), file.getName().substring(0, file.getName().lastIndexOf('.')));
     }

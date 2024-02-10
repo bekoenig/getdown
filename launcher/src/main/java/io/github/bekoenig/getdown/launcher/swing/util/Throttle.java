@@ -45,8 +45,7 @@ package io.github.bekoenig.getdown.launcher.swing.util;
  * }
  * </pre>
  */
-public class Throttle
-{
+public class Throttle {
     /**
      * Constructs a new throttle instance that will allow the specified number of operations to
      * proceed within the specified period (the period is measured in milliseconds).
@@ -57,8 +56,7 @@ public class Throttle
      * possible). However, note that you may not always want to reduce the ratio as much as
      * possible if you wish to allow bursts of operations up to some large value.
      */
-    public Throttle (int operations, long period)
-    {
+    public Throttle(int operations, long period) {
         _ops = new long[operations];
         _period = period;
     }
@@ -70,8 +68,7 @@ public class Throttle
      *
      * @return true if the throttle is activated, false if the operation can proceed.
      */
-    public boolean throttleOp ()
-    {
+    public boolean throttleOp() {
         return throttleOp(System.currentTimeMillis());
     }
 
@@ -84,11 +81,9 @@ public class Throttle
      * unnecessary call to {@link System#currentTimeMillis} by using this version of the method.
      *
      * @param timeStamp the timestamp at which this operation is being attempted.
-     *
      * @return true if the throttle is activated, false if the operation can proceed.
      */
-    public boolean throttleOp (long timeStamp)
-    {
+    public boolean throttleOp(long timeStamp) {
         if (wouldThrottle(timeStamp)) {
             return true;
         }
@@ -101,8 +96,7 @@ public class Throttle
      * Check to see if we would throttle an operation occuring at the specified timestamp.
      * Typically used in conjunction with {@link #noteOp}.
      */
-    public boolean wouldThrottle (long timeStamp)
-    {
+    public boolean wouldThrottle(long timeStamp) {
         // if the oldest operation was performed less than _period ago, we need to throttle
         long elapsed = timeStamp - _ops[_lastOp];
         // if negative time elapsed, we must be running on windows; let's just cope by not
@@ -117,8 +111,7 @@ public class Throttle
      * determines whether the operation can occur. You are responsible for calling this method in a
      * safe and timely manner after using wouldThrottle.
      */
-    public void noteOp (long timeStamp)
-    {
+    public void noteOp(long timeStamp) {
         // overwrite the oldest operation with the current time and move the oldest operation
         // pointer to the second oldest operation (which is now the oldest as we overwrote the
         // oldest)
@@ -127,8 +120,7 @@ public class Throttle
     }
 
     @Override // from Object
-    public String toString ()
-    {
+    public String toString() {
         long oldest = System.currentTimeMillis() - _ops[_lastOp];
         return _ops.length + " ops per " + _period + "ms (oldest " + oldest + ")";
     }
@@ -136,18 +128,19 @@ public class Throttle
     /**
      * Used for testing.
      */
-    public static void main (String[] args)
-    {
+    public static void main(String[] args) {
         // set up a throttle for 5 ops per 10 seconds
         Throttle throttle = new Throttle(5, 10000);
 
         // try doing one operation per second and we should hit the throttle on the sixth operation
         // and then kick in again on the eleventh, only to stop again on the fifteenth
         for (int i = 0; i < 20; i++) {
-            System.out.println((i+1) + ". Throttle: " + throttle.throttleOp());
+            System.out.println((i + 1) + ". Throttle: " + throttle.throttleOp());
             // pause for a sec
-            try { Thread.sleep(1000L); }
-            catch (InterruptedException ie) {}
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException ie) {
+            }
         }
     }
 

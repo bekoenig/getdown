@@ -5,24 +5,6 @@
 
 package io.github.bekoenig.getdown.launcher;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-
 import io.github.bekoenig.getdown.launcher.swing.GroupLayout;
 import io.github.bekoenig.getdown.launcher.swing.Spacer;
 import io.github.bekoenig.getdown.launcher.swing.VGroupLayout;
@@ -30,16 +12,23 @@ import io.github.bekoenig.getdown.util.MessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
 /**
  * Displays an interface with which the user can configure their proxy
  * settings.
  */
-public final class ProxyPanel extends JPanel implements ActionListener
-{
+public final class ProxyPanel extends JPanel implements ActionListener {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ProxyPanel (Getdown getdown, ResourceBundle msgs, boolean updateAuth)
-    {
+    public ProxyPanel(Getdown getdown, ResourceBundle msgs, boolean updateAuth) {
         _getdown = getdown;
         _msgs = msgs;
         _updateAuth = updateAuth;
@@ -83,12 +72,10 @@ public final class ProxyPanel extends JPanel implements ActionListener
         row.add(_password);
         add(row);
 
-        _useAuth.addItemListener(new ItemListener() {
-            @Override public void itemStateChanged (ItemEvent event) {
-                boolean selected = (event.getStateChange() == ItemEvent.SELECTED);
-                _username.setEnabled(selected);
-                _password.setEnabled(selected);
-            }
+        _useAuth.addItemListener(event -> {
+            boolean selected = (event.getStateChange() == ItemEvent.SELECTED);
+            _username.setEnabled(selected);
+            _password.setEnabled(selected);
         });
 
         add(new Spacer(5, 5));
@@ -104,7 +91,7 @@ public final class ProxyPanel extends JPanel implements ActionListener
         add(row);
     }
 
-    public void setProxy (String host, String port) {
+    public void setProxy(String host, String port) {
         if (host != null) {
             _host.setText(host);
         }
@@ -115,8 +102,7 @@ public final class ProxyPanel extends JPanel implements ActionListener
 
     // documentation inherited
     @Override
-    public void addNotify ()
-    {
+    public void addNotify() {
         super.addNotify();
         if (_updateAuth) {
             // we are asking the user to update the credentials for an existing proxy
@@ -129,8 +115,7 @@ public final class ProxyPanel extends JPanel implements ActionListener
 
     // documentation inherited
     @Override
-    public Dimension getPreferredSize ()
-    {
+    public Dimension getPreferredSize() {
         // this is annoyingly hardcoded, but we can't just force the width
         // or the JLabel will claim a bogus height thinking it can lay its
         // text out all on one line which will booch the whole UI's
@@ -140,8 +125,7 @@ public final class ProxyPanel extends JPanel implements ActionListener
 
     // documentation inherited from interface
     @Override
-    public void actionPerformed (ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if ("ok".equals(cmd)) {
             String user = null, pass = null;
@@ -158,9 +142,10 @@ public final class ProxyPanel extends JPanel implements ActionListener
         }
     }
 
-    /** Used to look up localized messages. */
-    private String get(String key)
-    {
+    /**
+     * Used to look up localized messages.
+     */
+    private String get(String key) {
         // if this string is tainted, we don't translate it, instead we
         // simply remove the taint character and return it to the caller
         if (MessageUtil.isTainted(key)) {
@@ -175,18 +160,26 @@ public final class ProxyPanel extends JPanel implements ActionListener
     }
 
     protected static class SaneLabelField extends JLabel {
-        public SaneLabelField(String message) { super(message); }
-        @Override public Dimension getPreferredSize () {
+        public SaneLabelField(String message) {
+            super(message);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
             return clampWidth(super.getPreferredSize(), 200);
         }
     }
+
     protected static class SaneTextField extends JTextField {
-        @Override public Dimension getPreferredSize () {
+        @Override
+        public Dimension getPreferredSize() {
             return clampWidth(super.getPreferredSize(), 150);
         }
     }
+
     protected static class SanePasswordField extends JPasswordField {
-        @Override public Dimension getPreferredSize () {
+        @Override
+        public Dimension getPreferredSize() {
             return clampWidth(super.getPreferredSize(), 150);
         }
     }

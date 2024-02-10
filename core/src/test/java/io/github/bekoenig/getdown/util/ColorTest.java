@@ -6,13 +6,13 @@
 package io.github.bekoenig.getdown.util;
 
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link Color}.
  */
-public class ColorTest
-{
+public class ColorTest {
     @Test
     public void testBrightness() {
         assertEquals(0, Color.brightness(0xFF000000), 0.0000001);

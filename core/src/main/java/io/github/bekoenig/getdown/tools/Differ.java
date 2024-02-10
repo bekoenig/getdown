@@ -5,21 +5,6 @@
 
 package io.github.bekoenig.getdown.tools;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
-
 import io.github.bekoenig.getdown.data.Application;
 import io.github.bekoenig.getdown.data.Digest;
 import io.github.bekoenig.getdown.data.EnvConfig;
@@ -29,14 +14,22 @@ import io.github.bekoenig.getdown.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
 /**
  * Generates patch files between two particular revisions of an
  * application. The differences between all the files in the two
  * revisions are bundled into a single patch file which is placed into the
  * target version directory.
  */
-public class Differ
-{
+public class Differ {
     private static final Logger LOGGER = LoggerFactory.getLogger(Differ.class);
 
     /**
@@ -45,9 +38,8 @@ public class Differ
      * created in the {@code nvdir} directory with name
      * {@code patchV.dat} where V is the old application version.
      */
-    public void createDiff (File nvdir, File ovdir, boolean verbose)
-        throws IOException
-    {
+    public void createDiff(File nvdir, File ovdir, boolean verbose)
+        throws IOException {
         // sanity check
         String nvers = nvdir.getName();
         String overs = ovdir.getName();
@@ -59,7 +51,7 @@ public class Differ
             }
         } catch (NumberFormatException nfe) {
             throw new IOException("Non-numeric versions? [nvers=" + nvers +
-                                  ", overs=" + overs + "].");
+                ", overs=" + overs + "].");
         }
 
         Application oapp = new Application(new EnvConfig(ovdir));
@@ -94,10 +86,9 @@ public class Differ
         }
     }
 
-    protected void createPatch (File patch, List<Resource> orsrcs,
-                                List<Resource> nrsrcs, boolean verbose)
-        throws IOException
-    {
+    protected void createPatch(File patch, List<Resource> orsrcs,
+                               List<Resource> nrsrcs, boolean verbose)
+        throws IOException {
         int version = Digest.VERSION;
         MessageDigest md = Digest.getMessageDigest(version);
         try (FileOutputStream fos = new FileOutputStream(patch);
@@ -171,16 +162,15 @@ public class Differ
         }
     }
 
-    protected File rebuildJar (File target)
-        throws IOException
-    {
+    protected File rebuildJar(File target)
+        throws IOException {
         File temp = File.createTempFile("differ", "jar");
         try (ZipFile jar = new ZipFile(target);
              FileOutputStream tempFos = new FileOutputStream(temp);
              BufferedOutputStream tempBos = new BufferedOutputStream(tempFos);
              ZipOutputStream jout = new ZipOutputStream(tempBos)) {
             byte[] buffer = new byte[4096];
-            for (Enumeration<? extends ZipEntry> iter = jar.entries(); iter.hasMoreElements();) {
+            for (Enumeration<? extends ZipEntry> iter = jar.entries(); iter.hasMoreElements(); ) {
                 ZipEntry entry = iter.nextElement();
                 entry.setCompressedSize(-1);
                 jout.putNextEntry(entry);
@@ -196,13 +186,11 @@ public class Differ
         return temp;
     }
 
-    protected void jarDiff (File ofile, File nfile, ZipOutputStream jout) throws IOException
-    {
+    protected void jarDiff(File ofile, File nfile, ZipOutputStream jout) throws IOException {
         JarDiff.createPatch(ofile.getPath(), nfile.getPath(), jout, false);
     }
 
-    public static void main (String[] args)
-    {
+    public static void main(String[] args) {
         if (args.length < 2) {
             System.err.println(
                 "Usage: Differ [-verbose] new_vers_dir old_vers_dir");
@@ -217,15 +205,14 @@ public class Differ
         }
         try {
             differ.createDiff(new File(args[aidx++]),
-                              new File(args[aidx++]), verbose);
+                new File(args[aidx++]), verbose);
         } catch (IOException ioe) {
             System.err.println("Error: " + ioe.getMessage());
             System.exit(255);
         }
     }
 
-    protected static void pipe (File file, OutputStream out) throws IOException
-    {
+    protected static void pipe(File file, OutputStream out) throws IOException {
         try (FileInputStream fin = new FileInputStream(file)) {
             StreamUtil.copy(fin, out);
         }

@@ -5,6 +5,8 @@
 
 package io.github.bekoenig.getdown.data;
 
+import io.github.bekoenig.getdown.util.StringUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.cert.Certificate;
@@ -12,20 +14,33 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import io.github.bekoenig.getdown.util.StringUtil;
-
-/** Configuration that comes from our "environment" (command line args, sys props, etc.). */
+/**
+ * Configuration that comes from our "environment" (command line args, sys props, etc.).
+ */
 public final class EnvConfig {
 
-    /** Used to report problems or feedback by {@link #create}. */
+    /**
+     * Used to report problems or feedback by {@link #create}.
+     */
     public static final class Note {
-        public enum Level { INFO, WARN, ERROR }
-        public static Note info (String msg) { return new Note(Level.INFO, msg); }
-        public static Note warn (String msg) { return new Note(Level.WARN, msg); }
-        public static Note error (String msg) { return new Note(Level.ERROR, msg); }
+        public enum Level {INFO, WARN, ERROR}
+
+        public static Note info(String msg) {
+            return new Note(Level.INFO, msg);
+        }
+
+        public static Note warn(String msg) {
+            return new Note(Level.WARN, msg);
+        }
+
+        public static Note error(String msg) {
+            return new Note(Level.ERROR, msg);
+        }
+
         public final Level level;
         public final String message;
-        public Note (Level level, String message) {
+
+        public Note(Level level, String message) {
             this.level = level;
             this.message = message;
         }
@@ -39,17 +54,17 @@ public final class EnvConfig {
      * <li> System properties supplied to the JVM. </li>
      * <li> The supplied command line arguments ({@code argv}). </li>
      * </ul>
-     *
+     * <p>
      * If a later source supplies a configuration already provided by a prior source, a warning
      * message will be logged to indicate the conflict, and the prior source will be used.
      *
      * @param notes a list into which notes are added, to be logged after the logging system has
-     * been initialized (which cannot happen until the appdir is known). If any {@code ERROR} notes
-     * are included, the app should terminate after reporting them.
+     *              been initialized (which cannot happen until the appdir is known). If any {@code ERROR} notes
+     *              are included, the app should terminate after reporting them.
      * @return an env config instance, or {@code null} if no appdir could be located via any
      * configuration source.
      */
-    public static EnvConfig create (String[] argv, List<Note> notes) {
+    public static EnvConfig create(String[] argv, List<Note> notes) {
         String appDir = null, appDirProv = null;
         String appId = null, appIdProv = null;
         String appBase = null, appBaseProv = null;
@@ -76,7 +91,7 @@ public final class EnvConfig {
                     String skey = key.substring(4);
                     String svalue = bundle.getString(key);
                     notes.add(Note.info("Setting system property from bundle: " +
-                                        skey + "='" + svalue + "'"));
+                        skey + "='" + svalue + "'"));
                     System.setProperty(skey, svalue);
                 }
             }
@@ -93,7 +108,7 @@ public final class EnvConfig {
                 appDirProv = "system property";
             } else {
                 notes.add(Note.warn("Ignoring 'appdir' system property, have appdir via '" +
-                                    appDirProv + "'"));
+                    appDirProv + "'"));
             }
         }
         String spropsAppId = SysProps.appId();
@@ -103,7 +118,7 @@ public final class EnvConfig {
                 appIdProv = "system property";
             } else {
                 notes.add(Note.warn("Ignoring 'appid' system property, have appid via '" +
-                                    appIdProv + "'"));
+                    appIdProv + "'"));
             }
         }
         String spropsAppBase = SysProps.appBase();
@@ -113,7 +128,7 @@ public final class EnvConfig {
                 appBaseProv = "system property";
             } else {
                 notes.add(Note.warn("Ignoring 'appbase' system property, have appbase via '" +
-                                    appBaseProv + "'"));
+                    appBaseProv + "'"));
             }
         }
 
@@ -125,7 +140,7 @@ public final class EnvConfig {
                 appDirProv = "command line";
             } else {
                 notes.add(Note.warn("Ignoring 'appdir' command line arg, have appdir via '" +
-                                    appDirProv + "'"));
+                    appDirProv + "'"));
             }
         }
         String argvAppId = argv.length > 1 ? argv[1] : null;
@@ -135,7 +150,7 @@ public final class EnvConfig {
                 appIdProv = "command line";
             } else {
                 notes.add(Note.warn("Ignoring 'appid' command line arg, have appid via '" +
-                                    appIdProv + "'"));
+                    appIdProv + "'"));
             }
         }
 
@@ -175,7 +190,7 @@ public final class EnvConfig {
         // pass along anything after the first two args as extra app args
         List<String> appArgs = argv.length > 2 ?
             Arrays.asList(argv).subList(2, argv.length) :
-            Collections.<String>emptyList();
+            Collections.emptyList();
 
         // load X.509 certificate if it exists
         File crtFile = new File(appDirFile, Digest.digestFile(Digest.VERSION) + ".crt");
@@ -193,32 +208,42 @@ public final class EnvConfig {
         return new EnvConfig(appDirFile, appId, appBase, certs, appArgs);
     }
 
-    /** The directory in which the application and metadata is stored. */
+    /**
+     * The directory in which the application and metadata is stored.
+     */
     public final File appDir;
 
-    /** Either {@code null} or an identifier for a secondary application that should be
-      * launched. That app will use {@code appid.class} and {@code appid.apparg} to configure
-      * itself but all other parameters will be the same as the primary app. */
+    /**
+     * Either {@code null} or an identifier for a secondary application that should be
+     * launched. That app will use {@code appid.class} and {@code appid.apparg} to configure
+     * itself but all other parameters will be the same as the primary app.
+     */
     public final String appId;
 
-    /** Either {@code null} or fallback {@code appbase} to use if one cannot be read from a
-      * {@code getdown.txt} file during startup. */
+    /**
+     * Either {@code null} or fallback {@code appbase} to use if one cannot be read from a
+     * {@code getdown.txt} file during startup.
+     */
     public final String appBase;
 
-    /** Zero or more signing certificates used to verify the digest file. */
+    /**
+     * Zero or more signing certificates used to verify the digest file.
+     */
     public final List<Certificate> certs;
 
-    /** Additional arguments to pass on to launched application. These will be added after the
-      * args in the getdown.txt file. */
+    /**
+     * Additional arguments to pass on to launched application. These will be added after the
+     * args in the getdown.txt file.
+     */
     public final List<String> appArgs;
 
-    public EnvConfig (File appDir) {
-        this(appDir, null, null, Collections.<Certificate>emptyList(),
-             Collections.<String>emptyList());
+    public EnvConfig(File appDir) {
+        this(appDir, null, null, Collections.emptyList(),
+            Collections.emptyList());
     }
 
-    private EnvConfig (File appDir, String appId, String appBase, List<Certificate> certs,
-                       List<String> appArgs) {
+    private EnvConfig(File appDir, String appId, String appBase, List<Certificate> certs,
+                      List<String> appArgs) {
         this.appDir = appDir;
         this.appId = appId;
         this.appBase = appBase;

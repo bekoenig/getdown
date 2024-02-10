@@ -5,21 +5,16 @@
 
 package io.github.bekoenig.getdown.net;
 
+import io.github.bekoenig.getdown.data.SysProps;
+import io.github.bekoenig.getdown.util.StreamUtil;
+
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
+import java.net.*;
 import java.util.Base64;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-
-import io.github.bekoenig.getdown.data.SysProps;
-import io.github.bekoenig.getdown.util.StreamUtil;
 
 /**
  * Manages the process of making HTTP connections, using a proxy if necessary. Tracks and reports
@@ -27,25 +22,33 @@ import io.github.bekoenig.getdown.util.StreamUtil;
  */
 public class Connector {
 
-    /** The default connector uses no proxy. */
+    /**
+     * The default connector uses no proxy.
+     */
     public static final Connector DEFAULT = new Connector();
 
-    /** Tracks the state of a connector. If it fails for proxy-related reasons, it may transition
-      * to a need_proxy or need_proxy_auth state. */
-    public enum State { ACTIVE, NEED_PROXY, NEED_PROXY_AUTH }
+    /**
+     * Tracks the state of a connector. If it fails for proxy-related reasons, it may transition
+     * to a need_proxy or need_proxy_auth state.
+     */
+    public enum State {ACTIVE, NEED_PROXY, NEED_PROXY_AUTH}
 
-    /** The proxy used by this connector. */
+    /**
+     * The proxy used by this connector.
+     */
     public final Proxy proxy;
 
-    /** The current state of this connector. */
+    /**
+     * The current state of this connector.
+     */
     public State state = State.ACTIVE;
 
-    public Connector(){
+    public Connector() {
         this(null);
     }
 
-    public Connector (Proxy proxy) {
-        if (proxy == Proxy.NO_PROXY){
+    public Connector(Proxy proxy) {
+        if (proxy == Proxy.NO_PROXY) {
             throw new IllegalArgumentException("The passed Proxy cannot be " + Proxy.NO_PROXY + ". Use the empty constructor instead");
         }
         this.proxy = proxy;
@@ -53,17 +56,17 @@ public class Connector {
 
     /**
      * Opens a connection to a URL, setting the authentication header if user info is present.
-     * @param url the URL to which to open a connection.
+     *
+     * @param url            the URL to which to open a connection.
      * @param connectTimeout if {@code > 0} then a timeout, in seconds, to use when opening the
-     * connection. If {@code 0} is supplied, the connection timeout specified via system properties
-     * will be used instead.
-     * @param readTimeout if {@code > 0} then a timeout, in seconds, to use while reading data from
-     * the connection. If {@code 0} is supplied, the read timeout specified via system properties
-     * will be used instead.
+     *                       connection. If {@code 0} is supplied, the connection timeout specified via system properties
+     *                       will be used instead.
+     * @param readTimeout    if {@code > 0} then a timeout, in seconds, to use while reading data from
+     *                       the connection. If {@code 0} is supplied, the read timeout specified via system properties
+     *                       will be used instead.
      */
-    public URLConnection open (URL url, int connectTimeout, int readTimeout)
-        throws IOException
-    {
+    public URLConnection open(URL url, int connectTimeout, int readTimeout)
+        throws IOException {
         URLConnection conn;
         if (proxy == null) {
             conn = url.openConnection();
@@ -105,16 +108,15 @@ public class Connector {
      * present. Throws a class cast exception if the connection returned is not the right type. See
      * {@link #open} for parameter documentation.
      */
-    public HttpURLConnection openHttp (URL url, int connectTimeout, int readTimeout)
-        throws IOException
-    {
-        return (HttpURLConnection)open(url, connectTimeout, readTimeout);
+    public HttpURLConnection openHttp(URL url, int connectTimeout, int readTimeout)
+        throws IOException {
+        return (HttpURLConnection) open(url, connectTimeout, readTimeout);
     }
 
     /**
      * Downloads {@code url} into {@code target}.
      */
-    public void download (URL url, File target) throws IOException {
+    public void download(URL url, File target) throws IOException {
         URLConnection conn = open(url, 0, 0);
         // we have to tell Java not to use caches here, otherwise it will cache any request for
         // same URL for the lifetime of this JVM (based on the URL string, not the URL object);
@@ -138,7 +140,7 @@ public class Connector {
     /**
      * Fetches the data at {@code url} into a string.
      */
-    public String fetch (URL url) throws IOException {
+    public String fetch(URL url) throws IOException {
         URLConnection conn = open(url, 0, 0);
         checkConnectOK(conn, "Unable to fetch " + url);
         int size = conn.getContentLength();
@@ -154,7 +156,7 @@ public class Connector {
      * If the connection failed for proxy related reasons, this changes the state of this connector
      * to reflect the needed proxy information.
      */
-    public void checkConnectOK (URLConnection conn, String errpre) throws IOException {
+    public void checkConnectOK(URLConnection conn, String errpre) throws IOException {
         int code = checkConnectStatus(conn);
         if (code != HttpURLConnection.HTTP_OK) {
             throw new IOException(errpre + " [code=" + code + "]");
@@ -165,19 +167,19 @@ public class Connector {
      * Returns the connection status of {@code conn}. If the connection failed for proxy related
      * reasons, this changes the state of this connector to reflect the needed proxy information.
      */
-    public int checkConnectStatus (URLConnection conn) throws IOException {
+    public int checkConnectStatus(URLConnection conn) throws IOException {
         // if it's not an HTTP connection, we assume it's OK
         if (!(conn instanceof HttpURLConnection)) return HttpURLConnection.HTTP_OK;
 
-        int code = ((HttpURLConnection)conn).getResponseCode();
+        int code = ((HttpURLConnection) conn).getResponseCode();
         switch (code) {
-        case HttpURLConnection.HTTP_FORBIDDEN:
-        case HttpURLConnection.HTTP_USE_PROXY:
-            state = State.NEED_PROXY;
-            break;
-        case HttpURLConnection.HTTP_PROXY_AUTH:
-            state = State.NEED_PROXY_AUTH;
-            break;
+            case HttpURLConnection.HTTP_FORBIDDEN:
+            case HttpURLConnection.HTTP_USE_PROXY:
+                state = State.NEED_PROXY;
+                break;
+            case HttpURLConnection.HTTP_PROXY_AUTH:
+                state = State.NEED_PROXY_AUTH;
+                break;
         }
         return code;
     }
@@ -186,7 +188,7 @@ public class Connector {
      * Adds appropriate proxy args from this connector's configuration to the supplied list of
      * command line args that will be used to launch the app.
      */
-    public void addProxyArgs (List<String> args) {
+    public void addProxyArgs(List<String> args) {
         if (proxy != null && proxy.type() == Proxy.Type.HTTP && proxy.address() instanceof InetSocketAddress) {
             InetSocketAddress proxyAddr = (InetSocketAddress) proxy.address();
             String proxyHost = proxyAddr.getHostString();

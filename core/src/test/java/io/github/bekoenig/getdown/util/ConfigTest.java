@@ -5,23 +5,24 @@
 
 package io.github.bekoenig.getdown.util;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.*;
 import static org.junit.Assert.*;
 
 /**
  * Tests {@link Config}.
  */
-public class ConfigTest
-{
+public class ConfigTest {
     public static class Pair {
         public final String key;
         public final String value;
-        public Pair (String key, String value) {
+
+        public Pair(String key, String value) {
             this.key = key;
             this.value = value;
         }
@@ -35,8 +36,8 @@ public class ConfigTest
         new Pair("nine", "ten"),
     };
 
-    @Test public void testSimplePairs () throws IOException
-    {
+    @Test
+    public void testSimplePairs() throws IOException {
         List<String[]> pairs = Config.parsePairs(
             toReader(SIMPLE_PAIRS), Config.createOpts(true));
         for (int ii = 0; ii < SIMPLE_PAIRS.length; ii++) {
@@ -45,8 +46,8 @@ public class ConfigTest
         }
     }
 
-    @Test public void testCreateOps_withCheckPlatform ()
-    {
+    @Test
+    public void testCreateOps_withCheckPlatform() {
         String originalOsName = System.getProperty("os.name");
         String originalOsArch = System.getProperty("os.arch");
 
@@ -79,8 +80,8 @@ public class ConfigTest
         System.setProperty("os.arch", originalOsArch);
     }
 
-    @Test public void testQualifiedPairs () throws IOException
-    {
+    @Test
+    public void testQualifiedPairs() throws IOException {
         Pair linux = new Pair("one", "[linux] two");
         Pair mac = new Pair("three", "[mac os x] four");
         Pair linuxAndMac = new Pair("five", "[linux, mac os x] six");
@@ -89,7 +90,7 @@ public class ConfigTest
         Pair mac64 = new Pair("eleven", "[mac os x-x86_64] twelve");
         Pair win64 = new Pair("thirteen", "[windows-x86_64] fourteen");
         Pair notWin = new Pair("fifteen", "[!windows] sixteen");
-        Pair[] pairs = { linux, mac, linuxAndMac, linux64, linux64s, mac64, win64, notWin };
+        Pair[] pairs = {linux, mac, linuxAndMac, linux64, linux64s, mac64, win64, notWin};
 
         Config.ParseOpts opts = Config.createOpts(false);
         opts.osname = "linux";
@@ -173,8 +174,7 @@ public class ConfigTest
         assertFalse(exists(parsed, notWin.key));
     }
 
-    protected static boolean exists (List<String[]> pairs, String key)
-    {
+    protected static boolean exists(List<String[]> pairs, String key) {
         for (String[] pair : pairs) {
             if (pair[0].equals(key)) {
                 return true;
@@ -183,8 +183,7 @@ public class ConfigTest
         return false;
     }
 
-    protected static StringReader toReader (Pair[] pairs)
-    {
+    protected static StringReader toReader(Pair[] pairs) {
         StringBuilder builder = new StringBuilder();
         for (Pair pair : pairs) {
             // throw some whitespace in to ensure it's trimmed
@@ -196,8 +195,7 @@ public class ConfigTest
         return new StringReader(builder.toString());
     }
 
-    protected static String whitespace ()
-    {
+    protected static String whitespace() {
         return _rando.nextBoolean() ? " " : "";
     }
 

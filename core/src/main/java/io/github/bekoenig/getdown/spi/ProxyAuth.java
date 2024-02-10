@@ -8,13 +8,15 @@ package io.github.bekoenig.getdown.spi;
 /**
  * A service provider interface that handles the storage of proxy credentials.
  */
-public interface ProxyAuth
-{
-    /** Credentials for a proxy server. */
+public interface ProxyAuth {
+    /**
+     * Credentials for a proxy server.
+     */
     class Credentials {
         public final String username;
         public final String password;
-        public Credentials (String username, String password) {
+
+        public Credentials(String username, String password) {
             this.username = username;
             this.password = password;
         }
@@ -23,10 +25,10 @@ public interface ProxyAuth
     /**
      * Loads the credentials for the app installed in {@code appDir}.
      */
-    Credentials loadCredentials (String appDir);
+    Credentials loadCredentials(String appDir);
 
     /**
      * Encrypts and saves the credentials for the app installed in {@code appDir}.
      */
-    void saveCredentials (String appDir, String username, String password);
+    void saveCredentials(String appDir, String username, String password);
 }

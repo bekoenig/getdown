@@ -22,16 +22,13 @@ package io.github.bekoenig.getdown.launcher.swing;
 
 import java.awt.*;
 
-public class VGroupLayout extends GroupLayout
-{
+public class VGroupLayout extends GroupLayout {
 
-    public VGroupLayout ()
-    {
+    public VGroupLayout() {
     }
 
     @Override
-    protected Dimension getLayoutSize (Container parent, int type)
-    {
+    protected Dimension getLayoutSize(Container parent, int type) {
         DimenInfo info = computeDimens(parent, type);
         Dimension dims = new Dimension();
 
@@ -55,8 +52,7 @@ public class VGroupLayout extends GroupLayout
     }
 
     @Override
-    public void layoutContainer (Container parent)
-    {
+    public void layoutContainer(Container parent) {
         Rectangle b = parent.getBounds();
         DimenInfo info = computeDimens(parent, PREFERRED);
 
@@ -67,7 +63,7 @@ public class VGroupLayout extends GroupLayout
 
         int nk = parent.getComponentCount();
         int sx, sy;
-        int tothei, totgap = _gap * (info.count-1);
+        int tothei, totgap = _gap * (info.count - 1);
         int freecount = info.count - info.numfix;
 
         // when stretching, there is the possibility that a pixel or more
@@ -107,7 +103,7 @@ public class VGroupLayout extends GroupLayout
         if (_justification == LEFT || _justification == TOP) {
             sy = insets.top;
         } else if (_justification == CENTER) {
-            sy = insets.top + (b.height - tothei)/2;
+            sy = insets.top + (b.height - tothei) / 2;
         } else { // RIGHT or BOTTOM
             sy = insets.top + b.height - tothei;
         }
@@ -145,7 +141,7 @@ public class VGroupLayout extends GroupLayout
             } else if (_offjust == RIGHT || _offjust == BOTTOM) {
                 sx = insets.left + b.width - newwid;
             } else { // CENTER
-                sx = insets.left + (b.width - newwid)/2;
+                sx = insets.left + (b.width - newwid) / 2;
             }
 
             child.setBounds(sx, sy, newwid, newhei);

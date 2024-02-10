@@ -8,11 +8,10 @@ package io.github.bekoenig.getdown.util;
 /**
  * Used to communicate progress.
  */
-public interface ProgressObserver
-{
+public interface ProgressObserver {
     /**
      * Informs the observer that we have completed the specified
      * percentage of the process.
      */
-    void progress (int percent);
+    void progress(int percent);
 }

@@ -5,23 +5,23 @@
 
 package io.github.bekoenig.getdown.util;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
 
 import static org.junit.Assert.*;
 
 /**
  * Tests {@link FileUtil}.
  */
-public class FileUtilTest
-{
-    @Test public void testReadLines () throws IOException
-    {
+public class FileUtilTest {
+    @Test
+    public void testReadLines() throws IOException {
         String data = "This is a test\nof a file with\na few lines\n";
         List<String> lines = FileUtil.readLines(new StringReader(data));
         String[] linesBySplit = data.split("\n");
@@ -31,8 +31,8 @@ public class FileUtilTest
         }
     }
 
-    @Test public void shouldCopyFile () throws IOException
-    {
+    @Test
+    public void shouldCopyFile() throws IOException {
         File source = _folder.newFile("source.txt");
         File target = new File(_folder.getRoot(), "target.txt");
         assertFalse(target.exists());
@@ -40,5 +40,6 @@ public class FileUtilTest
         assertTrue(target.exists());
     }
 
-    @Rule public final TemporaryFolder _folder = new TemporaryFolder();
+    @Rule
+    public final TemporaryFolder _folder = new TemporaryFolder();
 }

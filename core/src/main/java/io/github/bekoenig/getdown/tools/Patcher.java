@@ -5,6 +5,12 @@
 
 package io.github.bekoenig.getdown.tools;
 
+import io.github.bekoenig.getdown.util.FileUtil;
+import io.github.bekoenig.getdown.util.ProgressObserver;
+import io.github.bekoenig.getdown.util.StreamUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,29 +19,28 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import io.github.bekoenig.getdown.util.FileUtil;
-import io.github.bekoenig.getdown.util.ProgressObserver;
-import io.github.bekoenig.getdown.util.StreamUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Applies a unified patch file to an application directory, providing
  * percentage completion feedback along the way. <em>Note:</em> the
  * patcher is not thread safe. Create a separate patcher instance for each
  * patching action that is desired.
  */
-public class Patcher
-{
+public class Patcher {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    /** A suffix appended to file names to indicate that a file should be newly created. */
+    /**
+     * A suffix appended to file names to indicate that a file should be newly created.
+     */
     public static final String CREATE = ".create";
 
-    /** A suffix appended to file names to indicate that a file should be patched. */
+    /**
+     * A suffix appended to file names to indicate that a file should be patched.
+     */
     public static final String PATCH = ".patch";
 
-    /** A suffix appended to file names to indicate that a file should be deleted. */
+    /**
+     * A suffix appended to file names to indicate that a file should be deleted.
+     */
     public static final String DELETE = ".delete";
 
     /**
@@ -48,9 +53,8 @@ public class Patcher
      * with the patcher so that the user interface is not blocked for the
      * duration of the patch.
      */
-    public void patch (File appdir, File patch, ProgressObserver obs)
-        throws IOException
-    {
+    public void patch(File appdir, File patch, ProgressObserver obs)
+        throws IOException {
         // save this information for later
         _obs = obs;
         _plength = patch.length();
@@ -91,13 +95,11 @@ public class Patcher
         }
     }
 
-    protected String strip (String path, String suffix)
-    {
+    protected String strip(String path, String suffix) {
         return path.substring(0, path.length() - suffix.length());
     }
 
-    protected void createFile (ZipFile file, ZipEntry entry, File target)
-    {
+    protected void createFile(ZipFile file, ZipEntry entry, File target) {
         // create our copy buffer if necessary
         if (_buffer == null) {
             _buffer = new byte[COPY_BUFFER_SIZE];
@@ -124,8 +126,7 @@ public class Patcher
         }
     }
 
-    protected void patchFile (ZipFile file, ZipEntry entry, File appdir, String path)
-    {
+    protected void patchFile(ZipFile file, ZipEntry entry, File appdir, String path) {
         File target = new File(appdir, path);
         File patch = new File(appdir, entry.getName());
         File otarget = new File(appdir, path + ".old");
@@ -150,8 +151,8 @@ public class Patcher
             // we'll need this to pass progress along to our observer
             final long elength = entry.getCompressedSize();
             ProgressObserver obs = new ProgressObserver() {
-                public void progress (int percent) {
-                    updateProgress((int)(percent * elength / 100));
+                public void progress(int percent) {
+                    updateProgress((int) (percent * elength / 100));
                 }
             };
 
@@ -173,15 +174,13 @@ public class Patcher
         }
     }
 
-    protected void updateProgress (int progress)
-    {
+    protected void updateProgress(int progress) {
         if (_obs != null) {
-            _obs.progress((int)(100 * (_complete + progress) / _plength));
+            _obs.progress((int) (100 * (_complete + progress) / _plength));
         }
     }
 
-    public static void main (String[] args)
-    {
+    public static void main(String[] args) {
         if (args.length != 2) {
             System.err.println("Usage: Patcher appdir patch_file");
             System.exit(-1);

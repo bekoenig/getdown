@@ -11,8 +11,7 @@ public final class MessageUtil {
      * Returns whether or not the provided string is tainted. See {@link #taint}. Null strings
      * are considered untainted.
      */
-    public static boolean isTainted (String text)
-    {
+    public static boolean isTainted(String text) {
         return text != null && text.startsWith(TAINT_CHAR);
     }
 
@@ -21,8 +20,7 @@ public final class MessageUtil {
      * so that the translation code knows not to attempt to translate this string when doing
      * recursive translations.
      */
-    public static String taint (Object text)
-    {
+    public static String taint(Object text) {
         return TAINT_CHAR + text;
     }
 
@@ -30,8 +28,7 @@ public final class MessageUtil {
      * Removes the tainting character added to a string by {@link #taint}. If the provided string
      * is not tainted, this silently returns the originally provided string.
      */
-    public static String untaint (String text)
-    {
+    public static String untaint(String text) {
         return isTainted(text) ? text.substring(TAINT_CHAR.length()) : text;
     }
 
@@ -39,8 +36,7 @@ public final class MessageUtil {
      * Composes a message key with an array of arguments. The message can subsequently be
      * decomposed and translated without prior knowledge of how many arguments were provided.
      */
-    public static String compose (String key, Object... args)
-    {
+    public static String compose(String key, Object... args) {
         StringBuilder buf = new StringBuilder();
         buf.append(key);
         buf.append('|');
@@ -69,17 +65,15 @@ public final class MessageUtil {
      * Compose a message with String args. This is just a convenience so callers do not have to
      * cast their String[] to an Object[].
      */
-    public static String compose (String key, String... args)
-    {
+    public static String compose(String key, String... args) {
         return compose(key, (Object[]) args);
     }
 
     /**
-     * A convenience method for calling {@link #compose(String,Object[])} with an array of
+     * A convenience method for calling {@link #compose(String, Object[])} with an array of
      * arguments that will be automatically tainted (see {@link #taint}).
      */
-    public static String tcompose (String key, Object... args)
-    {
+    public static String tcompose(String key, Object... args) {
         int acount = args.length;
         String[] targs = new String[acount];
         for (int ii = 0; ii < acount; ii++) {
@@ -89,11 +83,10 @@ public final class MessageUtil {
     }
 
     /**
-     * A convenience method for calling {@link #compose(String,String[])} with an array of argument
+     * A convenience method for calling {@link #compose(String, String[])} with an array of argument
      * that will be automatically tainted.
      */
-    public static String tcompose (String key, String... args)
-    {
+    public static String tcompose(String key, String... args) {
         for (int ii = 0, nn = args.length; ii < nn; ii++) {
             args[ii] = taint(args[ii]);
         }
@@ -107,16 +100,14 @@ public final class MessageUtil {
      * pay to have to differentiate between messages that will and won't eventually be parsed by a
      * {@code MessageFormat} instance.
      */
-    public static String escape (String message)
-    {
+    public static String escape(String message) {
         return message.replace("'", "''");
     }
 
     /**
      * Unescapes characters that are escaped in a call to compose.
      */
-    public static String unescape (String value)
-    {
+    public static String unescape(String value) {
         int bsidx = value.indexOf('\\');
         if (bsidx == -1) {
             return value;
@@ -126,7 +117,7 @@ public final class MessageUtil {
         int vlength = value.length();
         for (int ii = 0; ii < vlength; ii++) {
             char ch = value.charAt(ii);
-            if (ch != '\\' || ii == vlength-1) {
+            if (ch != '\\' || ii == vlength - 1) {
                 buf.append(ch);
             } else {
                 // look at the next character
@@ -138,7 +129,9 @@ public final class MessageUtil {
         return buf.toString();
     }
 
-    /** Text prefixed by this character will be considered tainted when doing recursive
-     * translations and won't be translated. */
+    /**
+     * Text prefixed by this character will be considered tainted when doing recursive
+     * translations and won't be translated.
+     */
     private static final String TAINT_CHAR = "~";
 }

@@ -5,74 +5,48 @@
 
 package io.github.bekoenig.getdown.launcher;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.file.*;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLayeredPane;
-
-import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
-import io.github.bekoenig.getdown.data.Application;
+import io.github.bekoenig.getdown.data.*;
 import io.github.bekoenig.getdown.data.Application.UpdateInterface.Step;
-import io.github.bekoenig.getdown.data.Build;
-import io.github.bekoenig.getdown.data.EnvConfig;
-import io.github.bekoenig.getdown.data.Resource;
-import io.github.bekoenig.getdown.data.SysProps;
+import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
 import io.github.bekoenig.getdown.net.Downloader;
 import io.github.bekoenig.getdown.tools.Patcher;
-import io.github.bekoenig.getdown.util.Config;
-import io.github.bekoenig.getdown.util.FileUtil;
-import io.github.bekoenig.getdown.util.LaunchUtil;
-import io.github.bekoenig.getdown.util.MessageUtil;
-import io.github.bekoenig.getdown.util.ProgressAggregator;
-import io.github.bekoenig.getdown.util.ProgressObserver;
-import io.github.bekoenig.getdown.util.StringUtil;
-import io.github.bekoenig.getdown.util.VersionUtil;
+import io.github.bekoenig.getdown.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the main control for the Getdown application updater and deployment system.
  */
 public abstract class Getdown
-    implements Application.StatusDisplay, RotatingBackgrounds.ImageLoader
-{
+    implements Application.StatusDisplay, RotatingBackgrounds.ImageLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetdownApp.class);
 
     /**
      * Starts a thread to run Getdown and ultimately (hopefully) launch the target app.
      */
-    public static void run (final Getdown getdown) {
+    public static void run(final Getdown getdown) {
         new Thread("Getdown") {
-            @Override public void run () {
+            @Override
+            public void run() {
                 getdown.run();
             }
         }.start();
     }
 
-    public Getdown (EnvConfig envc)
-    {
+    public Getdown(EnvConfig envc) {
         try {
             // If the silent property exists, install without bringing up any gui. If it equals
             // launch, start the application after installing. Otherwise, just install and exit.
@@ -114,16 +88,14 @@ public abstract class Getdown
     /**
      * Returns true if there are pending new resources, waiting to be installed.
      */
-    public boolean isUpdateAvailable ()
-    {
+    public boolean isUpdateAvailable() {
         return _readyToInstall && !_toInstallResources.isEmpty();
     }
 
     /**
      * Installs the currently pending new resources.
      */
-    public void install () throws IOException
-    {
+    public void install() throws IOException {
         if (SysProps.noInstall()) {
             LOGGER.info("Skipping install due to 'no_install' sysprop.");
         } else if (isUpdateAvailable()) {
@@ -148,8 +120,7 @@ public abstract class Getdown
     /**
      * Configures our proxy settings (called by {@link ProxyPanel}) and fires up the launcher.
      */
-    public void configProxy (String host, String port, String username, String password)
-    {
+    public void configProxy(String host, String port, String username, String password) {
         LOGGER.atInfo()
             .setMessage("User configured proxy")
             .addKeyValue("host", host)
@@ -170,8 +141,7 @@ public abstract class Getdown
      * actual getting down to {@link #getdown}. This is not called directly, but rather via the
      * static {@code run} method as Getdown does its main work on a separate thread.
      */
-    protected void run ()
-    {
+    protected void run() {
         // if we have no messages, just bail because we're hosed; the error message will be
         // displayed to the user already
         if (_msgs == null) {
@@ -202,7 +172,7 @@ public abstract class Getdown
         else requestProxyInfo(false);
     }
 
-    protected boolean detectProxy () {
+    protected boolean detectProxy() {
         // first we have to initialize our application to get the appbase URL, etc.
         LOGGER.info("Checking whether we need to use a proxy...");
         try {
@@ -225,7 +195,7 @@ public abstract class Getdown
         }
 
         LOGGER.info("No proxy appears to be needed.");
-        if (!tryNoProxy)  {
+        if (!tryNoProxy) {
             // we got through, so we appear not to require a proxy; make a blank proxy config so
             // that we don't go through this whole detection process again next time
             ProxyUtil.saveProxy(_app, null, null);
@@ -233,13 +203,13 @@ public abstract class Getdown
         return true;
     }
 
-    protected void readConfig (boolean preloads) throws IOException {
+    protected void readConfig(boolean preloads) throws IOException {
         Config config = _app.init(true);
         if (preloads) doPredownloads(_app.getResources());
         _ifc = new Application.UpdateInterface(config);
     }
 
-    protected void requestProxyInfo (boolean reinitAuth) {
+    protected void requestProxyInfo(boolean reinitAuth) {
         if (_silent) {
             LOGGER.warn("Need a proxy, but we don't want to bother anyone. Exiting.");
             return;
@@ -261,10 +231,11 @@ public abstract class Getdown
     /**
      * Downloads and installs (without verifying) any resources that are marked with a
      * {@code PRELOAD} attribute.
+     *
      * @param resources the full set of resources from the application (the predownloads will be
-     * extracted from it).
+     *                  extracted from it).
      */
-    protected void doPredownloads (Collection<Resource> resources) {
+    protected void doPredownloads(Collection<Resource> resources) {
         List<Resource> predownloads = new ArrayList<>();
         for (Resource rsrc : resources) {
             if (rsrc.shouldPredownload() && !rsrc.getLocal().exists()) {
@@ -287,8 +258,7 @@ public abstract class Getdown
     /**
      * Does the actual application validation, update and launching business.
      */
-    protected void getdown ()
-    {
+    protected void getdown() {
         try {
             // first parse our application deployment file
             try {
@@ -309,7 +279,7 @@ public abstract class Getdown
             File config = _app.getLocalPath(Application.CONFIG_FILE);
             if (!config.setLastModified(System.currentTimeMillis())) {
                 LOGGER.warn("Unable to set modtime on config file, will be unable to check for " +
-                            "another instance of getdown running while this one waits.");
+                    "another instance of getdown running while this one waits.");
             }
             if (_delay > 0) {
                 // don't hold the lock while waiting, let another getdown proceed if it starts.
@@ -363,7 +333,7 @@ public abstract class Getdown
                 setStatusAsync("m.validating", -1, -1L, false);
                 Set<Resource> toDownload = new HashSet<>();
                 _app.verifyResources(_progobs, alreadyValid, unpacked,
-                                     _toInstallResources, toDownload);
+                    _toInstallResources, toDownload);
 
                 if (!toDownload.isEmpty()) {
                     // we have resources to download, also note them as to-be-installed
@@ -458,25 +428,24 @@ public abstract class Getdown
         } catch (Exception e) {
             // if we failed due to proxy errors, ask for proxy info
             switch (_app.conn.state) {
-            case NEED_PROXY:
-                requestProxyInfo(false);
-                break;
-            case NEED_PROXY_AUTH:
-                requestProxyInfo(true);
-                break;
-            default:
-                LOGGER.warn("getdown() failed.", e);
-                fail(e);
-                _app.releaseLock();
-                break;
+                case NEED_PROXY:
+                    requestProxyInfo(false);
+                    break;
+                case NEED_PROXY_AUTH:
+                    requestProxyInfo(true);
+                    break;
+                default:
+                    LOGGER.warn("getdown() failed.", e);
+                    fail(e);
+                    _app.releaseLock();
+                    break;
             }
         }
     }
 
     // documentation inherited from interface
     @Override
-    public void updateStatus (String message)
-    {
+    public void updateStatus(String message) {
         setStatusAsync(message, -1, -1L, true);
     }
 
@@ -486,8 +455,7 @@ public abstract class Getdown
      * the filename.
      */
     @Override
-    public BufferedImage loadImage (String path)
-    {
+    public BufferedImage loadImage(String path) {
         if (StringUtil.isBlank(path)) {
             return null;
         }
@@ -520,9 +488,8 @@ public abstract class Getdown
      * Downloads and installs an Java VM bundled with the application. This is called if we are not
      * running with the necessary Java version.
      */
-    protected void updateJava ()
-        throws IOException
-    {
+    protected void updateJava()
+        throws IOException {
         Resource vmjar = _app.getJavaVMResource();
         if (vmjar == null) {
             throw new IOException("m.java_download_failed");
@@ -562,7 +529,7 @@ public abstract class Getdown
 
         // lastly regenerate the .jsa dump file that helps Java to start up faster
         String vmpath = LaunchUtil.getJVMBinaryPath(javaLocalDir, false);
-        String[] command = { vmpath, "-Xshare:dump" };
+        String[] command = {vmpath, "-Xshare:dump"};
         try {
             LOGGER.info("Regenerating classes.jsa for {}...", vmpath);
             Runtime.getRuntime().exec(command);
@@ -579,9 +546,8 @@ public abstract class Getdown
     /**
      * Called if the application is determined to be of an old version.
      */
-    protected void update ()
-        throws IOException
-    {
+    protected void update()
+        throws IOException {
         // first clear all validation markers
         _app.clearValidationMarkers();
 
@@ -618,7 +584,8 @@ public abstract class Getdown
             long[] sizes = new long[list.size()];
             Arrays.fill(sizes, 1L);
             ProgressAggregator pragg = new ProgressAggregator(_progobs, sizes);
-            int ii = 0; for (Resource prsrc : list) {
+            int ii = 0;
+            for (Resource prsrc : list) {
                 ProgressObserver pobs = pragg.startElement(ii++);
                 try {
                     // if this patch file failed to download, skip it
@@ -656,18 +623,19 @@ public abstract class Getdown
     /**
      * Called if the application is determined to require resource downloads.
      */
-    protected void download (Collection<Resource> resources)
-        throws IOException
-    {
+    protected void download(Collection<Resource> resources)
+        throws IOException {
         // create our user interface
         createInterfaceAsync(false);
 
         Downloader dl = new Downloader(_app.conn) {
-            @Override protected void resolvingDownloads () {
+            @Override
+            protected void resolvingDownloads() {
                 updateStatus("m.resolving");
             }
 
-            @Override protected void downloadProgress (int percent, long remaining) {
+            @Override
+            protected void downloadProgress(int percent, long remaining) {
                 // check for another getdown running at 0 and every 10% after that
                 if (_lastCheck == -1 || percent >= _lastCheck + 10) {
                     if (_delay > 0) {
@@ -684,7 +652,8 @@ public abstract class Getdown
                 }
             }
 
-            @Override protected void downloadFailed (Resource rsrc, Exception e) {
+            @Override
+            protected void downloadFailed(Resource rsrc, Exception e) {
                 updateStatus(MessageUtil.tcompose("m.failure", e.getMessage()));
                 LOGGER.atWarn()
                     .setMessage("Download failed")
@@ -693,7 +662,8 @@ public abstract class Getdown
                     .log();
             }
 
-            @Override protected void resourceMissing (Resource rsrc) {
+            @Override
+            protected void resourceMissing(Resource rsrc) {
                 LOGGER.atWarn()
                     .setMessage("Resource missing (got 404)")
                     .addKeyValue("rsrc", rsrc)
@@ -744,8 +714,7 @@ public abstract class Getdown
     /**
      * Called to launch the application if everything is determined to be ready to go.
      */
-    protected void launch ()
-    {
+    protected void launch() {
         setStep(Step.LAUNCH);
         setStatusAsync("m.launching", stepToGlobalPercent(100), -1L, false);
 
@@ -832,8 +801,7 @@ public abstract class Getdown
      *
      * @param reinit - if the interface should be reinitialized if it already exists.
      */
-    protected void createInterfaceAsync (final boolean reinit)
-    {
+    protected void createInterfaceAsync(final boolean reinit) {
         if (_silent || (_container != null && !reinit)) {
             return;
         }
@@ -849,7 +817,8 @@ public abstract class Getdown
                 _layers = new JLayeredPane();
                 _container.add(_layers, BorderLayout.CENTER);
                 _patchNotes = new JButton(new AbstractAction(_msgs.getString("m.patch_notes")) {
-                    @Override public void actionPerformed (ActionEvent event) {
+                    @Override
+                    public void actionPerformed(ActionEvent event) {
                         showDocument(_ifc.patchNotesUrl);
                     }
                 });
@@ -866,8 +835,7 @@ public abstract class Getdown
     /**
      * Initializes the interface with the current UpdateInterface and backgrounds.
      */
-    protected void initInterface ()
-    {
+    protected void initInterface() {
         RotatingBackgrounds newBackgrounds = getBackground();
         if (_background == null || newBackgrounds.getNumImages() > 0) {
             // Leave the old _background in place if there is an old one to leave in place
@@ -880,7 +848,7 @@ public abstract class Getdown
         _layers.setPreferredSize(size);
 
         _patchNotes.setBounds(_ifc.patchNotes.x, _ifc.patchNotes.y,
-                              _ifc.patchNotes.width, _ifc.patchNotes.height);
+            _ifc.patchNotes.width, _ifc.patchNotes.height);
         _patchNotes.setVisible(false);
 
         // we were displaying progress while the UI wasn't up. Now that it is, whatever progress
@@ -889,12 +857,11 @@ public abstract class Getdown
         _stepMinPercent = _lastGlobalPercent = 0;
     }
 
-    protected RotatingBackgrounds getBackground ()
-    {
+    protected RotatingBackgrounds getBackground() {
         if (_ifc.rotatingBackgrounds != null) {
             if (_ifc.backgroundImage != null) {
                 LOGGER.warn("ui.background_image and ui.rotating_background were both specified. " +
-                            "The rotating images are being used.");
+                    "The rotating images are being used.");
             }
             return new RotatingBackgrounds(_ifc.rotatingBackgrounds, _ifc.errorBackground,
                 Getdown.this);
@@ -905,13 +872,11 @@ public abstract class Getdown
         }
     }
 
-    protected Image getProgressImage ()
-    {
+    protected Image getProgressImage() {
         return loadImage(_ifc.progressImage);
     }
 
-    protected void handleWindowClose ()
-    {
+    protected void handleWindowClose() {
         if (_dead) {
             exit(0);
         } else {
@@ -926,7 +891,7 @@ public abstract class Getdown
         }
     }
 
-    private void fail (Exception e) {
+    private void fail(Exception e) {
         String msg = e.getMessage();
         if (msg == null) {
             msg = MessageUtil.compose("m.unknown_error", _ifc.installError);
@@ -944,8 +909,7 @@ public abstract class Getdown
     /**
      * Update the status to indicate getdown has failed for the reason in {@code message}.
      */
-    protected void fail (String message)
-    {
+    protected void fail(String message) {
         _dead = true;
         setStatusAsync(message, stepToGlobalPercent(0), -1L, true);
     }
@@ -953,8 +917,7 @@ public abstract class Getdown
     /**
      * Set the current step, which will be used to globalize per-step percentages.
      */
-    protected void setStep (Step step)
-    {
+    protected void setStep(Step step) {
         int finalPercent = -1;
         for (Integer perc : _ifc.stepPercentages.get(step)) {
             if (perc > _stepMaxPercent) {
@@ -974,8 +937,7 @@ public abstract class Getdown
     /**
      * Convert a step percentage to the global percentage.
      */
-    protected int stepToGlobalPercent (int percent)
-    {
+    protected int stepToGlobalPercent(int percent) {
         int adjustedMaxPercent =
             ((_stepMaxPercent - _uiDisplayPercent) * 100) / (100 - _uiDisplayPercent);
         _lastGlobalPercent = Math.max(_lastGlobalPercent,
@@ -986,9 +948,8 @@ public abstract class Getdown
     /**
      * Updates the status. NOTE: this happens on the next UI tick, not immediately.
      */
-    protected void setStatusAsync (final String message, final int percent, final long remaining,
-                                   boolean createUI)
-    {
+    protected void setStatusAsync(final String message, final int percent, final long remaining,
+                                  boolean createUI) {
         if (_status == null && createUI) {
             createInterfaceAsync(false);
         }
@@ -1011,8 +972,7 @@ public abstract class Getdown
         });
     }
 
-    protected void reportTrackingEvent (String event, int progress)
-    {
+    protected void reportTrackingEvent(String event, int progress) {
         if (!_enableTracking) {
             return;
 
@@ -1036,48 +996,46 @@ public abstract class Getdown
     /**
      * Creates the container in which our user interface will be displayed.
      */
-    protected abstract Container createContainer ();
+    protected abstract Container createContainer();
 
     /**
      * Configures the interface container based on the latest UI config.
      */
-    protected abstract void configureContainer ();
+    protected abstract void configureContainer();
 
     /**
      * Shows the container in which our user interface will be displayed.
      */
-    protected abstract void showContainer ();
+    protected abstract void showContainer();
 
     /**
      * Disposes the container in which we have our user interface.
      */
-    protected abstract void disposeContainer ();
+    protected abstract void disposeContainer();
 
     /**
      * If this method returns true we will run the application in the same JVM, otherwise we will
      * fork off a new JVM. Some options are not supported if we do not fork off a new JVM.
      */
-    protected boolean invokeDirect ()
-    {
+    protected boolean invokeDirect() {
         return SysProps.direct();
     }
 
     /**
      * Requests to show the document at the specified URL in a new window.
      */
-    protected abstract void showDocument (String url);
+    protected abstract void showDocument(String url);
 
     /**
      * Requests that Getdown exit.
      */
-    protected abstract void exit (int exitCode);
+    protected abstract void exit(int exitCode);
 
     /**
      * Copies the supplied stream from the specified input to the specified output. Used to copy
      * our child processes stderr and stdout to our own stderr and stdout.
      */
-    protected static void copyStream (InputStream in, PrintStream out)
-    {
+    protected static void copyStream(InputStream in, PrintStream out) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             String line;
@@ -1095,10 +1053,12 @@ public abstract class Getdown
         }
     }
 
-    /** Used to fetch a progress report URL. */
-    protected void reportProgress (final URL url) {
+    /**
+     * Used to fetch a progress report URL.
+     */
+    protected void reportProgress(final URL url) {
         Thread reporter = new Thread("Progress reporter") {
-            public void run () {
+            public void run() {
                 try {
                     HttpURLConnection ucon = _app.conn.openHttp(url, 0, 0);
 
@@ -1139,7 +1099,9 @@ public abstract class Getdown
         reporter.start();
     }
 
-    /** Used to pass progress on to our user interface. */
+    /**
+     * Used to pass progress on to our user interface.
+     */
     protected final ProgressObserver _progobs = percent -> setStatusAsync(null,
         stepToGlobalPercent(percent), -1L, false);
 
@@ -1166,7 +1128,9 @@ public abstract class Getdown
     protected boolean _enableTracking = true;
     protected int _reportedProgress = 0;
 
-    /** Number of minutes to wait after startup before beginning any real heavy lifting. */
+    /**
+     * Number of minutes to wait after startup before beginning any real heavy lifting.
+     */
     protected int _delay;
 
     protected int _stepMaxPercent;

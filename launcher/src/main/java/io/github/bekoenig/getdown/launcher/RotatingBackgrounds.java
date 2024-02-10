@@ -8,46 +8,46 @@ package io.github.bekoenig.getdown.launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Image;
+import java.awt.*;
 import java.util.List;
 
-public final class RotatingBackgrounds
-{
+public final class RotatingBackgrounds {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public interface ImageLoader {
-        /** Loads and returns the image with the supplied path. */
-        Image loadImage (String path);
+        /**
+         * Loads and returns the image with the supplied path.
+         */
+        Image loadImage(String path);
     }
 
     /**
      * Creates a placeholder if there are no images. Just returns null from getImage every time.
      */
-    public RotatingBackgrounds ()
-    {
+    public RotatingBackgrounds() {
         makeEmpty();
     }
 
-    /** Creates a single image background. */
-    public RotatingBackgrounds (Image background)
-    {
-        percentages = new int[] { 0 };
-        minDisplayTime = new int[] { 0 };
-        images = new Image[] { background };
+    /**
+     * Creates a single image background.
+     */
+    public RotatingBackgrounds(Image background) {
+        percentages = new int[]{0};
+        minDisplayTime = new int[]{0};
+        images = new Image[]{background};
         errorImage = images[0];
     }
 
     /**
      * Create a sequence of images to be rotated through from {@code backgrounds}.
-     *
+     * <p>
      * Each String in backgrounds should be the path to the image, a semicolon, and the minimum
      * amount of time to display the image in seconds. Each image will be active for an equal
      * percentage of the download process, unless one hasn't been active for its minimum display
      * time when the next should be shown. In that case, it's left up until its been there for its
      * minimum display time and then the next one gets to come up.
      */
-    public RotatingBackgrounds (List<String> backgrounds, String errorBackground, ImageLoader loader)
-    {
+    public RotatingBackgrounds(List<String> backgrounds, String errorBackground, ImageLoader loader) {
         percentages = new int[backgrounds.size()];
         minDisplayTime = new int[backgrounds.size()];
         images = new Image[backgrounds.size()];
@@ -67,7 +67,7 @@ public final class RotatingBackgrounds
                 makeEmpty();
                 return;
             }
-            percentages[ii] = (int)((ii/(float)backgrounds.size()) * 100);
+            percentages[ii] = (int) ((ii / (float) backgrounds.size()) * 100);
         }
         if (errorBackground == null) {
             errorImage = images[0];
@@ -79,15 +79,14 @@ public final class RotatingBackgrounds
     /**
      * @return the image to display at the given progress or null if there aren't any.
      */
-    public Image getImage (int progress)
-    {
+    public Image getImage(int progress) {
         if (images.length == 0) {
             return null;
         }
         long now = System.currentTimeMillis();
         if (current != images.length - 1
             && (current == -1 || (progress >= percentages[current + 1] &&
-                    (now - currentDisplayStart) / 1000 > minDisplayTime[current]))) {
+            (now - currentDisplayStart) / 1000 > minDisplayTime[current]))) {
             current++;
             currentDisplayStart = now;
         }
@@ -97,8 +96,7 @@ public final class RotatingBackgrounds
     /**
      * Returns the image to display if an error has caused getdown to fail.
      */
-    public Image getErrorImage ()
-    {
+    public Image getErrorImage() {
         return errorImage;
     }
 
@@ -109,27 +107,36 @@ public final class RotatingBackgrounds
         return images.length;
     }
 
-    private void makeEmpty()
-    {
-        percentages = new int[] {};
-        minDisplayTime = new int[] {};
-        images = new Image[] {};
+    private void makeEmpty() {
+        percentages = new int[]{};
+        minDisplayTime = new int[]{};
+        images = new Image[]{};
     }
 
-    /** Time at which the currently displayed image was first displayed in millis. */
+    /**
+     * Time at which the currently displayed image was first displayed in millis.
+     */
     private long currentDisplayStart;
 
-    /** The index of the currently displayed image or -1 if we haven't displayed any. */
+    /**
+     * The index of the currently displayed image or -1 if we haven't displayed any.
+     */
     private int current = -1;
 
     private Image[] images;
 
-    /** The image to display if getdown has failed due to an error. */
+    /**
+     * The image to display if getdown has failed due to an error.
+     */
     private Image errorImage;
 
-    /** Percentage at which each image should be displayed. */
+    /**
+     * Percentage at which each image should be displayed.
+     */
     private int[] percentages;
 
-    /** Time to show each image in seconds. */
+    /**
+     * Time to show each image in seconds.
+     */
     private int[] minDisplayTime;
 }

@@ -20,25 +20,23 @@
 
 package io.github.bekoenig.getdown.launcher.swing;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Graphics;
-
-import javax.swing.JComponent;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * A Swing component that displays a {@link Label}.
  */
 public class MultiLineLabel extends JComponent
-    implements SwingConstants, LabelStyleConstants
-{
-    /** A layout constant used by {@link #setLayout}. */
-    public static final int GOLDEN = HORIZONTAL+VERTICAL+1;
+    implements SwingConstants, LabelStyleConstants {
+    /**
+     * A layout constant used by {@link #setLayout}.
+     */
+    public static final int GOLDEN = HORIZONTAL + VERTICAL + 1;
 
-    /** A layout constant used by {@link #setLayout}. */
-    public static final int NONE = GOLDEN+1;
+    /**
+     * A layout constant used by {@link #setLayout}.
+     */
+    public static final int NONE = GOLDEN + 1;
 
     /**
      * Constructs a multi line label that displays the supplied text with the specified
@@ -46,49 +44,48 @@ public class MultiLineLabel extends JComponent
      *
      * @see #setLayout
      */
-    public MultiLineLabel (String text, int align, int constrain, int size)
-    {
+    public MultiLineLabel(String text, int align, int constrain, int size) {
         _label = createLabel(text);
         _label.setAlignment(align);
         noteConstraints(constrain, size);
     }
 
-    /** Helper function. */
-    protected void noteConstraints (int constrain, int size)
-    {
+    /**
+     * Helper function.
+     */
+    protected void noteConstraints(int constrain, int size) {
         switch (constrain) {
-        case HORIZONTAL:
-            if (size == 0) {
-                _constrain = HORIZONTAL;
-            } else {
-                _label.setTargetWidth(size);
-            }
-            break;
+            case HORIZONTAL:
+                if (size == 0) {
+                    _constrain = HORIZONTAL;
+                } else {
+                    _label.setTargetWidth(size);
+                }
+                break;
 
-        case VERTICAL:
-            if (size == 0) {
-                _constrain = VERTICAL;
-            } else {
-                _label.setTargetHeight(size);
-            }
-            break;
+            case VERTICAL:
+                if (size == 0) {
+                    _constrain = VERTICAL;
+                } else {
+                    _label.setTargetHeight(size);
+                }
+                break;
 
-        case GOLDEN:
-            _label.setGoldenLayout();
-            break;
+            case GOLDEN:
+                _label.setGoldenLayout();
+                break;
 
-        case NONE:
-            // nothing doing
-            break;
+            case NONE:
+                // nothing doing
+                break;
 
-        default:
-            throw new IllegalArgumentException("Invalid constraint orientation " + constrain);
+            default:
+                throw new IllegalArgumentException("Invalid constraint orientation " + constrain);
         }
     }
 
     @Override
-    public void paintComponent (Graphics g)
-    {
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         // if we're dirty, re-lay things out before painting ourselves
@@ -96,7 +93,7 @@ public class MultiLineLabel extends JComponent
             layoutLabel();
         }
 
-        Graphics2D gfx = (Graphics2D)g;
+        Graphics2D gfx = (Graphics2D) g;
         int align = _label.getAlignment();
         int dx = 0, dy = 0;
         int wid = getWidth(), hei = getHeight();
@@ -107,14 +104,22 @@ public class MultiLineLabel extends JComponent
 
         // calculate the x-offset at which the label is rendered
         switch (align) {
-        case CENTER: dx = (wid - ld.width) / 2; break;
-        case RIGHT: dx = wid - ld.width; break;
+            case CENTER:
+                dx = (wid - ld.width) / 2;
+                break;
+            case RIGHT:
+                dx = wid - ld.width;
+                break;
         }
 
         // calculate the y-offset at which the label is rendered
         switch (_offalign) {
-        case CENTER: dy = (hei - ld.height) / 2; break;
-        case BOTTOM: dy = hei - ld.height; break;
+            case CENTER:
+                dy = (hei - ld.height) / 2;
+                break;
+            case BOTTOM:
+                dy = hei - ld.height;
+                break;
         }
 
         // draw the label
@@ -122,8 +127,7 @@ public class MultiLineLabel extends JComponent
     }
 
     @Override
-    public void doLayout ()
-    {
+    public void doLayout() {
         super.doLayout();
 
         // if we have been configured to relay ourselves out once we know our constrained width or
@@ -131,25 +135,25 @@ public class MultiLineLabel extends JComponent
         int size;
         boolean delayedRevalidate = false;
         switch (_constrain) {
-        case HORIZONTAL:
-            size = getWidth();
-            // sanity check; sometimes labels are laid out with completely invalid dimensions, so
-            // we just quietly play along
-            if (size > 0 && size != _constrainedSize) {
-                _constrainedSize = size;
-                _label.setTargetWidth(size);
-                delayedRevalidate = true;
-            }
-            break;
+            case HORIZONTAL:
+                size = getWidth();
+                // sanity check; sometimes labels are laid out with completely invalid dimensions, so
+                // we just quietly play along
+                if (size > 0 && size != _constrainedSize) {
+                    _constrainedSize = size;
+                    _label.setTargetWidth(size);
+                    delayedRevalidate = true;
+                }
+                break;
 
-        case VERTICAL:
-            size = getHeight();
-            if (size > 0 && size != _constrainedSize) {
-                _constrainedSize = size;
-                _label.setTargetHeight(size);
-                delayedRevalidate = true;
-            }
-            break;
+            case VERTICAL:
+                size = getHeight();
+                if (size > 0 && size != _constrainedSize) {
+                    _constrainedSize = size;
+                    _label.setTargetHeight(size);
+                    delayedRevalidate = true;
+                }
+                break;
         }
 
         // we can't just call revalidate() because we're in the middle of a validation traversal;
@@ -171,8 +175,7 @@ public class MultiLineLabel extends JComponent
     /**
      * Creates the underlying {@link Label} that we use to render our text.
      */
-    protected Label createLabel (String text)
-    {
+    protected Label createLabel(String text) {
         return new Label(text);
     }
 
@@ -180,9 +183,8 @@ public class MultiLineLabel extends JComponent
      * Called when the label has changed in some meaningful way and we'd accordingly like to
      * re-layout the label, update our component's size, and repaint everything to suit.
      */
-    protected void layoutLabel ()
-    {
-        Graphics2D gfx = (Graphics2D)getGraphics();
+    protected void layoutLabel() {
+        Graphics2D gfx = (Graphics2D) getGraphics();
         if (gfx != null) {
             // re-layout the label
             _label.layout(gfx);
@@ -194,8 +196,7 @@ public class MultiLineLabel extends JComponent
     }
 
     @Override
-    public Dimension getPreferredSize ()
-    {
+    public Dimension getPreferredSize() {
         if (isPreferredSizeSet()) {
             return super.getPreferredSize();
         }
@@ -209,41 +210,53 @@ public class MultiLineLabel extends JComponent
         if (size != null) {
             // never let our preferred size shrink in our constrained direction
             switch (_constrain) {
-            case HORIZONTAL:
-                _prefd.width = Math.max(_prefd.width, size.width);
-                _prefd.height = size.height;
-                break;
+                case HORIZONTAL:
+                    _prefd.width = Math.max(_prefd.width, size.width);
+                    _prefd.height = size.height;
+                    break;
 
-            case VERTICAL:
-                _prefd.width = size.width;
-                _prefd.height = Math.max(_prefd.height, size.height);
-                break;
+                case VERTICAL:
+                    _prefd.width = size.width;
+                    _prefd.height = Math.max(_prefd.height, size.height);
+                    break;
 
-            default:
-                _prefd.width = size.width;
-                _prefd.height = size.height;
-                break;
+                default:
+                    _prefd.width = size.width;
+                    _prefd.height = size.height;
+                    break;
             }
         }
 
         return _prefd;
     }
 
-    /** Our preferred size. */
+    /**
+     * Our preferred size.
+     */
     protected Dimension _prefd = new Dimension(5, 5);
 
-    /** The label we're displaying. */
+    /**
+     * The label we're displaying.
+     */
     protected Label _label;
 
-    /** The off-axis alignment with which the label is positioned. */
+    /**
+     * The off-axis alignment with which the label is positioned.
+     */
     protected int _offalign;
 
-    /** Pending constraint adjustments. */
+    /**
+     * Pending constraint adjustments.
+     */
     protected int _constrain = NONE;
 
-    /** The size to which we constrained ourselves when most recently laid out. */
+    /**
+     * The size to which we constrained ourselves when most recently laid out.
+     */
     protected int _constrainedSize;
 
-    /** Whether this label is dirty and should be re-layed out. */
+    /**
+     * Whether this label is dirty and should be re-layed out.
+     */
     protected boolean _dirty = true;
 }

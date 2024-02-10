@@ -5,23 +5,21 @@
 
 package io.github.bekoenig.getdown.util;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link HostWhitelist}.
  */
-public class HostWhitelistTest
-{
+public class HostWhitelistTest {
     @Test
-    public void testVerify () throws MalformedURLException
-    {
+    public void testVerify() throws MalformedURLException {
         checkCanVerify("foo.com", "http://foo.com", true);
         checkCanVerify("foo.com", "http://foo.com/", true);
         checkCanVerify("foo.com", "http://foo.com/x/y/z", true);
@@ -139,9 +137,8 @@ public class HostWhitelistTest
         checkCanVerify("aaa.bbb.com,xxx.yyy.com, *.jjj.net", "http://www.jjj.net/o", true);
     }
 
-    private static void checkCanVerify (String whitelist, String url, boolean expectedToPass)
-        throws MalformedURLException
-    {
+    private static void checkCanVerify(String whitelist, String url, boolean expectedToPass)
+        throws MalformedURLException {
         List<String> w = Arrays.asList(StringUtil.parseStringArray(whitelist));
         URL u = new URL(url);
         boolean passed;

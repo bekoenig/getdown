@@ -5,6 +5,12 @@
 
 package io.github.bekoenig.getdown.data;
 
+import io.github.bekoenig.getdown.cache.GarbageCollector;
+import io.github.bekoenig.getdown.cache.ResourceCache;
+import io.github.bekoenig.getdown.util.FileUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -13,27 +19,23 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipFile;
 
-import io.github.bekoenig.getdown.cache.GarbageCollector;
-import io.github.bekoenig.getdown.cache.ResourceCache;
-import io.github.bekoenig.getdown.util.FileUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class PathBuilder
-{
+public class PathBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(PathBuilder.class);
 
-    /** Name of directory to store cached code files in. */
+    /**
+     * Name of directory to store cached code files in.
+     */
     public static final String CODE_CACHE_DIR = ".cache";
 
-    /** Name of directory to store cached native resources in. */
+    /**
+     * Name of directory to store cached native resources in.
+     */
     public static final String NATIVE_CACHE_DIR = ".ncache";
 
     /**
      * Builds either a default or cached classpath based on {@code app}'s configuration.
      */
-    public static ClassPath buildClassPath (Application app) throws IOException
-    {
+    public static ClassPath buildClassPath(Application app) throws IOException {
         return app.useCodeCache() ? buildCachedClassPath(app) : buildDefaultClassPath(app);
     }
 
@@ -41,8 +43,7 @@ public class PathBuilder
      * Builds a {@link ClassPath} instance for {@code app} using the code resources in place in
      * the app directory.
      */
-    public static ClassPath buildDefaultClassPath (Application app)
-    {
+    public static ClassPath buildDefaultClassPath(Application app) {
         LinkedHashSet<File> classPathEntries = new LinkedHashSet<>();
         for (Resource resource : app.getActiveCodeResources()) {
             classPathEntries.add(resource.getFinalTarget());
@@ -57,8 +58,7 @@ public class PathBuilder
      * overwriting in-use classpath elements when the application is later updated. This also
      * "garbage collects" expired caches if necessary.
      */
-    public static ClassPath buildCachedClassPath (Application app) throws IOException
-    {
+    public static ClassPath buildCachedClassPath(Application app) throws IOException {
         File codeCacheDir = new File(app.getAppDir(), CODE_CACHE_DIR);
 
         // a negative value of code_cache_retention_days allows to clean up the cache forcefully
@@ -80,7 +80,7 @@ public class PathBuilder
         return new ClassPath(classPathEntries);
     }
 
-    private static void addClassPathDirectories (Application app, Set<File> classPathEntries) {
+    private static void addClassPathDirectories(Application app, Set<File> classPathEntries) {
         for (String cpdir : app.getClassPathDirectories()) {
             File cpfile = new File(cpdir);
             if (!cpfile.isAbsolute()) {
@@ -99,10 +99,10 @@ public class PathBuilder
      * @param addCurrentLibraryPath if true, it adds the locations referenced by
      *                              {@code System.getProperty("java.library.path")} as well.
      * @return a classpath instance if at least one native resource was found and unpacked,
-     *         {@code null} if no native resources were used by the application.
+     * {@code null} if no native resources were used by the application.
      */
-    public static ClassPath buildLibsPath (Application app,
-                                           boolean addCurrentLibraryPath) throws IOException {
+    public static ClassPath buildLibsPath(Application app,
+                                          boolean addCurrentLibraryPath) throws IOException {
         List<Resource> resources = app.getNativeResources();
         if (resources.isEmpty()) {
             return null;

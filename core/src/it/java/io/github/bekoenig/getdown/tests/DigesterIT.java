@@ -5,6 +5,9 @@
 
 package io.github.bekoenig.getdown.tests;
 
+import io.github.bekoenig.getdown.tools.Digester;
+import org.junit.Test;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,14 +15,12 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.bekoenig.getdown.tools.Digester;
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class DigesterIT {
 
     @Test
-    public void testDigester () throws Exception {
+    public void testDigester() throws Exception {
         Path appdir = Paths.get("src/it/resources/testapp");
         Digester.createDigests(appdir.toFile(), Paths.get("src/it/resources/testapp-keystore.jks").toFile(), "abcde123", "testdomain");
 

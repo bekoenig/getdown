@@ -5,13 +5,6 @@
 
 package io.github.bekoenig.getdown.data;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.concurrent.*;
-
 import io.github.bekoenig.getdown.util.Config;
 import io.github.bekoenig.getdown.util.MessageUtil;
 import io.github.bekoenig.getdown.util.ProgressObserver;
@@ -19,23 +12,31 @@ import io.github.bekoenig.getdown.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.concurrent.*;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Manages the {@code digest.txt} file and the computing and processing of digests for an
  * application.
  */
-public class Digest
-{
+public class Digest {
     private static final Logger LOGGER = LoggerFactory.getLogger(Digest.class);
 
-    /** The current version of the digest protocol. */
+    /**
+     * The current version of the digest protocol.
+     */
     public static final int VERSION = 2;
 
     /**
      * Returns the name of the digest file for the specified protocol version.
      */
-    public static String digestFile (int version) {
+    public static String digestFile(int version) {
         String infix = version > 1 ? String.valueOf(version) : "";
         return FILE_NAME + infix + FILE_SUFFIX;
     }
@@ -43,21 +44,24 @@ public class Digest
     /**
      * Returns the crypto algorithm used to sign digest files of the specified version.
      */
-    public static String sigAlgorithm (int version) {
+    public static String sigAlgorithm(int version) {
         switch (version) {
-        case 1: return "SHA1withRSA";
-        case 2: return "SHA256withRSA";
-        default: throw new IllegalArgumentException("Invalid digest version " + version);
+            case 1:
+                return "SHA1withRSA";
+            case 2:
+                return "SHA256withRSA";
+            default:
+                throw new IllegalArgumentException("Invalid digest version " + version);
         }
     }
 
     /**
      * Creates a digest file at the specified location using the supplied list of resources.
+     *
      * @param version the version of the digest protocol to use.
      */
-    public static void createDigest (int version, List<Resource> resources, File output)
-        throws IOException
-    {
+    public static void createDigest(int version, List<Resource> resources, File output)
+        throws IOException {
         // first compute the digests for all the resources in parallel
         ExecutorService exec = Executors.newFixedThreadPool(SysProps.threadPoolSize());
         final Map<Resource, String> digests = new ConcurrentHashMap<>();
@@ -86,7 +90,7 @@ public class Digest
             while (!pending.isEmpty()) {
                 Object done = completed.poll(600, TimeUnit.SECONDS);
                 if (done instanceof IOException) {
-                    throw (IOException)done;
+                    throw (IOException) done;
                 } else if (done instanceof Resource) {
                     pending.remove(done);
                 } else {
@@ -126,8 +130,7 @@ public class Digest
     /**
      * Obtains an appropriate message digest instance for use by the Getdown system.
      */
-    public static MessageDigest getMessageDigest (int version)
-    {
+    public static MessageDigest getMessageDigest(int version) {
         String algo = version > 1 ? "SHA-256" : "MD5";
         try {
             return MessageDigest.getInstance(algo);
@@ -140,17 +143,17 @@ public class Digest
      * Creates a digest instance which will parse and validate the digest in the supplied
      * application directory, using the current digest version.
      */
-    public Digest (File appdir, boolean strictComments) throws IOException {
+    public Digest(File appdir, boolean strictComments) throws IOException {
         this(appdir, VERSION, strictComments);
     }
 
     /**
      * Creates a digest instance which will parse and validate the digest in the supplied
      * application directory.
+     *
      * @param version the version of the digest protocol to use.
      */
-    public Digest (File appdir, int version, boolean strictComments) throws IOException
-    {
+    public Digest(File appdir, int version, boolean strictComments) throws IOException {
         // parse and validate our digest file contents
         String filename = digestFile(version);
         StringBuilder data = new StringBuilder();
@@ -182,8 +185,7 @@ public class Digest
     /**
      * Returns the digest for the digest file.
      */
-    public String getMetaDigest ()
-    {
+    public String getMetaDigest() {
         return _metaDigest;
     }
 
@@ -194,8 +196,7 @@ public class Digest
      * @return true if the resource is valid, false if it failed the digest check or if an I/O
      * error was encountered during the validation process.
      */
-    public boolean validateResource (Resource resource, ProgressObserver obs)
-    {
+    public boolean validateResource(Resource resource, ProgressObserver obs) {
         try {
             String chash = resource.computeDigest(VERSION, getMessageDigest(VERSION), obs);
             String ehash = _digests.get(resource.getPath());
@@ -221,14 +222,14 @@ public class Digest
     /**
      * Returns the digest of the given {@code resource}.
      */
-    public String getDigest (Resource resource)
-    {
+    public String getDigest(Resource resource) {
         return _digests.get(resource.getPath());
     }
 
-    /** Used by {@link #createDigest} and {@link Digest}. */
-    protected static void note (StringBuilder data, String path, String digest)
-    {
+    /**
+     * Used by {@link #createDigest} and {@link Digest}.
+     */
+    protected static void note(StringBuilder data, String path, String digest) {
         data.append(path).append(" = ").append(digest).append("\n");
     }
 

@@ -12,13 +12,13 @@ import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * File related utilities.
  */
-public final class FileUtil
-{
+public final class FileUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
     /**
@@ -27,8 +27,7 @@ public final class FileUtil
      *
      * @return true if we managed to get the job done, false otherwise.
      */
-    public static boolean renameTo (File source, File dest)
-    {
+    public static boolean renameTo(File source, File dest) {
         // if we're on a civilized operating system we may be able to simple rename it
         if (source.renameTo(dest)) {
             return true;
@@ -71,7 +70,7 @@ public final class FileUtil
      * succeed if you just try again. Given that delete failure is a rare occurrence, we can
      * implement this hacky workaround without any negative consequences for normal behavior.
      */
-    public static boolean deleteHarder (File file) {
+    public static boolean deleteHarder(File file) {
         // if at first you don't succeed... try, try again
         boolean deleted = (file.delete() || file.delete());
         if (!deleted) {
@@ -89,7 +88,7 @@ public final class FileUtil
      * @param file file to delete.
      * @return true iff {@code file} was successfully deleted.
      */
-    public static boolean deleteDirHarder (File file) {
+    public static boolean deleteDirHarder(File file) {
         if (file.isDirectory()) {
             for (File child : file.listFiles()) {
                 deleteDirHarder(child);
@@ -102,24 +101,24 @@ public final class FileUtil
      * Reads the contents of the supplied input stream into a list of lines. Closes the reader on
      * successful or failed completion.
      */
-    public static List<String> readLines (Reader in)
-        throws IOException
-    {
+    public static List<String> readLines(Reader in)
+        throws IOException {
         List<String> lines = new ArrayList<>();
         try (BufferedReader bin = new BufferedReader(in)) {
-            for (String line = null; (line = bin.readLine()) != null; lines.add(line)) {}
+            for (String line = null; (line = bin.readLine()) != null; lines.add(line)) {
+            }
         }
         return lines;
     }
 
     /**
      * Unpacks the specified jar file into the specified target directory.
+     *
      * @param cleanExistingDirs if true, all files and subdirectories in all directories contained in {@code jar} will
-     * be deleted prior to unpacking the jar.
+     *                          be deleted prior to unpacking the jar.
      */
-    public static void unpackJar (ZipFile jar, File target, boolean cleanExistingDirs)
-        throws IOException
-    {
+    public static void unpackJar(ZipFile jar, File target, boolean cleanExistingDirs)
+        throws IOException {
         if (cleanExistingDirs) {
             Enumeration<? extends ZipEntry> entries = jar.entries();
             while (entries.hasMoreElements()) {
@@ -175,7 +174,7 @@ public final class FileUtil
     /**
      * Copies the given {@code source} file to the given {@code target}.
      */
-    public static void copy (File source, File target) throws IOException {
+    public static void copy(File source, File target) throws IOException {
         try (FileInputStream in = new FileInputStream(source);
              FileOutputStream out = new FileOutputStream(target)) {
             StreamUtil.copy(in, out);
@@ -185,7 +184,7 @@ public final class FileUtil
     /**
      * Marks {@code file} as executable, if it exists. Catches and logs any errors that occur.
      */
-    public static void makeExecutable (File file) {
+    public static void makeExecutable(File file) {
         try {
             if (file.exists()) {
                 if (!file.setExecutable(true, false)) {
@@ -223,7 +222,7 @@ public final class FileUtil
             Files.walkFileTree(Paths.get(basePath), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path path,
-                    BasicFileAttributes attrs) {
+                                                 BasicFileAttributes attrs) {
                     if (pathMatcher.matches(path) && !Files.isDirectory(path)) {
                         foundFilePaths.add(path);
                     }

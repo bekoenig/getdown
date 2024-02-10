@@ -8,19 +8,11 @@ package io.github.bekoenig.getdown.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Handles parsing and runtime access for Getdown's config files (mainly {@code getdown.txt}).
@@ -28,14 +20,17 @@ import java.util.Map;
  * fetched as single strings, lists of strings, or parsed into primitives or compound data types
  * like colors and rectangles.
  */
-public class Config
-{
+public class Config {
     private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
-    /** Empty configuration. */
-    public static final Config EMPTY = new Config(new HashMap<String, Object>());
+    /**
+     * Empty configuration.
+     */
+    public static final Config EMPTY = new Config(new HashMap<>());
 
-    /** Options that control the {@link #parsePairs} function. */
+    /**
+     * Options that control the {@link #parsePairs} function.
+     */
     public static class ParseOpts {
         // these should be tweaked as desired by the caller
         public boolean biasToKey = false;
@@ -50,7 +45,7 @@ public class Config
      * Creates a parse configuration, filling in the platform filters (or not) depending on the
      * value of {@code checkPlatform}.
      */
-    public static ParseOpts createOpts (boolean checkPlatform) {
+    public static ParseOpts createOpts(boolean checkPlatform) {
         ParseOpts opts = new ParseOpts();
         if (checkPlatform) {
             opts.osname = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
@@ -61,12 +56,12 @@ public class Config
 
     /**
      * Parses configuration text containing key/value pairs.
+     *
      * @param opts options that influence the parsing. See {@link #createOpts}.
      * @return a list of {@code String[]} instances containing the key/value pairs in the
      * order they were parsed from the file.
      */
-    public static List<String[]> parsePairs (Reader source, ParseOpts opts) throws IOException
-    {
+    public static List<String[]> parsePairs(Reader source, ParseOpts opts) throws IOException {
         List<String[]> pairs = new ArrayList<>();
         for (String line : FileUtil.readLines(source)) {
             // nix comments
@@ -87,7 +82,7 @@ public class Config
             int eidx = opts.biasToKey ? line.lastIndexOf('=') : line.indexOf('=');
             if (eidx != -1) {
                 pair[0] = line.substring(0, eidx).trim();
-                pair[1] = line.substring(eidx+1).trim();
+                pair[1] = line.substring(eidx + 1).trim();
             } else {
                 pair[0] = line;
                 pair[1] = "";
@@ -118,7 +113,7 @@ public class Config
                     continue;
                 }
                 // otherwise filter out the qualifier text
-                pair[1] = pair[1].substring(qidx+1).trim();
+                pair[1] = pair[1].substring(qidx + 1).trim();
             }
 
             pairs.add(pair);
@@ -129,12 +124,12 @@ public class Config
 
     /**
      * Parses configuration file containing key/value pairs.
+     *
      * @param source the file containing the config text. Must be in the UTF-8 encoding.
-     * @param opts options that influence the parsing. See {@link #createOpts}.
+     * @param opts   options that influence the parsing. See {@link #createOpts}.
      */
-    public static List<String[]> parsePairs (File source, ParseOpts opts)
-        throws IOException
-    {
+    public static List<String[]> parsePairs(File source, ParseOpts opts)
+        throws IOException {
         // annoyingly FileReader does not allow encoding to be specified (uses platform default)
         try (FileInputStream fis = new FileInputStream(source);
              InputStreamReader input = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
@@ -146,8 +141,7 @@ public class Config
      * Takes a comma-separated String of four integers and returns a rectangle using those ints as
      * the its x, y, width, and height.
      */
-    public static Rectangle parseRect (String name, String value)
-    {
+    public static Rectangle parseRect(String name, String value) {
         if (!StringUtil.isBlank(value)) {
             int[] v = StringUtil.parseIntArray(value);
             if (v != null && v.length == 4) {
@@ -162,8 +156,7 @@ public class Config
      * Parses the given hex color value (e.g. FFCC99) and returns an {@code Integer} with that
      * value. If the given value is null or not a valid hexadecimal number, this will return null.
      */
-    public static Integer parseColor (String hexValue)
-    {
+    public static Integer parseColor(String hexValue) {
         if (!StringUtil.isBlank(hexValue)) {
             try {
                 // if no alpha channel is specified, use 255 (full alpha)
@@ -182,11 +175,11 @@ public class Config
 
     /**
      * Parses the data for a config instance from the supplied {@code source} reader.
+     *
      * @return a map that can be used to create a {@link #Config}.
      */
-    public static Map<String, Object> parseData (Reader source, ParseOpts opts)
-        throws IOException
-    {
+    public static Map<String, Object> parseData(Reader source, ParseOpts opts)
+        throws IOException {
         Map<String, Object> data = new HashMap<>();
 
         // I thought that we could use HashMap<String, String[]> and put new String[] {pair[1]} for
@@ -197,10 +190,10 @@ public class Config
             if (value == null) {
                 data.put(pair[0], pair[1]);
             } else if (value instanceof String) {
-                data.put(pair[0], new String[] { (String)value, pair[1] });
+                data.put(pair[0], new String[]{(String) value, pair[1]});
             } else if (value instanceof String[]) {
-                String[] values = (String[])value;
-                String[] nvalues = new String[values.length+1];
+                String[] values = (String[]) value;
+                String[] nvalues = new String[values.length + 1];
                 System.arraycopy(values, 0, nvalues, 0, values.length);
                 nvalues[values.length] = pair[1];
                 data.put(pair[0], nvalues);
@@ -217,9 +210,8 @@ public class Config
      * @return a map from keys to values, where a value will be an array of strings if more than
      * one key/value pair in the config file was associated with the same key.
      */
-    public static Config parseConfig (File source, ParseOpts opts)
-        throws IOException
-    {
+    public static Config parseConfig(File source, ParseOpts opts)
+        throws IOException {
         // annoyingly FileReader does not allow encoding to be specified (uses platform default)
         try (FileInputStream fis = new FileInputStream(source);
              InputStreamReader input = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
@@ -228,7 +220,7 @@ public class Config
             // special magic for the getdown.txt config: if the parsed data contains
             // 'strict_comments = true' then we reparse the file with strict comments (i.e. # is
             // only assumed to start a comment in column 0)
-            if (!opts.strictComments && Boolean.parseBoolean((String)data.get("strict_comments"))) {
+            if (!opts.strictComments && Boolean.parseBoolean((String) data.get("strict_comments"))) {
                 opts.strictComments = true;
                 return parseConfig(source, opts);
             }
@@ -237,14 +229,14 @@ public class Config
         }
     }
 
-    public Config (Map<String,  Object> data) {
+    public Config(Map<String, Object> data) {
         _data = data;
     }
 
     /**
      * Returns whether {@code name} has a value in this config.
      */
-    public boolean hasValue (String name) {
+    public boolean hasValue(String name) {
         return _data.containsKey(name);
     }
 
@@ -252,29 +244,29 @@ public class Config
      * Returns the raw-value for {@code name}. This may be a {@code String}, {@code String[]}, or
      * {@code null}.
      */
-    public Object getRaw (String name) {
+    public Object getRaw(String name) {
         return _data.get(name);
     }
 
     /**
      * Returns the specified config value as a string, or {@code null}.
      */
-    public String getString (String name) {
-        return (String)_data.get(name);
+    public String getString(String name) {
+        return (String) _data.get(name);
     }
 
     /**
      * Returns the specified config value as a string, or {@code def}.
      */
-    public String getString (String name, String def) {
-        String value = (String)_data.get(name);
+    public String getString(String name, String def) {
+        String value = (String) _data.get(name);
         return value == null ? def : value;
     }
 
     /**
      * Returns the specified config value as a boolean.
      */
-    public boolean getBoolean (String name) {
+    public boolean getBoolean(String name) {
         return Boolean.parseBoolean(getString(name));
     }
 
@@ -282,7 +274,7 @@ public class Config
      * Returns the specified config value as an enum value. The string value of the config is
      * converted to all upper case and then turned into an enum via {@link Enum#valueOf}.
      */
-    public <T extends Enum<T>> T getEnum (String name, Class<T> eclass, T defval) {
+    public <T extends Enum<T>> T getEnum(String name, Class<T> eclass, T defval) {
         String value = getString(name, defval.toString());
         try {
             return Enum.valueOf(eclass, value.toUpperCase());
@@ -296,19 +288,19 @@ public class Config
      * Massages a single string into an array and leaves existing array values as is. Simplifies
      * access to parameters that are expected to be arrays.
      */
-    public String[] getMultiValue (String name)
-    {
+    public String[] getMultiValue(String name) {
         Object value = _data.get(name);
         if (value instanceof String) {
-            return new String[] { (String)value };
+            return new String[]{(String) value};
         } else {
-            return (String[])value;
+            return (String[]) value;
         }
     }
 
-    /** Used to parse rectangle specifications from the config file. */
-    public Rectangle getRect (String name, Rectangle def)
-    {
+    /**
+     * Used to parse rectangle specifications from the config file.
+     */
+    public Rectangle getRect(String name, Rectangle def) {
         String value = getString(name);
         Rectangle rect = parseRect(name, value);
         return (rect == null) ? def : rect;
@@ -319,7 +311,7 @@ public class Config
      * {@code def} is returned. If the value is invalid, a warning is logged and {@code def} is
      * returned.
      */
-    public int getInt (String name, int def) {
+    public int getInt(String name, int def) {
         String value = getString(name);
         try {
             return value == null ? def : Integer.parseInt(value);
@@ -334,7 +326,7 @@ public class Config
      * {@code def} is returned. If the value is invalid, a warning is logged and {@code def} is
      * returned.
      */
-    public long getLong (String name, long def) {
+    public long getLong(String name, long def) {
         String value = getString(name);
         try {
             return value == null ? def : Long.parseLong(value);
@@ -344,17 +336,19 @@ public class Config
         }
     }
 
-    /** Used to parse color specifications from the config file. */
-    public int getColor (String name, int def)
-    {
+    /**
+     * Used to parse color specifications from the config file.
+     */
+    public int getColor(String name, int def) {
         String value = getString(name);
         Integer color = parseColor(value);
         return (color == null) ? def : color;
     }
 
-    /** Parses a list of strings from the config file. */
-    public String[] getList (String name)
-    {
+    /**
+     * Parses a list of strings from the config file.
+     */
+    public String[] getList(String name) {
         String value = getString(name);
         return (value == null) ? new String[0] : StringUtil.parseStringArray(value);
     }
@@ -362,8 +356,7 @@ public class Config
     /**
      * Parses a URL from the config file, checking first for a localized version.
      */
-    public String getUrl (String name, String def)
-    {
+    public String getUrl(String name, String def) {
         String value = getString(name + "." + Locale.getDefault().getLanguage());
         if (StringUtil.isBlank(value)) {
             value = getString(name);
@@ -387,7 +380,7 @@ public class Config
     }
 
     /**
-     * A helper function for {@link #parsePairs(Reader,ParseOpts)}. Qualifiers have the following
+     * A helper function for {@link #parsePairs(Reader, ParseOpts)}. Qualifiers have the following
      * form:
      * <pre>
      * id = os[-arch]
@@ -397,8 +390,7 @@ public class Config
      * Examples: [linux-amd64,linux-x86_64], [windows], [mac os x], [!windows]. Negative qualifiers
      * must appear alone, they cannot be used with other qualifiers (positive or negative).
      */
-    protected static boolean checkQualifiers (String quals, String osname, String osarch)
-    {
+    protected static boolean checkQualifiers(String quals, String osname, String osarch) {
         if (quals.startsWith("!")) {
             if (quals.contains(",")) { // sanity check
                 LOGGER.atWarn()
@@ -418,9 +410,10 @@ public class Config
         return false; // we had no positive matches, so return false
     }
 
-    /** A helper function for {@link #checkQualifiers}. */
-    protected static boolean checkQualifier (String qual, String osname, String osarch)
-    {
+    /**
+     * A helper function for {@link #checkQualifiers}.
+     */
+    protected static boolean checkQualifier(String qual, String osname, String osarch) {
         String[] bits = qual.trim().toLowerCase(Locale.ROOT).split("-");
         String os = bits[0], arch = (bits.length > 1) ? bits[1] : "";
         return (osname.contains(os)) && (osarch.contains(arch));

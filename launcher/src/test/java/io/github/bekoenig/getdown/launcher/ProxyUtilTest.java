@@ -5,38 +5,38 @@
 
 package io.github.bekoenig.getdown.launcher;
 
+import org.junit.Test;
+
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.URL;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 public class ProxyUtilTest {
 
-    static String[] strs (String... strs) { return strs; }
-
-    static String[] findPAC (String code, String url) throws Exception {
+    static String[] findPAC(String code, String url) throws Exception {
         return ProxyUtil.findPACProxiesForURL(new StringReader(code), new URL(url));
     }
 
-    static void testPAC (String code, String url, String... expectedProxies) throws Exception {
+    static void testPAC(String code, String url, String... expectedProxies) throws Exception {
         assertArrayEquals(expectedProxies, findPAC(code, url));
     }
 
-    @Test public void testPACProxy () throws Exception {
+    @Test
+    public void testPACProxy() throws Exception {
         // we use the Graal JavaScrip VM for testing, because JDK15 no longer bundles Nashorn, but
         // it does not support calling back into Java unless we set this compatibility property
         System.setProperty("polyglot.js.nashorn-compat", "true");
 
         String EXAMPLE0 =
             "function FindProxyForURL(url, host) {\n" +
-            "  if (shExpMatch(host, '*.example.com')) { return 'DIRECT'; }\n" +
-            "  if (isInNet(host, '10.0.0.0', '255.255.248.0')) {\n" +
-            "    return 'PROXY fastproxy.example.com:8080';\n" +
-            "  }\n" +
-            "  return 'PROXY proxy.example.com:8080; DIRECT';\n" +
-            "}\n";
+                "  if (shExpMatch(host, '*.example.com')) { return 'DIRECT'; }\n" +
+                "  if (isInNet(host, '10.0.0.0', '255.255.248.0')) {\n" +
+                "    return 'PROXY fastproxy.example.com:8080';\n" +
+                "  }\n" +
+                "  return 'PROXY proxy.example.com:8080; DIRECT';\n" +
+                "}\n";
 
         testPAC(EXAMPLE0, "http://test.example.com/", "DIRECT");
         testPAC(EXAMPLE0, "http://10.0.1.1/", "PROXY fastproxy.example.com:8080");
@@ -44,12 +44,12 @@ public class ProxyUtilTest {
 
         String EXAMPLE1 =
             "function FindProxyForURL(url, host) {" +
-            "    if (isPlainHostName(host) || dnsDomainIs(host, '.mozilla.org')) {" +
-            "        return 'DIRECT';" +
-            "    } else {" +
-            "        return 'PROXY w3proxy.mozilla.org:8080; DIRECT';" +
-            "    }" +
-            "}";
+                "    if (isPlainHostName(host) || dnsDomainIs(host, '.mozilla.org')) {" +
+                "        return 'DIRECT';" +
+                "    } else {" +
+                "        return 'PROXY w3proxy.mozilla.org:8080; DIRECT';" +
+                "    }" +
+                "}";
         testPAC(EXAMPLE1, "http://test.example.com/", "PROXY w3proxy.mozilla.org:8080", "DIRECT");
         testPAC(EXAMPLE1, "http://www.mozilla.org/", "DIRECT");
         testPAC(EXAMPLE1, "http://foo.mozilla.org/", "DIRECT");
@@ -57,14 +57,14 @@ public class ProxyUtilTest {
 
         String EXAMPLE2 =
             "    function FindProxyForURL(url, host) {\n" +
-            "        if ((isPlainHostName(host) || dnsDomainIs(host, '.mozilla.org')) &&\n" +
-            "            !localHostOrDomainIs(host, 'www.mozilla.org') &&\n" +
-            "            !localHostOrDomainIs(host, 'merchant.mozilla.org')) {\n" +
-            "            return 'DIRECT';\n" +
-            "        } else {\n" +
-            "            return 'PROXY w3proxy.mozilla.org:8080; DIRECT';\n" +
-            "        }\n" +
-            "    }";
+                "        if ((isPlainHostName(host) || dnsDomainIs(host, '.mozilla.org')) &&\n" +
+                "            !localHostOrDomainIs(host, 'www.mozilla.org') &&\n" +
+                "            !localHostOrDomainIs(host, 'merchant.mozilla.org')) {\n" +
+                "            return 'DIRECT';\n" +
+                "        } else {\n" +
+                "            return 'PROXY w3proxy.mozilla.org:8080; DIRECT';\n" +
+                "        }\n" +
+                "    }";
         testPAC(EXAMPLE2, "http://test.example.com/", "PROXY w3proxy.mozilla.org:8080", "DIRECT");
         testPAC(EXAMPLE2, "http://www.mozilla.org/", "PROXY w3proxy.mozilla.org:8080", "DIRECT");
         testPAC(EXAMPLE2, "http://www/", "PROXY w3proxy.mozilla.org:8080", "DIRECT");
@@ -73,22 +73,22 @@ public class ProxyUtilTest {
 
         String EXAMPLE3A =
             "function FindProxyForURL(url, host) {\n" +
-            "    if (isResolvable(host)) return 'DIRECT';\n" +
-            "    else return 'PROXY proxy.mydomain.com:8080';\n" +
-            "}";
+                "    if (isResolvable(host)) return 'DIRECT';\n" +
+                "    else return 'PROXY proxy.mydomain.com:8080';\n" +
+                "}";
         testPAC(EXAMPLE3A, "http://www.mozilla.org/", "DIRECT");
         testPAC(EXAMPLE3A, "http://doesnotexist.mozilla.org/", "PROXY proxy.mydomain.com:8080");
 
         String EXAMPLE3B =
             "function FindProxyForURL(url, host) {\n" +
-            "    if (isPlainHostName(host) ||\n" +
-            "        dnsDomainIs(host, '.mydomain.com') ||\n" +
-            "        isResolvable(host)) {\n" +
-            "        return 'DIRECT';\n" +
-            "    } else {\n" +
-            "        return 'PROXY proxy.mydomain.com:8080';\n" +
-            "    }\n" +
-            "}";
+                "    if (isPlainHostName(host) ||\n" +
+                "        dnsDomainIs(host, '.mydomain.com') ||\n" +
+                "        isResolvable(host)) {\n" +
+                "        return 'DIRECT';\n" +
+                "    } else {\n" +
+                "        return 'PROXY proxy.mydomain.com:8080';\n" +
+                "    }\n" +
+                "}";
         testPAC(EXAMPLE3B, "http://plain/", "DIRECT");
         testPAC(EXAMPLE3B, "http://foo.mydomain.com/", "DIRECT");
         testPAC(EXAMPLE3B, "http://www.mozilla.org/", "DIRECT");
@@ -141,8 +141,8 @@ public class ProxyUtilTest {
 
         String MYIP =
             "function FindProxyForURL(url, host) {\n" +
-            "   return 'PROXY ' + myIpAddress() + ':8080';\n" +
-            "}";
+                "   return 'PROXY ' + myIpAddress() + ':8080';\n" +
+                "}";
         String myIp = InetAddress.getLocalHost().getHostAddress();
         testPAC(MYIP, "http://testurl.com/", "PROXY " + myIp + ":8080");
     }

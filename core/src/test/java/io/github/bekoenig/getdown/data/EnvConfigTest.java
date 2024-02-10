@@ -5,12 +5,13 @@
 
 package io.github.bekoenig.getdown.data;
 
+import org.junit.Test;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.io.File;
 
-import org.junit.*;
 import static org.junit.Assert.*;
 
 public class EnvConfigTest {
@@ -19,13 +20,13 @@ public class EnvConfigTest {
     static final String TESTID = "testid";
     static final String TESTBASE = "https://test.com/test";
 
-    private void debugNotes (List<EnvConfig.Note> notes) {
+    private void debugNotes(List<EnvConfig.Note> notes) {
         for (EnvConfig.Note note : notes) {
             System.out.println(note.message);
         }
     }
 
-    static void checkNoNotes (List<EnvConfig.Note> notes) {
+    static void checkNoNotes(List<EnvConfig.Note> notes) {
         StringBuilder msg = new StringBuilder();
         for (EnvConfig.Note note : notes) {
             if (note.level != EnvConfig.Note.Level.INFO) {
@@ -36,32 +37,40 @@ public class EnvConfigTest {
             fail("Unexpected notes:" + msg);
         }
     }
-    private void checkDir (EnvConfig cfg) {
-        assertTrue(cfg != null);
+
+    private void checkDir(EnvConfig cfg) {
+        assertNotNull(cfg);
         assertEquals(new File(CWD), cfg.appDir);
     }
-    private void checkNoAppId (EnvConfig cfg) {
+
+    private void checkNoAppId(EnvConfig cfg) {
         assertNull(cfg.appId);
     }
-    private void checkAppId (EnvConfig cfg, String appId) {
+
+    private void checkAppId(EnvConfig cfg, String appId) {
         assertEquals(appId, cfg.appId);
     }
-    private void checkAppBase (EnvConfig cfg, String appBase) {
+
+    private void checkAppBase(EnvConfig cfg, String appBase) {
         assertEquals(appBase, cfg.appBase);
     }
-    private void checkNoAppBase (EnvConfig cfg) {
+
+    private void checkNoAppBase(EnvConfig cfg) {
         assertNull(cfg.appBase);
     }
-    private void checkNoAppArgs (EnvConfig cfg) {
+
+    private void checkNoAppArgs(EnvConfig cfg) {
         assertTrue(cfg.appArgs.isEmpty());
     }
-    private void checkAppArgs (EnvConfig cfg, String... args) {
+
+    private void checkAppArgs(EnvConfig cfg, String... args) {
         assertEquals(Arrays.asList(args), cfg.appArgs);
     }
 
-    @Test public void testArgvDir () {
+    @Test
+    public void testArgvDir() {
         List<EnvConfig.Note> notes = new ArrayList<>();
-        String[] args = { CWD };
+        String[] args = {CWD};
         EnvConfig cfg = EnvConfig.create(args, notes);
         // debugNotes(notes);
         checkNoNotes(notes);
@@ -71,9 +80,10 @@ public class EnvConfigTest {
         checkNoAppArgs(cfg);
     }
 
-    @Test public void testArgvDirId () {
+    @Test
+    public void testArgvDirId() {
         List<EnvConfig.Note> notes = new ArrayList<>();
-        String[] args = { CWD, TESTID };
+        String[] args = {CWD, TESTID};
         EnvConfig cfg = EnvConfig.create(args, notes);
         // debugNotes(notes);
         checkNoNotes(notes);
@@ -83,9 +93,10 @@ public class EnvConfigTest {
         checkNoAppArgs(cfg);
     }
 
-    @Test public void testArgvDirArgs () {
+    @Test
+    public void testArgvDirArgs() {
         List<EnvConfig.Note> notes = new ArrayList<>();
-        String[] args = { CWD, "", "one", "two" };
+        String[] args = {CWD, "", "one", "two"};
         EnvConfig cfg = EnvConfig.create(args, notes);
         // debugNotes(notes);
         checkNoNotes(notes);
@@ -95,9 +106,10 @@ public class EnvConfigTest {
         checkAppArgs(cfg, "one", "two");
     }
 
-    @Test public void testArgvDirIdArgs () {
+    @Test
+    public void testArgvDirIdArgs() {
         List<EnvConfig.Note> notes = new ArrayList<>();
-        String[] args = { CWD, TESTID, "one", "two" };
+        String[] args = {CWD, TESTID, "one", "two"};
         EnvConfig cfg = EnvConfig.create(args, notes);
         // debugNotes(notes);
         checkNoNotes(notes);
@@ -107,9 +119,9 @@ public class EnvConfigTest {
         checkAppArgs(cfg, "one", "two");
     }
 
-    private EnvConfig sysPropsConfig (List<EnvConfig.Note> notes, String... keyVals) {
+    private EnvConfig sysPropsConfig(List<EnvConfig.Note> notes, String... keyVals) {
         for (int ii = 0; ii < keyVals.length; ii += 2) {
-            System.setProperty(keyVals[ii], keyVals[ii+1]);
+            System.setProperty(keyVals[ii], keyVals[ii + 1]);
         }
         EnvConfig cfg = EnvConfig.create(new String[0], notes);
         for (int ii = 0; ii < keyVals.length; ii += 2) {
@@ -118,7 +130,8 @@ public class EnvConfigTest {
         return cfg;
     }
 
-    @Test public void testSysPropsDir () {
+    @Test
+    public void testSysPropsDir() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         EnvConfig cfg = sysPropsConfig(notes, "appdir", CWD);
         // debugNotes(notes);
@@ -129,7 +142,8 @@ public class EnvConfigTest {
         checkNoAppArgs(cfg);
     }
 
-    @Test public void testSysPropsDirIdBase () {
+    @Test
+    public void testSysPropsDirIdBase() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         EnvConfig cfg = sysPropsConfig(notes, "appdir", CWD, "appid", TESTID, "appbase", TESTBASE);
         // debugNotes(notes);

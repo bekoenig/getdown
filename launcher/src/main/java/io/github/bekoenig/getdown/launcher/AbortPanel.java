@@ -5,37 +5,28 @@
 
 package io.github.bekoenig.getdown.launcher;
 
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 import io.github.bekoenig.getdown.launcher.swing.GroupLayout;
 import io.github.bekoenig.getdown.launcher.swing.Spacer;
 import io.github.bekoenig.getdown.launcher.swing.VGroupLayout;
-
 import io.github.bekoenig.getdown.util.MessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 /**
  * Displays a confirmation that the user wants to abort installation.
  */
 public final class AbortPanel extends JFrame
-    implements ActionListener
-{
+    implements ActionListener {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public AbortPanel (Getdown getdown, ResourceBundle msgs)
-    {
+    public AbortPanel(Getdown getdown, ResourceBundle msgs) {
         _getdown = getdown;
         _msgs = msgs;
 
@@ -62,8 +53,7 @@ public final class AbortPanel extends JFrame
 
     // documentation inherited
     @Override
-    public Dimension getPreferredSize ()
-    {
+    public Dimension getPreferredSize() {
         // this is annoyingly hardcoded, but we can't just force the width
         // or the JLabel will claim a bogus height thinking it can lay its
         // text out all on one line which will booch the whole UI's
@@ -72,8 +62,7 @@ public final class AbortPanel extends JFrame
     }
 
     // documentation inherited from interface
-    public void actionPerformed (ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if ("ok".equals(cmd)) {
             System.exit(0);
@@ -82,9 +71,10 @@ public final class AbortPanel extends JFrame
         }
     }
 
-    /** Used to look up localized messages. */
-    private String get(String key)
-    {
+    /**
+     * Used to look up localized messages.
+     */
+    private String get(String key) {
         // if this string is tainted, we don't translate it, instead we
         // simply remove the taint character and return it to the caller
         if (MessageUtil.isTainted(key)) {

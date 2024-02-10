@@ -5,10 +5,19 @@
 
 package io.github.bekoenig.getdown.launcher;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.EventQueue;
-import java.awt.Image;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import io.github.bekoenig.getdown.data.EnvConfig;
+import io.github.bekoenig.getdown.data.SysProps;
+import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
+import io.github.bekoenig.getdown.util.LaunchUtil;
+import io.github.bekoenig.getdown.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -17,34 +26,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.KeyStroke;
-import javax.swing.WindowConstants;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import io.github.bekoenig.getdown.launcher.swing.util.SwingUtil;
-import io.github.bekoenig.getdown.data.EnvConfig;
-import io.github.bekoenig.getdown.data.SysProps;
-import io.github.bekoenig.getdown.util.LaunchUtil;
-import io.github.bekoenig.getdown.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * The main application entry point for Getdown.
  */
-public class GetdownApp
-{
+public class GetdownApp {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetdownApp.class);
 
     /**
      * The main entry point of the Getdown launcher application.
      */
-    public static void main (String[] argv) {
+    public static void main(String[] argv) {
         try {
             start(argv);
         } catch (Exception e) {
@@ -54,10 +45,11 @@ public class GetdownApp
 
     /**
      * Runs Getdown as an application, using the arguments supplie as {@code argv}.
+     *
      * @return the {@code Getdown} instance that is running. {@link Getdown#run} will have been
      * called on it.
      */
-    public static Getdown start (String[] argv) {
+    public static Getdown start(String[] argv) {
         List<EnvConfig.Note> notes = new ArrayList<>();
         EnvConfig envc = EnvConfig.create(argv, notes);
         if (envc == null) {
@@ -92,9 +84,16 @@ public class GetdownApp
         boolean abort = false;
         for (EnvConfig.Note note : notes) {
             switch (note.level) {
-            case INFO: LOGGER.info(note.message); break;
-            case WARN: LOGGER.warn(note.message); break;
-            case ERROR: LOGGER.error(note.message); abort = true; break;
+                case INFO:
+                    LOGGER.info(note.message);
+                    break;
+                case WARN:
+                    LOGGER.warn(note.message);
+                    break;
+                case ERROR:
+                    LOGGER.error(note.message);
+                    abort = true;
+                    break;
             }
         }
         if (abort) System.exit(-1);
@@ -113,13 +112,13 @@ public class GetdownApp
 
         Getdown getdown = new Getdown(envc) {
             @Override
-            protected Container createContainer () {
+            protected Container createContainer() {
                 // create our user interface, and display it
                 if (_frame == null) {
                     _frame = new JFrame("");
                     _frame.addWindowListener(new WindowAdapter() {
                         @Override
-                        public void windowClosing (WindowEvent evt) {
+                        public void windowClosing(WindowEvent evt) {
                             handleWindowClose();
                         }
                     });
@@ -128,7 +127,7 @@ public class GetdownApp
                     _frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                         KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), cancelId);
                     _frame.getRootPane().getActionMap().put(cancelId, new AbstractAction() {
-                        public void actionPerformed (ActionEvent e) {
+                        public void actionPerformed(ActionEvent e) {
                             handleWindowClose();
                         }
                     });
@@ -144,7 +143,7 @@ public class GetdownApp
             }
 
             @Override
-            protected void configureContainer () {
+            protected void configureContainer() {
                 if (_frame == null) return;
 
                 _frame.setTitle(_ifc.name);
@@ -184,7 +183,7 @@ public class GetdownApp
             }
 
             @Override
-            protected void showContainer () {
+            protected void showContainer() {
                 if (_frame != null) {
                     _frame.pack();
                     SwingUtil.centerWindow(_frame);
@@ -193,7 +192,7 @@ public class GetdownApp
             }
 
             @Override
-            protected void disposeContainer () {
+            protected void disposeContainer() {
                 if (_frame != null) {
                     _frame.dispose();
                     _frame = null;
@@ -201,7 +200,7 @@ public class GetdownApp
             }
 
             @Override
-            protected void showDocument (String url) {
+            protected void showDocument(String url) {
                 if (!StringUtil.couldBeValidUrl(url)) {
                     // command injection would be possible if we allowed e.g. spaces and double quotes
                     LOGGER.atWarn()
@@ -214,16 +213,16 @@ public class GetdownApp
                 if (LaunchUtil.isWindows()) {
                     String osName = System.getProperty("os.name", "");
                     if (osName.contains("9") || osName.contains("Me")) {
-                        cmdarray = new String[] {
-                            "command.com", "/c", "start", "\"" + url + "\"" };
+                        cmdarray = new String[]{
+                            "command.com", "/c", "start", "\"" + url + "\""};
                     } else {
-                        cmdarray = new String[] {
-                            "cmd.exe", "/c", "start", "\"\"", "\"" + url + "\"" };
+                        cmdarray = new String[]{
+                            "cmd.exe", "/c", "start", "\"\"", "\"" + url + "\""};
                     }
                 } else if (LaunchUtil.isMacOS()) {
-                    cmdarray = new String[] { "open", url };
+                    cmdarray = new String[]{"open", url};
                 } else { // Linux, Solaris, etc.
-                    cmdarray = new String[] { "firefox", url };
+                    cmdarray = new String[]{"firefox", url};
                 }
                 try {
                     Runtime.getRuntime().exec(cmdarray);
@@ -237,7 +236,7 @@ public class GetdownApp
             }
 
             @Override
-            protected void exit (int exitCode) {
+            protected void exit(int exitCode) {
                 // if we're running the app in the same JVM, don't call System.exit, but do
                 // make double sure that the download window is closed.
                 if (invokeDirect()) {
@@ -248,7 +247,7 @@ public class GetdownApp
             }
 
             @Override
-            protected void fail (String message) {
+            protected void fail(String message) {
                 super.fail(message);
                 // super.fail causes the UI to be created (if needed) on the next UI tick, so we
                 // want to wait until that happens before we attempt to redecorate the window

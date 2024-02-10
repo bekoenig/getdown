@@ -24,20 +24,29 @@ package io.github.bekoenig.getdown.launcher.swing;
  * Defines text style constants for use with the {@link Label} and {@link
  * MultiLineLabel}.
  */
-public interface LabelStyleConstants
-{
-    /** Constant denoting normal text style. */
+public interface LabelStyleConstants {
+    /**
+     * Constant denoting normal text style.
+     */
     int NORMAL = 0;
 
-    /** Constant denoting bold text style. */
+    /**
+     * Constant denoting bold text style.
+     */
     int BOLD = 1 << 0;
 
-    /** Constant denoting outline text style. */
+    /**
+     * Constant denoting outline text style.
+     */
     int OUTLINE = 1 << 1;
 
-    /** Constant denoting shadow text style. */
+    /**
+     * Constant denoting shadow text style.
+     */
     int SHADOW = 1 << 2;
 
-    /** Constant denoting underline text style. */
+    /**
+     * Constant denoting underline text style.
+     */
     int UNDERLINE = 1 << 3;
 }

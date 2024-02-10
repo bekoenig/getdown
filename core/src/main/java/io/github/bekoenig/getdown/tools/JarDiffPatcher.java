@@ -5,47 +5,33 @@
 
 package io.github.bekoenig.getdown.tools;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import io.github.bekoenig.getdown.util.ProgressObserver;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import io.github.bekoenig.getdown.util.ProgressObserver;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Applies a jardiff patch to a jar/zip file.
  */
-public class JarDiffPatcher implements JarDiffCodes
-{
+public class JarDiffPatcher implements JarDiffCodes {
     /**
      * Patches the specified jar file using the supplied patch file and writing the new jar file to
      * the supplied target.
      *
-     * @param jarPath the path to the original jar file.
+     * @param jarPath  the path to the original jar file.
      * @param diffPath the path to the jardiff patch file.
-     * @param target the output stream to which we will write the patched jar.
+     * @param target   the output stream to which we will write the patched jar.
      * @param observer an optional observer to be notified of patching progress.
-     *
      * @throws IOException if any problem occurs during patching.
      */
-    public void patchJar (String jarPath, String diffPath, File target, ProgressObserver observer)
-        throws IOException
-    {
+    public void patchJar(String jarPath, String diffPath, File target, ProgressObserver observer)
+        throws IOException {
         File oldFile = new File(jarPath), diffFile = new File(diffPath);
         try (ZipFile oldJar = new ZipFile(oldFile);
              ZipFile jarDiff = new ZipFile(diffFile);
@@ -58,7 +44,7 @@ public class JarDiffPatcher implements JarDiffCodes
             String[] keys = renameMap.keySet().toArray(new String[renameMap.size()]);
 
             // Files to implicit move
-            Set<String> oldjarNames  = new HashSet<>();
+            Set<String> oldjarNames = new HashSet<>();
             Enumeration<? extends ZipEntry> oldEntries = oldJar.entries();
             while (oldEntries.hasMoreElements()) {
                 oldjarNames.add(oldEntries.nextElement().getName());
@@ -157,17 +143,15 @@ public class JarDiffPatcher implements JarDiffCodes
         }
     }
 
-    protected void updateObserver (ProgressObserver observer, double currentSize, double size)
-    {
+    protected void updateObserver(ProgressObserver observer, double currentSize, double size) {
         if (observer != null) {
-            observer.progress((int)(100*currentSize/size));
+            observer.progress((int) (100 * currentSize / size));
         }
     }
 
-    protected void determineNameMapping (
+    protected void determineNameMapping(
         ZipFile jarDiff, Set<String> ignoreSet, Map<String, String> renameMap)
-        throws IOException
-    {
+        throws IOException {
         InputStream is = jarDiff.getInputStream(jarDiff.getEntry(INDEX_NAME));
         if (is == null) {
             throw new IOException("error.noindex");
@@ -209,15 +193,14 @@ public class JarDiffPatcher implements JarDiffCodes
         }
     }
 
-    protected List<String> getSubpaths (String path)
-    {
+    protected List<String> getSubpaths(String path) {
         int index = 0;
         int length = path.length();
         List<String> sub = new ArrayList<>();
 
         while (index < length) {
             while (index < length && Character.isWhitespace
-                   (path.charAt(index))) {
+                (path.charAt(index))) {
                 index++;
             }
             if (index < length) {
@@ -255,17 +238,15 @@ public class JarDiffPatcher implements JarDiffCodes
         return sub;
     }
 
-    protected void writeEntry (ZipOutputStream jos, ZipEntry entry, ZipFile file)
-        throws IOException
-    {
+    protected void writeEntry(ZipOutputStream jos, ZipEntry entry, ZipFile file)
+        throws IOException {
         try (InputStream data = file.getInputStream(entry)) {
             writeEntry(jos, entry, data);
         }
     }
 
-    protected void writeEntry (ZipOutputStream jos, ZipEntry entry, InputStream data)
-        throws IOException
-    {
+    protected void writeEntry(ZipOutputStream jos, ZipEntry entry, InputStream data)
+        throws IOException {
         jos.putNextEntry(new ZipEntry(entry.getName()));
 
         // Read the entry
@@ -276,16 +257,16 @@ public class JarDiffPatcher implements JarDiffCodes
         }
     }
 
-    protected static ZipOutputStream makeOutputStream (File source, File target)
-        throws IOException
-    {
+    protected static ZipOutputStream makeOutputStream(File source, File target)
+        throws IOException {
         FileOutputStream out = new FileOutputStream(target);
         String sourceName = source.getName();
         if (sourceName.endsWith(".jar") ||
             sourceName.endsWith(".jar.old")) return new JarOutputStream(out);
         else if (sourceName.endsWith(".zip") ||
-                 sourceName.endsWith(".zip.old")) return new ZipOutputStream(out);
-        else throw new AssertionError("Unsupported source file '" + source + "'. Not a .jar or .zip?");
+            sourceName.endsWith(".zip.old")) return new ZipOutputStream(out);
+        else
+            throw new AssertionError("Unsupported source file '" + source + "'. Not a .jar or .zip?");
     }
 
     protected static final int DEFAULT_READ_SIZE = 2048;

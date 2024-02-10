@@ -18,10 +18,8 @@ import java.util.Set;
  * can either be represented as an {@link #asArgumentString argument string} for the java command
  * line or as an {@link #asUrls array of URLs} to be used by a {@link URLClassLoader}.
  */
-public class ClassPath
-{
-    public ClassPath (LinkedHashSet<File> classPathEntries)
-    {
+public class ClassPath {
+    public ClassPath(LinkedHashSet<File> classPathEntries) {
         _classPathEntries = Collections.unmodifiableSet(classPathEntries);
     }
 
@@ -31,16 +29,15 @@ public class ClassPath
      * <pre>
      *   /path/to/a.jar:/path/to/b.jar
      * </pre>
-     *
+     * <p>
      * The paths are relativized to dir.
      *
      * @param dir the working directory of the process
      */
-    public String asArgumentString (File dir)
-    {
+    public String asArgumentString(File dir) {
         StringBuilder builder = new StringBuilder();
         String delimiter = "";
-        for (File entry: _classPathEntries) {
+        for (File entry : _classPathEntries) {
             builder.append(delimiter).append(dir.toPath().relativize(entry.toPath()));
             delimiter = File.pathSeparator;
         }
@@ -51,8 +48,7 @@ public class ClassPath
      * Returns the class path entries as an array of URLs to be used for example by an
      * {@link URLClassLoader}.
      */
-    public URL[] asUrls ()
-    {
+    public URL[] asUrls() {
         URL[] urls = new URL[_classPathEntries.size()];
         int i = 0;
         for (File entry : _classPathEntries) {
@@ -61,14 +57,12 @@ public class ClassPath
         return urls;
     }
 
-    public Set<File> getClassPathEntries ()
-    {
+    public Set<File> getClassPathEntries() {
         return _classPathEntries;
     }
 
 
-    private static URL getURL (File file)
-    {
+    private static URL getURL(File file) {
         try {
             return file.toURI().toURL();
         } catch (MalformedURLException e) {

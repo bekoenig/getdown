@@ -20,14 +20,13 @@
 
 package io.github.bekoenig.getdown.launcher.swing;
 
-import java.awt.Dimension;
+import java.awt.*;
 
 /**
  * This record is used by the group layout managers to return a set of
  * statistics computed for their target widgets.
  */
-public class DimenInfo
-{
+public class DimenInfo {
     public int count;
 
     public int totwid;
@@ -48,8 +47,7 @@ public class DimenInfo
     public Dimension[] dimens;
 
     @Override
-    public String toString ()
-    {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("[count=").append(count);
         buf.append(", totwid=").append(totwid);

@@ -22,18 +22,15 @@ package io.github.bekoenig.getdown.launcher.swing;
 
 import java.awt.*;
 
-public class HGroupLayout extends GroupLayout
-{
+public class HGroupLayout extends GroupLayout {
 
-    public HGroupLayout (Policy policy, Justification justification)
-    {
+    public HGroupLayout(Policy policy, Justification justification) {
         _policy = policy;
         _justification = justification;
     }
 
     @Override
-    protected Dimension getLayoutSize (Container parent, int type)
-    {
+    protected Dimension getLayoutSize(Container parent, int type) {
         DimenInfo info = computeDimens(parent, type);
         Dimension dims = new Dimension();
 
@@ -57,8 +54,7 @@ public class HGroupLayout extends GroupLayout
     }
 
     @Override
-    public void layoutContainer (Container parent)
-    {
+    public void layoutContainer(Container parent) {
         Rectangle b = parent.getBounds();
         DimenInfo info = computeDimens(parent, PREFERRED);
 
@@ -69,7 +65,7 @@ public class HGroupLayout extends GroupLayout
 
         int nk = parent.getComponentCount();
         int sx, sy;
-        int totwid, totgap = _gap * (info.count-1);
+        int totwid, totgap = _gap * (info.count - 1);
         int freecount = info.count - info.numfix;
 
         // when stretching, there is the possibility that a pixel or more
@@ -109,7 +105,7 @@ public class HGroupLayout extends GroupLayout
         if (_justification == LEFT || _justification == TOP) {
             sx = insets.left;
         } else if (_justification == CENTER) {
-            sx = insets.left + (b.width - totwid)/2;
+            sx = insets.left + (b.width - totwid) / 2;
         } else { // RIGHT or BOTTOM
             sx = insets.left + b.width - totwid;
         }
@@ -147,7 +143,7 @@ public class HGroupLayout extends GroupLayout
             } else if (_offjust == RIGHT || _offjust == BOTTOM) {
                 sy = insets.top + b.height - newhei;
             } else { // CENTER
-                sy = insets.top + (b.height - newhei)/2;
+                sy = insets.top + (b.height - newhei) / 2;
             }
 
             child.setBounds(sx, sy, newwid, newhei);

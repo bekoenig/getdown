@@ -20,26 +20,18 @@
 
 package io.github.bekoenig.getdown.launcher.swing.util;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 
 /**
  * Miscellaneous useful Swing-related utility functions.
  */
-public class SwingUtil
-{
+public class SwingUtil {
     /**
      * Center the given window within the screen boundaries.
      *
      * @param window the window to be centered.
      */
-    public static void centerWindow (Window window)
-    {
+    public static void centerWindow(Window window) {
         Rectangle bounds;
         try {
             bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().
@@ -51,8 +43,8 @@ public class SwingUtil
         }
 
         int width = window.getWidth(), height = window.getHeight();
-        window.setBounds(bounds.x + (bounds.width-width)/2, bounds.y + (bounds.height-height)/2,
-                         width, height);
+        window.setBounds(bounds.x + (bounds.width - width) / 2, bounds.y + (bounds.height - height) / 2,
+            width, height);
     }
 
     /**
@@ -62,8 +54,7 @@ public class SwingUtil
      * @return an object that should be passed to {@link #restoreAntiAliasing} to restore the
      * graphics context to its original settings.
      */
-    public static Object activateAntiAliasing (Graphics2D gfx)
-    {
+    public static Object activateAntiAliasing(Graphics2D gfx) {
         RenderingHints ohints = gfx.getRenderingHints(), nhints = new RenderingHints(null);
         nhints.add(ohints);
         nhints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -76,13 +67,12 @@ public class SwingUtil
      * Restores anti-aliasing in the supplied graphics context to its original setting.
      *
      * @param rock the results of a previous call to {@link #activateAntiAliasing} or null, in
-     * which case this method will NOOP. This alleviates every caller having to conditionally avoid
-     * calling restore if they chose not to activate earlier.
+     *             which case this method will NOOP. This alleviates every caller having to conditionally avoid
+     *             calling restore if they chose not to activate earlier.
      */
-    public static void restoreAntiAliasing (Graphics2D gfx, Object rock)
-    {
+    public static void restoreAntiAliasing(Graphics2D gfx, Object rock) {
         if (rock != null) {
-            gfx.setRenderingHints((RenderingHints)rock);
+            gfx.setRenderingHints((RenderingHints) rock);
         }
     }
 
@@ -91,13 +81,15 @@ public class SwingUtil
      * <code>swing.aatext</code> property, but will someday switch to using Java Desktop Properties
      * which in theory get their values from OS preferences.
      */
-    public static boolean getDefaultTextAntialiasing ()
-    {
+    public static boolean getDefaultTextAntialiasing() {
         return _defaultTextAntialiasing;
     }
 
-    /** Used by {@link #getDefaultTextAntialiasing}. */
+    /**
+     * Used by {@link #getDefaultTextAntialiasing}.
+     */
     protected static boolean _defaultTextAntialiasing;
+
     static {
         try {
             _defaultTextAntialiasing = Boolean.getBoolean("swing.aatext");

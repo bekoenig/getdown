@@ -5,55 +5,69 @@
 
 package io.github.bekoenig.getdown.data;
 
-import java.io.*;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
 import io.github.bekoenig.getdown.util.FileUtil;
 import io.github.bekoenig.getdown.util.ProgressObserver;
 import io.github.bekoenig.getdown.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
 /**
  * Models a single file resource used by an {@link Application}.
  */
-public class Resource implements Comparable<Resource>
-{
+public class Resource implements Comparable<Resource> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
 
-    /** Defines special attributes for resources. */
+    /**
+     * Defines special attributes for resources.
+     */
     public enum Attr {
-        /** Indicates that the resource should be unpacked. */
+        /**
+         * Indicates that the resource should be unpacked.
+         */
         UNPACK,
-        /** If present, when unpacking a resource, any directories created by the newly
-          * unpacked resource will first be cleared of files before unpacking. */
+        /**
+         * If present, when unpacking a resource, any directories created by the newly
+         * unpacked resource will first be cleared of files before unpacking.
+         */
         CLEAN,
-        /** Indicates that the resource should be marked executable. */
+        /**
+         * Indicates that the resource should be marked executable.
+         */
         EXEC,
-        /** Indicates that the resource should be downloaded before a UI is displayed. */
+        /**
+         * Indicates that the resource should be downloaded before a UI is displayed.
+         */
         PRELOAD,
-        /** Indicates that the resource is a jar containing native libs. */
+        /**
+         * Indicates that the resource is a jar containing native libs.
+         */
         NATIVE
     }
 
-    public static final EnumSet<Attr> NORMAL  = EnumSet.noneOf(Attr.class);
-    public static final EnumSet<Attr> UNPACK  = EnumSet.of(Attr.UNPACK);
-    public static final EnumSet<Attr> EXEC    = EnumSet.of(Attr.EXEC);
+    public static final EnumSet<Attr> NORMAL = EnumSet.noneOf(Attr.class);
+    public static final EnumSet<Attr> UNPACK = EnumSet.of(Attr.UNPACK);
+    public static final EnumSet<Attr> EXEC = EnumSet.of(Attr.EXEC);
     public static final EnumSet<Attr> PRELOAD = EnumSet.of(Attr.PRELOAD);
-    public static final EnumSet<Attr> NATIVE  = EnumSet.of(Attr.NATIVE);
+    public static final EnumSet<Attr> NATIVE = EnumSet.of(Attr.NATIVE);
 
     /**
      * Computes the MD5 hash of the supplied file.
+     *
      * @param version the version of the digest protocol to use.
      */
-    public static String computeDigest (int version, File target, MessageDigest md,
-                                        ProgressObserver obs)
-        throws IOException
-    {
+    public static String computeDigest(int version, File target, MessageDigest md,
+                                       ProgressObserver obs)
+        throws IOException {
         md.reset();
         byte[] buffer = new byte[DIGEST_BUFFER_SIZE];
         int read;
@@ -62,7 +76,7 @@ public class Resource implements Comparable<Resource>
 
         // if this is a jar, we need to compute the digest in a "timestamp and file order" agnostic
         // manner to properly correlate jardiff patched jars with their unpatched originals
-        if (isZip){
+        if (isZip) {
             ZipFile zip = null;
             try {
                 // if this is a compressed zip file, uncompress it to compute the zip file digest
@@ -121,8 +135,7 @@ public class Resource implements Comparable<Resource>
     /**
      * Returns whether {@code file} is a {@code zip} file.
      */
-    public static boolean isZip (File file)
-    {
+    public static boolean isZip(File file) {
         String path = file.getName();
         return path.endsWith(".zip") || path.endsWith(".zip_new");
     }
@@ -130,8 +143,7 @@ public class Resource implements Comparable<Resource>
     /**
      * Returns whether {@code file} is a {@code jar} file.
      */
-    public static boolean isJar (File file)
-    {
+    public static boolean isJar(File file) {
         String path = file.getName();
         return path.endsWith(".jar") || path.endsWith(".jar_new");
     }
@@ -139,8 +151,7 @@ public class Resource implements Comparable<Resource>
     /**
      * Creates a resource with the supplied remote URL and local path.
      */
-    public Resource (String path, URL remote, File local, EnumSet<Attr> attrs)
-    {
+    public Resource(String path, URL remote, File local, EnumSet<Attr> attrs) {
         _path = path;
         _remote = remote;
         _local = local;
@@ -158,83 +169,74 @@ public class Resource implements Comparable<Resource>
     /**
      * Returns the path associated with this resource.
      */
-    public String getPath ()
-    {
+    public String getPath() {
         return _path;
     }
 
     /**
      * Returns the local location of this resource.
      */
-    public File getLocal ()
-    {
+    public File getLocal() {
         return _local;
     }
 
     /**
      * Returns the location of the to-be-installed new version of this resource.
      */
-    public File getLocalNew ()
-    {
+    public File getLocalNew() {
         return _localNew;
     }
 
     /**
-     *  Returns the location of the unpacked resource.
+     * Returns the location of the unpacked resource.
      */
-    public File getUnpacked ()
-    {
+    public File getUnpacked() {
         return _unpacked;
     }
 
     /**
-     *  Returns the final target of this resource, whether it has been unpacked or not.
+     * Returns the final target of this resource, whether it has been unpacked or not.
      */
-    public File getFinalTarget ()
-    {
+    public File getFinalTarget() {
         return shouldUnpack() ? getUnpacked() : getLocal();
     }
 
     /**
      * Returns the remote location of this resource.
      */
-    public URL getRemote ()
-    {
+    public URL getRemote() {
         return _remote;
     }
 
     /**
      * Returns true if this resource should be unpacked as a part of the validation process.
      */
-    public boolean shouldUnpack ()
-    {
+    public boolean shouldUnpack() {
         return _attrs.contains(Attr.UNPACK) && !SysProps.noUnpack();
     }
 
     /**
      * Returns true if this resource should be pre-downloaded.
      */
-    public boolean shouldPredownload ()
-    {
+    public boolean shouldPredownload() {
         return _attrs.contains(Attr.PRELOAD);
     }
 
     /**
      * Returns true if this resource is a native lib jar.
      */
-    public boolean isNative ()
-    {
+    public boolean isNative() {
         return _attrs.contains(Attr.NATIVE);
     }
 
     /**
      * Computes the MD5 hash of this resource's underlying file.
      * <em>Note:</em> This is both CPU and I/O intensive.
+     *
      * @param version the version of the digest protocol to use.
      */
-    public String computeDigest (int version, MessageDigest md, ProgressObserver obs)
-        throws IOException
-    {
+    public String computeDigest(int version, MessageDigest md, ProgressObserver obs)
+        throws IOException {
         File file;
         if (_local.toString().toLowerCase(Locale.ROOT).endsWith(Application.CONFIG_FILE)) {
             file = _local;
@@ -248,8 +250,7 @@ public class Resource implements Comparable<Resource>
      * Returns true if this resource has an associated "validated" marker
      * file.
      */
-    public boolean isMarkedValid ()
-    {
+    public boolean isMarkedValid() {
         if (!_local.exists()) {
             clearMarker();
             return false;
@@ -264,17 +265,15 @@ public class Resource implements Comparable<Resource>
      *
      * @throws IOException if we fail to create the marker file.
      */
-    public void markAsValid ()
-        throws IOException
-    {
+    public void markAsValid()
+        throws IOException {
         _marker.createNewFile();
     }
 
     /**
      * Removes any "validated" marker file associated with this resource.
      */
-    public void clearMarker ()
-    {
+    public void clearMarker() {
         if (_marker.exists() && !FileUtil.deleteHarder(_marker)) {
             LOGGER.warn("Failed to erase marker file '{}'.", _marker);
         }
@@ -282,9 +281,10 @@ public class Resource implements Comparable<Resource>
 
     /**
      * Installs the {@code getLocalNew} version of this resource to {@code getLocal}.
+     *
      * @param validate whether or not to mark the resource as valid after installing.
      */
-    public void install (boolean validate) throws IOException {
+    public void install(boolean validate) throws IOException {
         File source = getLocalNew(), dest = getLocal();
         LOGGER.info("- {}", source);
         if (!FileUtil.renameTo(source, dest)) {
@@ -299,8 +299,7 @@ public class Resource implements Comparable<Resource>
     /**
      * Unpacks this resource file into the directory that contains it.
      */
-    public void unpack () throws IOException
-    {
+    public void unpack() throws IOException {
         // sanity check
         if (!_isZip) {
             throw new IOException("Requested to unpack non-jar file '" + _local + "'.");
@@ -314,7 +313,7 @@ public class Resource implements Comparable<Resource>
      * Applies this resources special attributes: unpacks this resource if needed, marks it as
      * executable if needed.
      */
-    public void applyAttrs () throws IOException {
+    public void applyAttrs() throws IOException {
         if (shouldUnpack()) {
             unpack();
         }
@@ -327,42 +326,43 @@ public class Resource implements Comparable<Resource>
      * Wipes this resource file along with any "validated" marker file that may be associated with
      * it.
      */
-    public void erase ()
-    {
+    public void erase() {
         clearMarker();
         if (_local.exists() && !FileUtil.deleteHarder(_local)) {
             LOGGER.warn("Failed to erase resource '{}'.", _local);
         }
     }
 
-    @Override public int compareTo (Resource other) {
+    @Override
+    public int compareTo(Resource other) {
         return _path.compareTo(other._path);
     }
 
-    @Override public boolean equals (Object other)
-    {
+    @Override
+    public boolean equals(Object other) {
         if (other instanceof Resource) {
-            return _path.equals(((Resource)other)._path);
+            return _path.equals(((Resource) other)._path);
         } else {
             return false;
         }
     }
 
-    @Override public int hashCode ()
-    {
+    @Override
+    public int hashCode() {
         return _path.hashCode();
     }
 
-    @Override public String toString ()
-    {
+    @Override
+    public String toString() {
         return _path;
     }
 
-    /** Helper function to simplify the process of reporting progress. */
-    protected static void updateProgress (ProgressObserver obs, long pos, long total)
-    {
+    /**
+     * Helper function to simplify the process of reporting progress.
+     */
+    protected static void updateProgress(ProgressObserver obs, long pos, long total) {
         if (obs != null) {
-            obs.progress((int)(100 * pos / total));
+            obs.progress((int) (100 * pos / total));
         }
     }
 
@@ -375,7 +375,9 @@ public class Resource implements Comparable<Resource>
     protected final EnumSet<Attr> _attrs;
     protected final boolean _isZip;
 
-    /** Used to sort the entries in a jar file. */
+    /**
+     * Used to sort the entries in a jar file.
+     */
     protected static final Comparator<ZipEntry> ENTRY_COMP = Comparator.comparing(ZipEntry::getName);
 
     protected static final int DIGEST_BUFFER_SIZE = 5 * 1025;

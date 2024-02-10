@@ -18,8 +18,7 @@ public final class StreamUtil {
     /**
      * Convenient close for a stream. Use in a finally clause and love life.
      */
-    public static void close (OutputStream out)
-    {
+    public static void close(OutputStream out) {
         if (out != null) {
             try {
                 out.close();
@@ -36,9 +35,8 @@ public final class StreamUtil {
     /**
      * Copies the contents of the supplied input stream to the supplied output stream.
      */
-    public static <T extends OutputStream> T copy (InputStream in, T out)
-        throws IOException
-    {
+    public static <T extends OutputStream> T copy(InputStream in, T out)
+        throws IOException {
         byte[] buffer = new byte[4096];
         for (int read = 0; (read = in.read(buffer)) > 0; ) {
             out.write(buffer, 0, read);

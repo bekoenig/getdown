@@ -28,7 +28,7 @@ public class ApplicationIT {
 
         InputStream keystore = Files.newInputStream(new File("src/it/resources/testapp-keystore.jks").toPath());
         sr.load(keystore, ("abcde123").toCharArray());
-        X509Certificate cert = (X509Certificate)sr.getCertificate("testdomain");
+        X509Certificate cert = (X509Certificate) sr.getCertificate("testdomain");
         List<Certificate> certs = Collections.singletonList(cert);
 
         int sigVersion = 2;

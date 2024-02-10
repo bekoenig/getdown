@@ -3,7 +3,8 @@
 Getdown (yes, it's the funky stuff) is a system for deploying Java applications to end-user
 computers, as well as keeping those applications up to date.
 
-It was designed as a replacement for [Java Web Start](https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/)
+It was designed as a replacement
+for [Java Web Start](https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/)
 due to limitations in Java Web Start's architecture which are outlined in the
 [rationale](https://github.com/threerings/getdown/wiki/Rationale) section.
 
@@ -53,28 +54,28 @@ Getdown will likely need to be integrated into your build. We have separate inst
 Getdown is comprised of three Maven artifacts (jar files), though you probably only need the first
 one:
 
-  * [getdown-launcher](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-launcher)
-    contains code that you actually run to update and launch your app. It also contains the tools
-  * needed to build a Getdown app distribution.
+* [getdown-launcher](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-launcher)
+  contains code that you actually run to update and launch your app. It also contains the tools
+* needed to build a Getdown app distribution.
 
-  * [getdown-core](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-core) contains the
-    core logic for downloading, verifying, patching and launching an app as well as the core logic
-    for creating an app distribution. It does not contain any user interface code. You would only
-    use this artifact if you were planning to integrate Getdown directly into your app.
+* [getdown-core](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-core) contains the
+  core logic for downloading, verifying, patching and launching an app as well as the core logic
+  for creating an app distribution. It does not contain any user interface code. You would only
+  use this artifact if you were planning to integrate Getdown directly into your app.
 
-  * [getdown-ant](http://repo2.maven.org/maven2/com/bekoenig/getdown/getdown-ant) contains an Ant
-    task for building a Getdown app distribution. See the [build integration] instructions for
-    details.
+* [getdown-ant](http://repo2.maven.org/maven2/com/bekoenig/getdown/getdown-ant) contains an Ant
+  task for building a Getdown app distribution. See the [build integration] instructions for
+  details.
 
 You can also:
 
-  * [Check out the code](https://github.com/bekoenig/getdown) and build it yourself.
-  * Browse the [source code] online.
-  * View the [javadoc documentation] online.
+* [Check out the code](https://github.com/bekoenig/getdown) and build it yourself.
+* Browse the [source code] online.
+* View the [javadoc documentation] online.
 
 ## JVM Version Requirements
 
-  * Getdown version 2.0.x requires Java 8 VM or newer.
+* Getdown version 2.0.x requires Java 8 VM or newer.
 
 ## Migrating from Getdown 1.8 to Getdown 2.0
 

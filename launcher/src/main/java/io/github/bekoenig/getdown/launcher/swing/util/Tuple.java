@@ -28,27 +28,28 @@ import java.util.Objects;
  * equality semantics that allow it to be used to combine two objects into a single key (for
  * hashtables, etc.).
  */
-public class Tuple<L,R> implements Serializable
-{
-    /** The left object. */
+public class Tuple<L, R> implements Serializable {
+    /**
+     * The left object.
+     */
     public final L left;
 
-    /** The right object. */
+    /**
+     * The right object.
+     */
     public final R right;
 
 
     /**
      * Constructs a tuple with the supplied values.
      */
-    public Tuple (L left, R right)
-    {
+    public Tuple(L left, R right) {
         this.left = left;
         this.right = right;
     }
 
     @Override // from Object
-    public int hashCode ()
-    {
+    public int hashCode() {
         int value = 17;
         value = value * 31 + ((left == null) ? 0 : left.hashCode());
         value = value * 31 + ((right == null) ? 0 : right.hashCode());
@@ -56,21 +57,21 @@ public class Tuple<L,R> implements Serializable
     }
 
     @Override // from Object
-    public boolean equals (Object other)
-    {
+    public boolean equals(Object other) {
         if (!(other instanceof Tuple<?, ?>)) {
             return false;
         }
-        Tuple<?, ?> to = (Tuple<?, ?>)other;
+        Tuple<?, ?> to = (Tuple<?, ?>) other;
         return Objects.equals(left, to.left) && Objects.equals(right, to.right);
     }
 
     @Override // from Object
-    public String toString ()
-    {
+    public String toString() {
         return "[left=" + left + ", right=" + right + "]";
     }
 
-    /** Don't you go a changin'. */
+    /**
+     * Don't you go a changin'.
+     */
     private static final long serialVersionUID = 1;
 }
