@@ -53,22 +53,22 @@ Getdown will likely need to be integrated into your build. We have separate inst
 Getdown is comprised of three Maven artifacts (jar files), though you probably only need the first
 one:
 
-  * [getdown-launcher](https://repo1.maven.org/maven2/com/threerings/getdown/getdown-launcher)
-    contains minified (via Proguard) code that you actually run to update and launch your app. It
-    also contains the tools needed to build a Getdown app distribution.
+  * [getdown-launcher](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-launcher)
+    contains code that you actually run to update and launch your app. It also contains the tools
+  * needed to build a Getdown app distribution.
 
-  * [getdown-core](https://repo1.maven.org/maven2/com/threerings/getdown/getdown-core) contains the
+  * [getdown-core](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-core) contains the
     core logic for downloading, verifying, patching and launching an app as well as the core logic
     for creating an app distribution. It does not contain any user interface code. You would only
     use this artifact if you were planning to integrate Getdown directly into your app.
 
-  * [getdown-ant](http://repo2.maven.org/maven2/com/threerings/getdown/getdown-ant) contains an Ant
+  * [getdown-ant](http://repo2.maven.org/maven2/com/bekoenig/getdown/getdown-ant) contains an Ant
     task for building a Getdown app distribution. See the [build integration] instructions for
     details.
 
 You can also:
 
-  * [Check out the code](https://github.com/threerings/getdown) and build it yourself.
+  * [Check out the code](https://github.com/bekoenig/getdown) and build it yourself.
   * Browse the [source code] online.
   * View the [javadoc documentation] online.
 
@@ -99,7 +99,7 @@ Feel free to pop over to the [OOO Libs Google Group] to ask questions and get (a
 
 [Documentation]: https://github.com/threerings/getdown/wiki
 [OOO Libs Google group]: http://groups.google.com/group/ooo-libs
-[source code]: https://github.com/threerings/getdown/tree/master/src/main/java/com/threerings/getdown/launcher
+[source code]: https://github.com/bekoenig/getdown/tree/master/src/main/java/com/threerings/getdown/launcher
 [javadoc documentation]: https://threerings.github.com/getdown/apidocs/
 [OOO]: https://en.wikipedia.org/wiki/Three_Rings_Design
 [build integration]: https://github.com/threerings/getdown/wiki/Build-Integration
