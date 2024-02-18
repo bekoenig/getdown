@@ -3,7 +3,8 @@
 Getdown (yes, it's the funky stuff) is a system for deploying Java applications to end-user
 computers, as well as keeping those applications up to date.
 
-It was designed as a replacement for [Java Web Start](https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/)
+It was designed as a replacement
+for [Java Web Start](https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/)
 due to limitations in Java Web Start's architecture which are outlined in the
 [rationale](https://github.com/threerings/getdown/wiki/Rationale) section.
 
@@ -35,10 +36,7 @@ The main design and operation of Getdown is detailed on the
 ## Where can I see it in action?
 
 Getdown was originally written by developers at [OOO] for the deployment of their Java-based
-massively multiplayer games. Try out any of the following games to see it in action:
-
-  * [Puzzle Pirates](https://www.puzzlepirates.com/) - OOO
-  * [Spiral Knights](https://www.spiralknights.com/) - OOO
+massively multiplayer games.
 
 Getdown is implemented in Java, and is designed to deploy and update JVM-based applications. While
 it would be technically feasible to use Getdown to deploy non-JVM-based applications, it is not
@@ -56,36 +54,33 @@ Getdown will likely need to be integrated into your build. We have separate inst
 Getdown is comprised of three Maven artifacts (jar files), though you probably only need the first
 one:
 
-  * [getdown-launcher](https://repo1.maven.org/maven2/com/threerings/getdown/getdown-launcher)
-    contains minified (via Proguard) code that you actually run to update and launch your app. It
-    also contains the tools needed to build a Getdown app distribution.
+* [getdown-launcher](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-launcher)
+  contains code that you actually run to update and launch your app. It also contains the tools
+* needed to build a Getdown app distribution.
 
-  * [getdown-core](https://repo1.maven.org/maven2/com/threerings/getdown/getdown-core) contains the
-    core logic for downloading, verifying, patching and launching an app as well as the core logic
-    for creating an app distribution. It does not contain any user interface code. You would only
-    use this artifact if you were planning to integrate Getdown directly into your app.
+* [getdown-core](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-core) contains the
+  core logic for downloading, verifying, patching and launching an app as well as the core logic
+  for creating an app distribution. It does not contain any user interface code. You would only
+  use this artifact if you were planning to integrate Getdown directly into your app.
 
-  * [getdown-ant](http://repo2.maven.org/maven2/com/threerings/getdown/getdown-ant) contains an Ant
-    task for building a Getdown app distribution. See the [build integration] instructions for
-    details.
+* [getdown-ant](http://repo2.maven.org/maven2/com/bekoenig/getdown/getdown-ant) contains an Ant
+  task for building a Getdown app distribution. See the [build integration] instructions for
+  details.
 
 You can also:
 
-  * [Check out the code](https://github.com/threerings/getdown) and build it yourself.
-  * Browse the [source code] online.
-  * View the [javadoc documentation] online.
+* [Check out the code](https://github.com/bekoenig/getdown) and build it yourself.
+* Browse the [source code] online.
+* View the [javadoc documentation] online.
 
 ## JVM Version Requirements
 
-  * Getdown version 1.8.x requires Java 7 VM or newer.
-  * Getdown version 1.7.x requires Java 7 VM or newer.
-  * Getdown version 1.6.x requires Java 6 VM or newer.
-  * Getdown version 1.5 and earlier requires Java 5 VM or newer.
+* Getdown version 2.0.x requires Java 8 VM or newer.
 
-## Migrating from Getdown 1.7 to Getdown 1.8
+## Migrating from Getdown 1.8 to Getdown 2.0
 
-See [this document](https://github.com/threerings/getdown/wiki/Migrating-from-1.7-to-1.8) on the
-changes needed to migrate from Getdown 1.7 to 1.8.
+See [this document](https://github.com/bekoenig/getdown/wiki/Migrating-from-1.8-to-2.0) on the
+changes needed to migrate from Getdown 1.8 to 2.0.
 
 ## Building
 
@@ -105,7 +100,7 @@ Feel free to pop over to the [OOO Libs Google Group] to ask questions and get (a
 
 [Documentation]: https://github.com/threerings/getdown/wiki
 [OOO Libs Google group]: http://groups.google.com/group/ooo-libs
-[source code]: https://github.com/threerings/getdown/tree/master/src/main/java/com/threerings/getdown/launcher
+[source code]: https://github.com/bekoenig/getdown/tree/master/src/main/java/com/threerings/getdown/launcher
 [javadoc documentation]: https://threerings.github.com/getdown/apidocs/
 [OOO]: https://en.wikipedia.org/wiki/Three_Rings_Design
 [build integration]: https://github.com/threerings/getdown/wiki/Build-Integration

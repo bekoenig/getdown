@@ -3,4 +3,4 @@
 # possible ignores for all possible IDEs.
 /*/target/
 /target/
-core/src/main/java/com/threerings/getdown/data/Build.java
+core/src/main/java/io/github/bekoenig/getdown/data/Build.java

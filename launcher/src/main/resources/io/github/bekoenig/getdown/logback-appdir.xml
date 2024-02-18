@@ -1,0 +1,13 @@
+<configuration>
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>${appdir}/launcher.log</file>
+    <append>false</append>
+    <encoder>
+      <pattern>%d{YYYY/MM/dd HH:mm:ss.SSS} %level %msg %kvp{NONE}%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="info">
+    <appender-ref ref="FILE"/>
+  </root>
+</configuration>

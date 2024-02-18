@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
-  </parent>
 
-  <groupId>com.threerings.getdown</groupId>
+  <groupId>io.github.bekoenig.getdown</groupId>
   <artifactId>getdown</artifactId>
   <packaging>pom</packaging>
-  <version>1.8.8-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
 
   <name>getdown</name>
   <description>An application installer and updater.</description>
-  <url>https://github.com/threerings/getdown</url>
+  <url>https://github.com/bekoenig/getdown</url>
   <issueManagement>
-    <url>https://github.com/threerings/getdown/issues</url>
+    <url>https://github.com/bekoenig/getdown/issues</url>
   </issueManagement>
 
   <licenses>
@@ -29,20 +26,23 @@
 
   <developers>
     <developer>
-      <id>samskivert</id>
-      <name>Michael Bayne</name>
-      <email>mdb@samskivert.com</email>
+      <id>bekoenig</id>
+      <name>Benjamin König</name>
+      <email>koenig87@googlemail.com</email>
     </developer>
   </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <slf4j.version>2.0.10</slf4j.version>
+    <logback.version>1.3.14</logback.version>
   </properties>
 
   <scm>
-    <connection>scm:git:git://github.com/threerings/getdown.git</connection>
-    <developerConnection>scm:git:git@github.com:threerings/getdown.git</developerConnection>
-    <url>https://github.com/threerings/getdown</url>
+    <connection>scm:git:git://github.com/bekoenig/getdown.git</connection>
+    <developerConnection>scm:git:git@github.com:bekoenig/getdown.git</developerConnection>
+    <url>https://github.com/bekoenig/getdown</url>
   </scm>
 
   <modules>
@@ -51,124 +51,136 @@
     <module>ant</module>
   </modules>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.bekoenig.getdown</groupId>
+        <artifactId>getdown-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- logging -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>${logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>${logback.version}</version>
+      </dependency>
+
+      <!-- testing -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>4.11.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <build>
     <plugins>
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.13</version>
-        <extensions>true</extensions>
-        <inherited>false</inherited>
-        <configuration>
-          <serverId>ossrh-releases</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <stagingProfileId>aa555c46fc37d0</stagingProfileId>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.1.0</version>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.12.1</version>
         <configuration>
-          <quiet>true</quiet>
-          <show>public</show>
-          <additionalOptions>
-            <additionalOption>-Xdoclint:all</additionalOption>
-            <additionalOption>-Xdoclint:-missing</additionalOption>
-          </additionalOptions>
+          <source>1.8</source>
+          <target>1.8</target>
+          <fork>true</fork>
+          <showDeprecation>true</showDeprecation>
+          <showWarnings>true</showWarnings>
+          <compilerArgs>
+            <arg>-Xlint</arg>
+            <arg>-Xlint:-serial</arg>
+            <arg>-Xlint:-path</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
     </plugins>
-
-    <!-- Common plugin configuration for all children -->
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.7.0</version>
-          <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
-            <fork>true</fork>
-            <showDeprecation>true</showDeprecation>
-            <showWarnings>true</showWarnings>
-            <compilerArgs>
-              <arg>-Xlint</arg>
-              <arg>-Xlint:-serial</arg>
-              <arg>-Xlint:-path</arg>
-            </compilerArgs>
-          </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.2</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.6</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
   <profiles>
     <profile>
-      <id>eclipse</id>
+      <id>publish</id>
       <activation>
         <property>
-          <name>m2e.version</name>
+          <name>publish</name>
+          <value>true</value>
         </property>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <!-- Tell m2eclipse to ignore the enforcer plugin from our parent. Otherwise it warns
-                   about not being able to run it. -->
-              <groupId>org.eclipse.m2e</groupId>
-              <artifactId>lifecycle-mapping</artifactId>
-              <version>1.0.0</version>
-              <configuration>
-                <lifecycleMappingMetadata>
-                  <pluginExecutions>
-                    <pluginExecution>
-                      <pluginExecutionFilter>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-enforcer-plugin</artifactId>
-                        <versionRange>[1.0,)</versionRange>
-                        <goals>
-                          <goal>enforce</goal>
-                        </goals>
-                      </pluginExecutionFilter>
-                      <action>
-                        <ignore />
-                      </action>
-                    </pluginExecution>
-                  </pluginExecutions>
-                </lifecycleMappingMetadata>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
-    <profile>
-      <id>release-sign-artifacts</id>
-      <activation>
-        <property><name>performRelease</name><value>true</value></property>
       </activation>
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.6.3</version>
+            <configuration>
+              <quiet>true</quiet>
+              <show>public</show>
+              <additionalOptions>
+                <additionalOption>-Xdoclint:all</additionalOption>
+                <additionalOption>-Xdoclint:-missing</additionalOption>
+              </additionalOptions>
+            </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+                </gpgArguments>
+            </configuration>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -178,8 +190,27 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <version>3.0.1</version>
             <configuration>
-              <keyname>mdb@samskivert.com</keyname>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+              <tagNameFormat>@{project.version}</tagNameFormat>
+              <goals>deploy</goals>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.13</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
             </configuration>
           </plugin>
         </plugins>

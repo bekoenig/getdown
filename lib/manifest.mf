@@ -1,4 +1,4 @@
-Main-Class: com.threerings.getdown.launcher.Getdown
+Main-Class: io.github.bekoenig.getdown.launcher.Getdown
 Permissions: all-permissions
 Application-Name: Getdown
 Codebase: *

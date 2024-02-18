@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.threerings.getdown</groupId>
+    <groupId>io.github.bekoenig.getdown</groupId>
     <artifactId>getdown</artifactId>
-    <version>1.8.8-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>getdown-launcher</artifactId>
@@ -21,15 +23,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.threerings.getdown</groupId>
+      <groupId>io.github.bekoenig.getdown</groupId>
       <artifactId>getdown-core</artifactId>
-      <version>${project.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>com.samskivert</groupId>
-      <artifactId>samskivert</artifactId>
-      <version>1.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -38,22 +33,37 @@
       <version>1.0</version>
       <optional>true</optional>
     </dependency>
+
+    <!-- logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+
+    <!-- testing -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.graalvm.js</groupId>
       <artifactId>js</artifactId>
-      <version>20.3.0</version>
+      <version>23.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.graalvm.js</groupId>
       <artifactId>js-scriptengine</artifactId>
-      <version>20.3.0</version>
+      <version>22.0.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -63,7 +73,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>native2ascii-maven-plugin</artifactId>
-        <version>2.0.1</version>
+        <version>2.1.0</version>
         <executions>
           <execution>
             <id>utf8-to-latin1</id>
@@ -83,86 +93,16 @@
       </plugin>
 
       <plugin>
-        <groupId>com.github.wvengen</groupId>
-        <artifactId>proguard-maven-plugin</artifactId>
-        <version>2.5.1</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals><goal>proguard</goal></goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>com.guardsquare</groupId>
-            <artifactId>proguard-base</artifactId>
-            <version>7.2.1</version>
-            <scope>runtime</scope>
-          </dependency>
-          <dependency>
-            <groupId>com.guardsquare</groupId>
-            <artifactId>proguard-core</artifactId>
-            <version>9.0.0</version>
-            <scope>runtime</scope>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <proguardVersion>7.2.1</proguardVersion>
-          <outputDirectory>${project.build.directory}</outputDirectory>
-          <outjar>${project.build.finalName}.jar</outjar>
-          <injar>${project.build.finalName}.jar</injar>
-          <assembly>
-            <inclusions>
-              <inclusion>
-                <groupId>com.threerings.getdown</groupId>
-                <artifactId>getdown-core</artifactId>
-              </inclusion>
-              <inclusion>
-                <groupId>com.samskivert</groupId>
-                <artifactId>samskivert</artifactId>
-                <filter>
-                  !**/*.java,
-                  !**/swing/RuntimeAdjust*,
-                  !**/swing/util/ButtonUtil*,
-                  !**/util/CalendarUtil*,
-                  !**/util/Calendars*,
-                  !**/util/Log4JLogger*,
-                  !**/util/PrefsConfig*,
-                  !**/util/SignalUtil*,
-                  com/samskivert/Log.class,
-                  **/samskivert/io/**,
-                  **/samskivert/swing/**,
-                  **/samskivert/text/**,
-                  **/samskivert/util/**
-                </filter>
-              </inclusion>
-              <inclusion>
-                <groupId>jregistrykey</groupId>
-                <artifactId>jregistrykey</artifactId>
-              </inclusion>
-            </inclusions>
-          </assembly>
-          <obfuscate>true</obfuscate>
-          <options>
-            <option>-keep public class com.threerings.getdown.** { *; }</option>
-            <option>-keep public class ca.beq.util.win32.registry.** { *; }</option>
-            <option>-keepattributes Exceptions, InnerClasses, Signature</option>
-          </options>
-          <libs>
-            <lib>${rt.jar.path}</lib>
-          </libs>
-          <addMavenDescriptor>false</addMavenDescriptor>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.0</version>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.6.0</version>
         <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>com.threerings.getdown.launcher.GetdownApp</mainClass>
+              <mainClass>io.github.bekoenig.getdown.launcher.GetdownApp</mainClass>
             </manifest>
             <manifestEntries>
               <Permissions>all-permissions</Permissions>
@@ -174,52 +114,16 @@
             </manifestEntries>
           </archive>
         </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <!-- finagling to find rt.jar -->
-    <profile>
-      <id>non-mac-jre</id>
-      <activation>
-        <file><exists>${java.home}/../lib/rt.jar</exists></file>
-      </activation>
-      <properties>
-        <rt.jar.path>${java.home}/../lib/rt.jar</rt.jar.path>
-      </properties>
-    </profile>
-    <profile>
-      <id>non-mac-jdk</id>
-      <activation>
-        <file><exists>${java.home}/lib/rt.jar</exists></file>
-      </activation>
-      <properties>
-        <rt.jar.path>${java.home}/lib/rt.jar</rt.jar.path>
-      </properties>
-    </profile>
-    <profile>
-      <id>java-9-jdk</id>
-      <activation>
-        <file><exists>${java.home}/jmods/java.base.jmod</exists></file>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.github.wvengen</groupId>
-            <artifactId>proguard-maven-plugin</artifactId>
-            <configuration>
-              <libs>
-                <lib>${java.home}/jmods/java.base.jmod</lib>
-                <lib>${java.home}/jmods/java.desktop.jmod</lib>
-                <lib>${java.home}/jmods/java.logging.jmod</lib>
-                <lib>${java.home}/jmods/java.scripting.jmod</lib>
-                <lib>${java.home}/jmods/jdk.jsobject.jmod</lib>
-              </libs>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
