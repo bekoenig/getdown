@@ -98,6 +98,8 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
+          <!-- workaround: launcher was only be published as fatjar without classifier -->
+          <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifest>
               <mainClass>io.github.bekoenig.getdown.launcher.GetdownApp</mainClass>
