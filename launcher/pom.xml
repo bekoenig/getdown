@@ -25,13 +25,11 @@
     <dependency>
       <groupId>io.github.bekoenig.getdown</groupId>
       <artifactId>getdown-core</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>jregistrykey</groupId>
       <artifactId>jregistrykey</artifactId>
       <version>1.0</version>
-      <optional>true</optional>
     </dependency>
 
     <!-- logging -->
@@ -100,6 +98,8 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
+          <!-- workaround: launcher was only be published as fatjar without classifier -->
+          <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifest>
               <mainClass>io.github.bekoenig.getdown.launcher.GetdownApp</mainClass>
