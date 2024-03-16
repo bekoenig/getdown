@@ -1,4 +1,4 @@
-name: Build and Publish Release to OSSRH
+name: Publish Release
 
 on:
   workflow_dispatch:
@@ -40,7 +40,14 @@ jobs:
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         OSSRH_GPG_SECRET_KEY_PASSWORD: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
       run: |
-        mvn -DreleaseVersion=${{ inputs.releaseVersion }} -DdevelopmentVersion=${{ inputs.developmentVersion }} --no-transfer-progress --batch-mode release:prepare release:perform -Dpublish=true
+        mvn \
+        --no-transfer-progress \
+        --batch-mode \
+        -DreleaseVersion=${{ inputs.releaseVersion }} \
+        -DdevelopmentVersion=${{ inputs.developmentVersion }} \
+        release:prepare \
+        release:perform \
+        -P publish
     - name: Push changes
       uses: ad-m/github-push-action@v0.6.0
       with:
