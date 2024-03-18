@@ -34,7 +34,7 @@ The main design and operation of Getdown is detailed on the
 
 ## Where can I see it in action?
 
-Getdown was originally written by developers at [OOO] for the deployment of their Java-based
+Getdown was originally written by developers at [OOO](https://en.wikipedia.org/wiki/Three_Rings_Design) for the deployment of their Java-based
 massively multiplayer games.
 
 Getdown is implemented in Java, and is designed to deploy and update JVM-based applications. While
