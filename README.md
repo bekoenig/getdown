@@ -6,7 +6,7 @@ computers, as well as keeping those applications up to date.
 It was designed as a replacement
 for [Java Web Start](https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/)
 due to limitations in Java Web Start's architecture which are outlined in the
-[rationale](https://github.com/threerings/getdown/wiki/Rationale) section.
+[rationale](https://github.com/bekoenig/getdown/wiki/Rationale) section.
 
 Note: Getdown was designed *in 2004* as an alternative to Java Web Start, because of design choices
 made by JWS that were problematic to the use cases its authors had. It is _not_ a drop-in
@@ -16,26 +16,25 @@ expect to find feature parity with JWS.
 
 ## How do I use it?
 
-A tutorial and more detailed specification are available from the [Documentation] page. Questions
-can be posted to the [OOO Libs Google group].
+A tutorial and more detailed specification are available from the [Documentation] page.
 
 Note that because one can not rely on users having a JRE installed, you must create a custom
 installer for each platform that you plan to support (Windows, macOS, Linux) that installs a JRE,
 the Getdown launcher jar file, a stub configuration file that identifies the URL at which your real
 app manifest is hosted, and whatever the appropiate "desktop integration" is that provides an icon
 the user can click on. We have some details on the
-[installers](https://github.com/threerings/getdown/wiki/Installers) documentation page, though it
+[installers](https://github.com/bekoenig/getdown/wiki/Installers) documentation page, though it
 is unfortunately not very detailed.
 
 ## How does it work?
 
 The main design and operation of Getdown is detailed on the
-[design](https://github.com/threerings/getdown/wiki/Design) page. You can also browse the
+[design](https://github.com/bekoenig/getdown/wiki/Design) page. You can also browse the
 [javadoc documentation] and [source code] if you're interested in implementation details.
 
 ## Where can I see it in action?
 
-Getdown was originally written by developers at [OOO] for the deployment of their Java-based
+Getdown was originally written by developers at [OOO](https://en.wikipedia.org/wiki/Three_Rings_Design) for the deployment of their Java-based
 massively multiplayer games.
 
 Getdown is implemented in Java, and is designed to deploy and update JVM-based applications. While
@@ -96,11 +95,9 @@ profit:
 
 ## Discussion
 
-Feel free to pop over to the [OOO Libs Google Group] to ask questions and get (and give) answers.
+Feel free to pop over in the [GitHub project discussions](https://github.com/bekoenig/getdown/discussions) to ask questions and get (and give) answers.
 
-[Documentation]: https://github.com/threerings/getdown/wiki
-[OOO Libs Google group]: http://groups.google.com/group/ooo-libs
+[Documentation]: https://github.com/bekoenig/getdown/wiki
 [source code]: https://github.com/bekoenig/getdown/tree/master/src/main/java/com/threerings/getdown/launcher
-[javadoc documentation]: https://threerings.github.com/getdown/apidocs/
-[OOO]: https://en.wikipedia.org/wiki/Three_Rings_Design
-[build integration]: https://github.com/threerings/getdown/wiki/Build-Integration
+[javadoc documentation]: https://github.com/bekoenig/getdown/apidocs/
+[build integration]: https://github.com/bekoenig/getdown/wiki/Build-Integration
