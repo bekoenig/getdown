@@ -87,6 +87,8 @@ public class Resource implements Comparable<Resource> {
 
                 int eidx = 0;
                 for (ZipEntry entry : entries) {
+                    eidx++;
+
                     // old versions of the digest code skipped metadata
                     if (version < 2) {
                         if (entry.getName().startsWith("META-INF")) {
