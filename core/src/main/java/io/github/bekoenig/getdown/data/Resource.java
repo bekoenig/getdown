@@ -19,6 +19,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 /**
@@ -77,60 +78,43 @@ public class Resource implements Comparable<Resource> {
         // if this is a jar, we need to compute the digest in a "timestamp and file order" agnostic
         // manner to properly correlate jardiff patched jars with their unpatched originals
         if (isZip) {
-            ZipFile zip = null;
-            try {
-                // if this is a compressed zip file, uncompress it to compute the zip file digest
-                zip = new ZipFile(target);
-
+            // if this is a compressed zip file, uncompress it to compute the zip file digest
+            try (ZipFile zip = new ZipFile(target)) {
                 List<? extends ZipEntry> entries = Collections.list(zip.entries());
                 entries.sort(ENTRY_COMP);
 
-                int eidx = 0;
+                int eidx = 1;
                 for (ZipEntry entry : entries) {
-                    eidx++;
 
                     // old versions of the digest code skipped metadata
-                    if (version < 2) {
-                        if (entry.getName().startsWith("META-INF")) {
-                            updateProgress(obs, eidx, entries.size());
-                            continue;
+                    if (version >= 2 || !entry.getName().startsWith("META-INF")) {
+                        try (InputStream in = zip.getInputStream(entry)) {
+                            while ((read = in.read(buffer)) != -1) {
+                                md.update(buffer, 0, read);
+                            }
                         }
                     }
 
-                    try (InputStream in = zip.getInputStream(entry)) {
-                        while ((read = in.read(buffer)) != -1) {
-                            md.update(buffer, 0, read);
-                        }
-                    }
-
-                    updateProgress(obs, eidx, entries.size());
+                    updateProgress(obs, eidx++, entries.size());
                 }
 
-            } finally {
-                if (zip != null) {
-                    try {
-                        zip.close();
-                    } catch (IOException ioe) {
-                        LOGGER.atWarn()
-                            .setMessage("Error closing")
-                            .addKeyValue("path", target)
-                            .addKeyValue("zip", zip)
-                            .addKeyValue("error", ioe)
-                            .log();
-                    }
-                }
-            }
-
-        } else {
-            long totalSize = target.length(), position = 0L;
-            try (FileInputStream fin = new FileInputStream(target)) {
-                while ((read = fin.read(buffer)) != -1) {
-                    md.update(buffer, 0, read);
-                    position += read;
-                    updateProgress(obs, position, totalSize);
-                }
+                return StringUtil.hexlate(md.digest());
+            } catch (ZipException e) {
+                LOGGER.warn("Zip digest computation for {} failed. Falling back to binary mode.",
+                    target, e);
+                md.reset();
             }
         }
+
+        long totalSize = target.length(), position = 0L;
+        try (FileInputStream fin = new FileInputStream(target)) {
+            while ((read = fin.read(buffer)) != -1) {
+                md.update(buffer, 0, read);
+                position += read;
+                updateProgress(obs, position, totalSize);
+            }
+        }
+
         return StringUtil.hexlate(md.digest());
     }
 
