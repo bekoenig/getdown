@@ -5,15 +5,15 @@
 
 package io.github.bekoenig.getdown.launcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.URL;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class ProxyUtilTest {
+class ProxyUtilTest {
 
     static String[] findPAC(String code, String url) throws Exception {
         return ProxyUtil.findPACProxiesForURL(new StringReader(code), new URL(url));
@@ -24,7 +24,7 @@ public class ProxyUtilTest {
     }
 
     @Test
-    public void testPACProxy() throws Exception {
+    void testPACProxy() throws Exception {
         // we use the Graal JavaScrip VM for testing, because JDK15 no longer bundles Nashorn, but
         // it does not support calling back into Java unless we set this compatibility property
         System.setProperty("polyglot.js.nashorn-compat", "true");

@@ -5,18 +5,18 @@
 
 package io.github.bekoenig.getdown.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static io.github.bekoenig.getdown.util.StringUtil.couldBeValidUrl;
 import static io.github.bekoenig.getdown.util.StringUtil.join;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests {@link StringUtil}.
  */
-public class StringUtilTest {
+class StringUtilTest {
     @Test
-    public void testCouldBeValidUrl() {
+    void testCouldBeValidUrl() {
         assertTrue(couldBeValidUrl("http://www.foo.com/"));
         assertTrue(couldBeValidUrl("http://www.foo.com/A-B-C/1_2_3/~bar/q.jsp?x=u+i&y=2;3;4#baz%20baz"));
         assertTrue(couldBeValidUrl("https://user:secret@www.foo.com/"));
@@ -26,7 +26,7 @@ public class StringUtilTest {
     }
 
     @Test
-    public void testJoin() {
+    void testJoin() {
         assertThrows(NullPointerException.class, () -> join(null, "\n "));
         assertEquals("", join(new String[]{}, "\n "));
         assertEquals("a,ccc,b", join(new String[]{"a", "ccc", "b"}, ","));

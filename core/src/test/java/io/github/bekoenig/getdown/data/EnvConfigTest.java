@@ -5,26 +5,20 @@
 
 package io.github.bekoenig.getdown.data;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class EnvConfigTest {
+class EnvConfigTest {
 
     static final String CWD = System.getProperty("user.dir");
     static final String TESTID = "testid";
     static final String TESTBASE = "https://test.com/test";
-
-    private void debugNotes(List<EnvConfig.Note> notes) {
-        for (EnvConfig.Note note : notes) {
-            System.out.println(note.message);
-        }
-    }
 
     static void checkNoNotes(List<EnvConfig.Note> notes) {
         StringBuilder msg = new StringBuilder();
@@ -68,7 +62,7 @@ public class EnvConfigTest {
     }
 
     @Test
-    public void testArgvDir() {
+    void testArgvDir() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         String[] args = {CWD};
         EnvConfig cfg = EnvConfig.create(args, notes);
@@ -81,7 +75,7 @@ public class EnvConfigTest {
     }
 
     @Test
-    public void testArgvDirId() {
+    void testArgvDirId() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         String[] args = {CWD, TESTID};
         EnvConfig cfg = EnvConfig.create(args, notes);
@@ -94,7 +88,7 @@ public class EnvConfigTest {
     }
 
     @Test
-    public void testArgvDirArgs() {
+    void testArgvDirArgs() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         String[] args = {CWD, "", "one", "two"};
         EnvConfig cfg = EnvConfig.create(args, notes);
@@ -107,7 +101,7 @@ public class EnvConfigTest {
     }
 
     @Test
-    public void testArgvDirIdArgs() {
+    void testArgvDirIdArgs() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         String[] args = {CWD, TESTID, "one", "two"};
         EnvConfig cfg = EnvConfig.create(args, notes);
@@ -131,7 +125,7 @@ public class EnvConfigTest {
     }
 
     @Test
-    public void testSysPropsDir() {
+    void testSysPropsDir() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         EnvConfig cfg = sysPropsConfig(notes, "appdir", CWD);
         // debugNotes(notes);
@@ -143,7 +137,7 @@ public class EnvConfigTest {
     }
 
     @Test
-    public void testSysPropsDirIdBase() {
+    void testSysPropsDirIdBase() {
         List<EnvConfig.Note> notes = new ArrayList<>();
         EnvConfig cfg = sysPropsConfig(notes, "appdir", CWD, "appid", TESTID, "appbase", TESTBASE);
         // debugNotes(notes);

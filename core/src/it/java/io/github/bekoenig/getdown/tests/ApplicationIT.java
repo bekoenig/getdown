@@ -1,7 +1,7 @@
 package io.github.bekoenig.getdown.tests;
 
 import io.github.bekoenig.getdown.data.Application;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,10 +19,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class ApplicationIT {
+class ApplicationIT {
 
     @Test
-    public void testIsVerify() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    void testIsVerify() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         // GIVEN
         KeyStore sr = KeyStore.getInstance("JKS");
 

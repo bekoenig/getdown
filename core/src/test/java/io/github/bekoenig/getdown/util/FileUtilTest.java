@@ -5,23 +5,23 @@
 
 package io.github.bekoenig.getdown.util;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests {@link FileUtil}.
  */
-public class FileUtilTest {
+class FileUtilTest {
     @Test
-    public void testReadLines() throws IOException {
+    void testReadLines() throws IOException {
         String data = "This is a test\nof a file with\na few lines\n";
         List<String> lines = FileUtil.readLines(new StringReader(data));
         String[] linesBySplit = data.split("\n");
@@ -32,14 +32,12 @@ public class FileUtilTest {
     }
 
     @Test
-    public void shouldCopyFile() throws IOException {
-        File source = _folder.newFile("source.txt");
-        File target = new File(_folder.getRoot(), "target.txt");
+    void shouldCopyFile(@TempDir Path folder) throws IOException {
+        File source = folder.resolve("source.txt").toFile();
+        source.createNewFile();
+        File target = folder.resolve("target.txt").toFile();
         assertFalse(target.exists());
         FileUtil.copy(source, target);
         assertTrue(target.exists());
     }
-
-    @Rule
-    public final TemporaryFolder _folder = new TemporaryFolder();
 }

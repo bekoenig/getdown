@@ -6,16 +6,16 @@
 package io.github.bekoenig.getdown.data;
 
 import io.github.bekoenig.getdown.util.Config;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ApplicationTest {
+class ApplicationTest {
 
     Application createApp() {
         List<EnvConfig.Note> notes = new ArrayList<>();
@@ -25,7 +25,7 @@ public class ApplicationTest {
     }
 
     @Test
-    public void testBaseConfig() throws Exception {
+    void testBaseConfig() throws Exception {
         Application app = createApp();
         URL appbase = new URL("https://test.com/foo/bar/");
         Config config = new Config(Config.parseData(toReader(
@@ -37,7 +37,7 @@ public class ApplicationTest {
     }
 
     @Test
-    public void testVersionedBase() throws Exception {
+    void testVersionedBase() throws Exception {
         Application app = createApp();
         String rootAppbase = "https://test.com/foo/bar/";
         Config config = new Config(Config.parseData(toReader(
@@ -50,7 +50,7 @@ public class ApplicationTest {
     }
 
     @Test
-    public void testEnvVarBase() throws Exception {
+    void testEnvVarBase() throws Exception {
         // fiddling to make test work on Windows or Unix
         String evar = System.getenv("USER") == null ? "USERNAME" : "USER";
         Application app = createApp();
@@ -65,7 +65,7 @@ public class ApplicationTest {
         assertEquals(new URL(expectAppbase), app.getRemoteURL(""));
     }
 
-    protected static StringReader toReader(String... pairs) {
+    private static StringReader toReader(String... pairs) {
         StringBuilder builder = new StringBuilder();
         for (int ii = 0; ii < pairs.length; ii += 2) {
             builder.append(pairs[ii]).append("=").append(pairs[ii + 1]).append("\n");

@@ -5,59 +5,61 @@
 
 package io.github.bekoenig.getdown.data;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PathBuilderTest {
-    @Before
-    public void setupFilesAndResources() throws IOException {
-        _firstJarFile = _appdir.newFile("a.jar");
-        _secondJarFile = _appdir.newFile("b.jar");
+@ExtendWith(MockitoExtension.class)
+class PathBuilderTest {
 
-        when(_firstJar.getFinalTarget()).thenReturn(_firstJarFile);
-        when(_secondJar.getFinalTarget()).thenReturn(_secondJarFile);
-        when(_application.getActiveCodeResources()).thenReturn(Arrays.asList(_firstJar, _secondJar));
-        when(_application.getAppDir()).thenReturn(_appdir.getRoot());
+    @Mock
+    private Application application;
+    @Mock
+    private Resource firstJar;
+    @Mock
+    private Resource secondJar;
+
+    @TempDir
+    private Path appdir;
+
+    @BeforeEach
+    void setupFilesAndResources() throws IOException {
+        File firstJarFile = appdir.resolve("a.jar").toFile();
+        firstJarFile.createNewFile();
+        File secondJarFile = appdir.resolve("b.jar").toFile();
+        secondJarFile.createNewFile();
+
+        when(firstJar.getFinalTarget()).thenReturn(firstJarFile);
+        when(secondJar.getFinalTarget()).thenReturn(secondJarFile);
+        when(application.getActiveCodeResources()).thenReturn(Arrays.asList(firstJar, secondJar));
     }
 
     @Test
-    public void shouldBuildDefaultClassPath() {
-        ClassPath classPath = PathBuilder.buildDefaultClassPath(_application);
-        assertEquals("a.jar:b.jar", classPath.asArgumentString(_appdir.getRoot()));
+    void shouldBuildDefaultClassPath() {
+        ClassPath classPath = PathBuilder.buildDefaultClassPath(application);
+        assertEquals("a.jar:b.jar", classPath.asArgumentString(appdir.toFile()));
     }
 
     @Test
-    public void shouldBuildCachedClassPath() throws IOException {
-        when(_application.getDigest(_firstJar)).thenReturn("first");
-        when(_application.getDigest(_secondJar)).thenReturn("second");
-        when(_application.getCodeCacheRetentionDays()).thenReturn(1);
+    void shouldBuildCachedClassPath() throws IOException {
+        when(application.getAppDir()).thenReturn(appdir.toFile());
+        when(application.getDigest(firstJar)).thenReturn("first");
+        when(application.getDigest(secondJar)).thenReturn("second");
+        when(application.getCodeCacheRetentionDays()).thenReturn(1);
 
-        ClassPath classPath = PathBuilder.buildCachedClassPath(_application);
-        assertEquals(".cache/fi/first.jar:.cache/se/second.jar", classPath.asArgumentString(_appdir.getRoot()));
+        ClassPath classPath = PathBuilder.buildCachedClassPath(application);
+        assertEquals(".cache/fi/first.jar:.cache/se/second.jar", classPath.asArgumentString(appdir.toFile()));
     }
 
-    @Mock
-    protected Application _application;
-    @Mock
-    protected Resource _firstJar;
-    @Mock
-    protected Resource _secondJar;
-
-    protected File _firstJarFile, _secondJarFile;
-
-    @Rule
-    public final TemporaryFolder _appdir = new TemporaryFolder();
 }

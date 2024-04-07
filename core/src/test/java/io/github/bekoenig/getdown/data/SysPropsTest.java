@@ -5,15 +5,15 @@
 
 package io.github.bekoenig.getdown.data;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SysPropsTest {
+class SysPropsTest {
 
-    @After
-    public void clearProps() {
+    @AfterEach
+    void clearProps() {
         System.clearProperty("delay");
         System.clearProperty("appbase_domain");
         System.clearProperty("appbase_override");
@@ -27,7 +27,7 @@ public class SysPropsTest {
     };
 
     @Test
-    public void testStartDelay() {
+    void testStartDelay() {
 
         assertEquals(0, SysProps.startDelay());
 
@@ -48,7 +48,7 @@ public class SysPropsTest {
     }
 
     @Test
-    public void testAppbaseDomain() {
+    void testAppbaseDomain() {
         System.setProperty("appbase_domain", "https://barbaz.com");
         for (String appbase : APPBASES) {
             assertEquals("https://barbaz.com/myapp", SysProps.overrideAppbase(appbase));
@@ -60,7 +60,7 @@ public class SysPropsTest {
     }
 
     @Test
-    public void testAppbaseOverride() {
+    void testAppbaseOverride() {
         System.setProperty("appbase_override", "https://barbaz.com/newapp");
         for (String appbase : APPBASES) {
             assertEquals("https://barbaz.com/newapp", SysProps.overrideAppbase(appbase));

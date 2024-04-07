@@ -5,30 +5,32 @@
 
 package io.github.bekoenig.getdown.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests {@link Config}.
  */
-public class ConfigTest {
-    public static class Pair {
-        public final String key;
-        public final String value;
+class ConfigTest {
+    private static final Random _rando = new Random();
 
-        public Pair(String key, String value) {
+    static class Pair {
+        final String key;
+        final String value;
+
+        Pair(String key, String value) {
             this.key = key;
             this.value = value;
         }
     }
 
-    public static final Pair[] SIMPLE_PAIRS = {
+    static final Pair[] SIMPLE_PAIRS = {
         new Pair("one", "two"),
         new Pair("three", "four"),
         new Pair("five", "six"),
@@ -37,7 +39,7 @@ public class ConfigTest {
     };
 
     @Test
-    public void testSimplePairs() throws IOException {
+    void testSimplePairs() throws IOException {
         List<String[]> pairs = Config.parsePairs(
             toReader(SIMPLE_PAIRS), Config.createOpts(true));
         for (int ii = 0; ii < SIMPLE_PAIRS.length; ii++) {
@@ -47,7 +49,7 @@ public class ConfigTest {
     }
 
     @Test
-    public void testCreateOps_withCheckPlatform() {
+    void testCreateOps_withCheckPlatform() {
         String originalOsName = System.getProperty("os.name");
         String originalOsArch = System.getProperty("os.arch");
 
@@ -81,7 +83,7 @@ public class ConfigTest {
     }
 
     @Test
-    public void testQualifiedPairs() throws IOException {
+    void testQualifiedPairs() throws IOException {
         Pair linux = new Pair("one", "[linux] two");
         Pair mac = new Pair("three", "[mac os x] four");
         Pair linuxAndMac = new Pair("five", "[linux, mac os x] six");
@@ -174,7 +176,7 @@ public class ConfigTest {
         assertFalse(exists(parsed, notWin.key));
     }
 
-    protected static boolean exists(List<String[]> pairs, String key) {
+    static boolean exists(List<String[]> pairs, String key) {
         for (String[] pair : pairs) {
             if (pair[0].equals(key)) {
                 return true;
@@ -183,7 +185,7 @@ public class ConfigTest {
         return false;
     }
 
-    protected static StringReader toReader(Pair[] pairs) {
+    static StringReader toReader(Pair[] pairs) {
         StringBuilder builder = new StringBuilder();
         for (Pair pair : pairs) {
             // throw some whitespace in to ensure it's trimmed
@@ -195,9 +197,7 @@ public class ConfigTest {
         return new StringReader(builder.toString());
     }
 
-    protected static String whitespace() {
+    static String whitespace() {
         return _rando.nextBoolean() ? " " : "";
     }
-
-    protected static final Random _rando = new Random();
 }

@@ -5,16 +5,16 @@
 
 package io.github.bekoenig.getdown.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests {@link Color}.
  */
-public class ColorTest {
+class ColorTest {
     @Test
-    public void testBrightness() {
+    void testBrightness() {
         assertEquals(0, Color.brightness(0xFF000000), 0.0000001);
         assertEquals(1, Color.brightness(0xFFFFFFFF), 0.0000001);
         assertEquals(0.0117647, Color.brightness(0xFF010203), 0.0000001);

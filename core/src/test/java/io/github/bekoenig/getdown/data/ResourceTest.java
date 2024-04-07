@@ -1,20 +1,20 @@
 package io.github.bekoenig.getdown.data;
 
 import io.github.bekoenig.getdown.util.ProgressObserver;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ResourceTest {
+class ResourceTest {
 
-    public static final ProgressObserver PROGRESS_OBSERVER = x -> {};
+    static final ProgressObserver PROGRESS_OBSERVER = x -> {};
 
     @Test
-    public void testComputeDigest_ReadableDat() throws IOException {
+    void testComputeDigest_ReadableDat() throws IOException {
         // GIVEN
         int version = 2;
         File target = new File(getClass().getClassLoader().getResource("io/github/bekoenig/getdown/data/readable.dat").getFile());
@@ -28,7 +28,7 @@ public class ResourceTest {
     }
 
     @Test
-    public void testComputeDigest_ReadableZip_Version1() throws IOException {
+    void testComputeDigest_ReadableZip_Version1() throws IOException {
         // GIVEN
         int version = 1;
         File target = new File(getClass().getClassLoader().getResource("io/github/bekoenig/getdown/data/readable.zip").getFile());
@@ -42,7 +42,7 @@ public class ResourceTest {
     }
 
     @Test
-    public void testComputeDigest_ReadableZip_Version2() throws IOException {
+    void testComputeDigest_ReadableZip_Version2() throws IOException {
         // GIVEN
         int version = 2;
         File target = new File(getClass().getClassLoader().getResource("io/github/bekoenig/getdown/data/readable.zip").getFile());
@@ -56,7 +56,7 @@ public class ResourceTest {
     }
 
     @Test
-    public void testComputeDigest_InvalidZip() throws IOException {
+    void testComputeDigest_InvalidZip() throws IOException {
         // GIVEN
         int version = 2;
         File target = new File(getClass().getClassLoader().getResource("io/github/bekoenig/getdown/data/invalid.zip").getFile());
@@ -70,7 +70,7 @@ public class ResourceTest {
     }
 
     @Test
-    public void testComputeDigest_EncryptedZip() throws IOException {
+    void testComputeDigest_EncryptedZip() throws IOException {
         // GIVEN
         int version = 2;
         File target = new File(getClass().getClassLoader().getResource("io/github/bekoenig/getdown/data/encrypted.zip").getFile());
@@ -84,7 +84,7 @@ public class ResourceTest {
     }
 
     @Test
-    public void testComputeDigest_StrongEncryptionZip() throws IOException {
+    void testComputeDigest_StrongEncryptionZip() throws IOException {
         // GIVEN
         int version = 2;
         File target = new File(getClass().getClassLoader().getResource("io/github/bekoenig/getdown/data/strong-encryption.zip").getFile());

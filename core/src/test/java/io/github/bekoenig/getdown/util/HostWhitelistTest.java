@@ -5,21 +5,21 @@
 
 package io.github.bekoenig.getdown.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**
  * Tests {@link HostWhitelist}.
  */
-public class HostWhitelistTest {
+class HostWhitelistTest {
     @Test
-    public void testVerify() throws MalformedURLException {
+    void testVerify() throws MalformedURLException {
         checkCanVerify("foo.com", "http://foo.com", true);
         checkCanVerify("foo.com", "http://foo.com/", true);
         checkCanVerify("foo.com", "http://foo.com/x/y/z", true);
@@ -150,7 +150,8 @@ public class HostWhitelistTest {
             passed = false;
         }
 
-        assertEquals("with whitelist '" + whitelist + "' and URL '" + url + "'",
-            expectedToPass, passed);
+        assertThat(passed)
+            .describedAs("with whitelist '" + whitelist + "' and URL '" + url + "'")
+            .isEqualTo(expectedToPass);
     }
 }

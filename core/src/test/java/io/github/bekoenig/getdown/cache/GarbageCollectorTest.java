@@ -5,84 +5,92 @@
 
 package io.github.bekoenig.getdown.cache;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Validates that cache garbage is collected and deleted correctly.
  */
-@RunWith(Parameterized.class)
-public class GarbageCollectorTest {
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{{".jar"}, {".zip"}});
+abstract class GarbageCollectorTest {
+
+    static class GarbageCollectorJarTest extends GarbageCollectorTest {
+        GarbageCollectorJarTest() {
+            super(".jar");
+        }
     }
 
-    @Parameterized.Parameter
-    public String extension;
+    static class GarbageCollectorZipTest extends GarbageCollectorTest {
+        GarbageCollectorZipTest() {
+            super(".zip");
+        }
+    }
 
-    @Before
-    public void setupFiles() throws IOException {
-        _cachedFile = _folder.newFile("abc123" + extension);
-        _lastAccessedFile = _folder.newFile(
-            "abc123" + extension + ResourceCache.LAST_ACCESSED_FILE_SUFFIX);
+    @TempDir
+    private Path folder;
+
+    private File cachedFile;
+    private File lastAccessedFile;
+
+    private final String extension;
+
+    GarbageCollectorTest(String extension) {
+        this.extension = extension;
+    }
+
+    @BeforeEach
+    void setupFiles() throws IOException {
+        cachedFile = folder.resolve("abc123" + extension).toFile();
+        cachedFile.createNewFile();
+        lastAccessedFile = folder.resolve(
+            "abc123" + extension + ResourceCache.LAST_ACCESSED_FILE_SUFFIX).toFile();
+        lastAccessedFile.createNewFile();
     }
 
     @Test
-    public void shouldDeleteCacheEntryIfRetentionPeriodIsReached() {
+    void shouldDeleteCacheEntryIfRetentionPeriodIsReached() {
         gcNow();
-        assertFalse(_cachedFile.exists());
-        assertFalse(_lastAccessedFile.exists());
+        assertFalse(cachedFile.exists());
+        assertFalse(lastAccessedFile.exists());
     }
 
     @Test
-    public void shouldDeleteCacheFolderIfFolderIsEmpty() {
+    void shouldDeleteCacheFolderIfFolderIsEmpty() {
         gcNow();
-        assertFalse(_folder.getRoot().exists());
+        assertFalse(folder.toFile().exists());
     }
 
     private void gcNow() {
-        GarbageCollector.collect(_folder.getRoot(), -1);
+        GarbageCollector.collect(folder.toFile(), -1);
     }
 
     @Test
-    public void shouldKeepFilesInCacheIfRententionPeriodIsNotReached() {
-        GarbageCollector.collect(_folder.getRoot(), TimeUnit.DAYS.toMillis(1));
-        assertTrue(_cachedFile.exists());
-        assertTrue(_lastAccessedFile.exists());
+    void shouldKeepFilesInCacheIfRententionPeriodIsNotReached() {
+        GarbageCollector.collect(folder.toFile(), TimeUnit.DAYS.toMillis(1));
+        assertTrue(cachedFile.exists());
+        assertTrue(lastAccessedFile.exists());
     }
 
     @Test
-    public void shouldDeleteCachedFileIfLastAccessedFileIsMissing() {
-        assumeTrue(_lastAccessedFile.delete());
+    void shouldDeleteCachedFileIfLastAccessedFileIsMissing() {
+        assumeTrue(lastAccessedFile.delete());
         gcNow();
-        assertFalse(_cachedFile.exists());
+        assertFalse(cachedFile.exists());
     }
 
     @Test
-    public void shouldDeleteLastAccessedFileIfCachedFileIsMissing() {
-        assumeTrue(_cachedFile.delete());
+    void shouldDeleteLastAccessedFileIfCachedFileIsMissing() {
+        assumeTrue(cachedFile.delete());
         gcNow();
-        assertFalse(_lastAccessedFile.exists());
+        assertFalse(lastAccessedFile.exists());
     }
-
-    @Rule
-    public final TemporaryFolder _folder = new TemporaryFolder();
-
-    private File _cachedFile;
-    private File _lastAccessedFile;
 }
