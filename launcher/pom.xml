@@ -28,6 +28,8 @@
       <groupId>jregistrykey</groupId>
       <artifactId>jregistrykey</artifactId>
       <version>1.0</version>
+      <!-- only necessary for windows proxy configuration-->
+      <optional>true</optional>
     </dependency>
 
     <!-- logging -->
