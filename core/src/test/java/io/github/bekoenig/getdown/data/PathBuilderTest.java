@@ -48,7 +48,7 @@ class PathBuilderTest {
     @Test
     void shouldBuildDefaultClassPath() {
         ClassPath classPath = PathBuilder.buildDefaultClassPath(application);
-        assertEquals("a.jar:b.jar", classPath.asArgumentString(appdir.toFile()));
+        assertEquals("a.jar" + File.pathSeparator + "b.jar", classPath.asArgumentString(appdir.toFile()));
     }
 
     @Test
@@ -59,7 +59,13 @@ class PathBuilderTest {
         when(application.getCodeCacheRetentionDays()).thenReturn(1);
 
         ClassPath classPath = PathBuilder.buildCachedClassPath(application);
-        assertEquals(".cache/fi/first.jar:.cache/se/second.jar", classPath.asArgumentString(appdir.toFile()));
+
+        StringBuilder expected = new StringBuilder();
+        expected
+            .append(".cache").append(File.separator).append("fi").append(File.separator).append("first.jar")
+            .append(File.pathSeparator)
+            .append(".cache").append(File.separator).append("se").append(File.separator).append("second.jar");
+        assertEquals(expected.toString(), classPath.asArgumentString(appdir.toFile()));
     }
 
 }
