@@ -1,5 +1,29 @@
 # Getdown Releases
 
+## 2.0.0 - May 01, 2024
+
+* GroupId and package root have moved from `com.threerings.getdown` to `io.github.bekoenig.getdown`
+
+* Used arguments file for long command line on windows
+
+* Replaced custom logging by slf4j and logback (look up [migrating from 1.8 to 2.0] for details)
+
+* Increased compile target from java 6 to java 8
+
+* Dropped dependency [samskivert library](https://github.com/samskivert/samskivert) and inlined necessary code
+
+* Removed custom logging facade
+
+* Replaced base64 implementation from android with java.util.Base64
+
+* Disabled obfuscation and compression with proguard for better troubleshooting
+
+* Used classifier `jar-with-dependencies` for core and launcher with bundled dependencies
+
+* Fixed process calculation for zip files
+
+* Added fallback to binary mode on failure in zip digest computation
+
 ## 1.8.7 - May 24, 2022
 
 * Paths in classpath are specified relative to appdir to avoid excessively long command lines.
