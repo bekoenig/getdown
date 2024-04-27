@@ -1138,13 +1138,44 @@ public class Application {
         }
 
         String[] envp = createEnvironment();
-        String[] sargs = args.toArray(new String[args.size()]);
+        String[] sargs = prepareProcessArguments(args);
         LOGGER.atInfo()
             .setMessage("Running {}")
             .addArgument(() -> StringUtil.join(sargs, "\n  "))
             .log();
 
         return Runtime.getRuntime().exec(sargs, envp, getAppDir());
+    }
+
+    protected String[] prepareProcessArguments(List<String> args) throws IOException {
+        String[] sargs = args.toArray(new String[args.size()]);
+
+        // use java-9 argument file for long command line on Windows (limited by CreateProcess)
+        if (LaunchUtil.isWindows() && StringUtil.join(sargs, " ").length() > 32767) {
+            LOGGER.info("Use argument-file to avoid length limitation on windows");
+
+            // extract the jvm path from current args
+            String jvmpath = args.remove(0);
+            // re-init array of arguments
+            sargs = args.toArray(new String[args.size()]);
+
+            // write arguments space separated to file
+            File argsfile = getLocalPath("arguments.txt");
+            try (PrintStream ps = new PrintStream(Files.newOutputStream(argsfile.toPath()))) {
+                ps.println(StringUtil.join(sargs, " "));
+            }
+
+            // drop all arguments
+            args.clear();
+            // restore path to JVM
+            args.add(jvmpath);
+            // add argument file
+            args.add("@" + argsfile.getName());
+            // re-init final arguments
+            sargs = args.toArray(new String[args.size()]);
+        }
+
+        return sargs;
     }
 
     /**
