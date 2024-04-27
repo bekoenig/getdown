@@ -1,0 +1,25 @@
+name: Builds and Verify
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build and Verify
+      run: |
+        mvn \
+        --no-transfer-progress \
+        --batch-mode \
+        clean verify
