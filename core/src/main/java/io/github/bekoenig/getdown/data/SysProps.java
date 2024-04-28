@@ -176,6 +176,13 @@ public final class SysProps {
     }
 
     /**
+     * Returns the host whitelist from system property.
+     */
+    public static String hostWhitelist() {
+        return System.getProperty("getdown.host.whitelist", "");
+    }
+
+    /**
      * Parses a Java version system property using the supplied regular expression. The numbers
      * extracted from the regexp will be placed in each consecutive hundreds position in the
      * returned value.

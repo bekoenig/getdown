@@ -7,7 +7,10 @@ package io.github.bekoenig.getdown.data;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.ClearSystemProperty;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SysPropsTest {
@@ -66,4 +69,29 @@ class SysPropsTest {
             assertEquals("https://barbaz.com/newapp", SysProps.overrideAppbase(appbase));
         }
     }
+
+    @Test
+    @ClearSystemProperty(key = "getdown.host.whitelist")
+    void test_hostWhitelist_undefined() {
+        // GIVEN
+
+        // WHEN
+        String hostWhitelist = SysProps.hostWhitelist();
+
+        // THEN
+        assertThat(hostWhitelist).isEqualTo("");
+    }
+
+    @Test
+    @SetSystemProperty(key = "getdown.host.whitelist", value = "app1.foo.com,app2.bar.com,app3.baz.com")
+    void test_hostWhitelist_defined() {
+        // GIVEN
+
+        // WHEN
+        String hostWhitelist = SysProps.hostWhitelist();
+
+        // THEN
+        assertThat(hostWhitelist).isEqualTo("app1.foo.com,app2.bar.com,app3.baz.com");
+    }
+
 }
