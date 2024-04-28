@@ -24,6 +24,8 @@
 
 * Added fallback to binary mode on failure in zip digest computation
 
+* Added support for user defined host whitelist from system property
+
 ## 1.8.7 - May 24, 2022
 
 * Paths in classpath are specified relative to appdir to avoid excessively long command lines.

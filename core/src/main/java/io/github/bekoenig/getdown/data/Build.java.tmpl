@@ -5,11 +5,6 @@
 
 package io.github.bekoenig.getdown.data;
 
-import java.util.Arrays;
-import java.util.List;
-
-import io.github.bekoenig.getdown.util.StringUtil;
-
 /**
  * Contains static data provided during the build process.
  */
@@ -26,7 +21,7 @@ public class Build {
     }
 
     /**
-     * <p>The hosts which Getdown is allowed to communicate with. An empty list indicates that
+     * <p>The hosts which Getdown is allowed to communicate with. An empty string indicates that
      * no whitelist is configured and there are no limitations. By default, no host whitelist
      * is added to the binary, so it can be used to download and run applications from any
      * server.
@@ -37,7 +32,7 @@ public class Build {
      * (e.g. {@code *.mycompany.com}) and multiple values can be separated by commas
      * (e.g. {@code app1.foo.com,app2.bar.com,app3.baz.com}).
      */
-    public static List<String> hostWhitelist () {
-        return Arrays.asList(StringUtil.parseStringArray("@host_whitelist@"));
+    public static String hostWhitelist () {
+        return "@host_whitelist@";
     }
 }
