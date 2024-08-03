@@ -28,6 +28,8 @@
 
 * Removed workaround for obsoleted Windows ME and Windows 98
 
+* Added logging for process output on debugging mode
+
 ## 1.8.7 - May 24, 2022
 
 * Paths in classpath are specified relative to appdir to avoid excessively long command lines.

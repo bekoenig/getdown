@@ -754,7 +754,9 @@ public abstract class Getdown
                 }
 
                 // close standard in to avoid choking standard out of the launched process
-                proc.getInputStream().close();
+                if (!SysProps.debug()) {
+                    proc.getInputStream().close();
+                }
                 // close standard out, since we're not going to write to anything to it anyway
                 proc.getOutputStream().close();
 
@@ -764,9 +766,17 @@ public abstract class Getdown
 
                 // spawn a daemon thread that will catch the early bits of stderr in case the
                 // launch fails
-                Thread t = new Thread(() -> logStream(stderr, Level.ERROR));
-                t.setDaemon(true);
-                t.start();
+                Thread spawnStdErr = new Thread(() -> logStream(stderr, Level.ERROR));
+                spawnStdErr.setDaemon(true);
+                spawnStdErr.start();
+
+                // same for stdout on debug mode
+                if (SysProps.debug()) {
+                    final InputStream stdout = proc.getInputStream();
+                    Thread spawnStdOut = new Thread(() -> logStream(stdout, Level.DEBUG));
+                    spawnStdOut.setDaemon(true);
+                    spawnStdOut.start();
+                }
             }
 
             // if we have a UI open and we haven't been around for at least 5 seconds (the default
