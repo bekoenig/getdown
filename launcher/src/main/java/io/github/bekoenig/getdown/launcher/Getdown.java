@@ -760,8 +760,6 @@ public abstract class Getdown
                 // close standard out, since we're not going to write to anything to it anyway
                 proc.getOutputStream().close();
 
-                // on Windows 98 and ME we need to stick around and read the output of stderr lest
-                // the process fill its output buffer and choke, yay!
                 final InputStream stderr = proc.getErrorStream();
 
                 // spawn a daemon thread that will catch the early bits of stderr in case the

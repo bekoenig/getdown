@@ -37,9 +37,7 @@ public final class LaunchUtil {
      * @param newVersion     the new version to which Getdown will update when it is executed.
      * @param javaLocalDir   the name of the directory (inside {@code appdir}) that contains a
      *                       locally installed JRE. Defaults to {@link #LOCAL_JAVA_DIR} if null is passed.
-     * @return true if the relaunch succeeded, false if we were unable to relaunch due to being on
-     * Windows 9x where we cannot launch subprocesses without waiting around for them to exit,
-     * reading their stdout and stderr all the while. If true is returned, the application may exit
+     * @return true if the relaunch succeeded. If true is returned, the application may exit
      * after making this call as it will be upgraded and restarted. If false is returned, the
      * application should tell the user that they must restart the application manually.
      * @throws IOException thrown if we were unable to create the {@code version.txt} file
