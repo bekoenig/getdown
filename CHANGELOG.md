@@ -26,6 +26,8 @@
 
 * Added support for user defined host whitelist from system property
 
+* Removed workaround for obsoleted Windows ME and Windows 98
+
 ## 1.8.7 - May 24, 2022
 
 * Paths in classpath are specified relative to appdir to avoid excessively long command lines.

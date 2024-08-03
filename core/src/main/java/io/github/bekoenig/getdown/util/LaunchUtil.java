@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
-import java.util.Locale;
 
 /**
  * Useful routines for launching Java applications from within other Java
@@ -59,7 +58,7 @@ public final class LaunchUtil {
 
         // make sure that we can find our getdown.jar file and can safely launch children
         File pro = new File(appdir, getdownJarName);
-        if (mustMonitorChildren() || !pro.exists()) {
+        if (!pro.exists()) {
             return false;
         }
 
@@ -174,15 +173,6 @@ public final class LaunchUtil {
         } catch (IOException ioe) {
             LOGGER.warn("Mayday! Brute force copy method also failed.", ioe);
         }
-    }
-
-    /**
-     * Returns true if, on this operating system, we have to stick around and read the stderr from
-     * our children processes to prevent them from filling their output buffers and hanging.
-     */
-    public static boolean mustMonitorChildren() {
-        String osname = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
-        return (osname.contains("windows 98") || osname.contains("windows me"));
     }
 
     /**

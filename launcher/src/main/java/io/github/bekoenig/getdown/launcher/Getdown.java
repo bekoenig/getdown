@@ -758,20 +758,12 @@ public abstract class Getdown
                 // on Windows 98 and ME we need to stick around and read the output of stderr lest
                 // the process fill its output buffer and choke, yay!
                 final InputStream stderr = proc.getErrorStream();
-                if (LaunchUtil.mustMonitorChildren()) {
-                    // close our window if it's around
-                    disposeContainer();
-                    _container = null;
-                    copyStream(stderr, System.err);
-                    LOGGER.info("Process exited: {}", proc.waitFor());
 
-                } else {
-                    // spawn a daemon thread that will catch the early bits of stderr in case the
-                    // launch fails
-                    Thread t = new Thread(() -> copyStream(stderr, System.err));
-                    t.setDaemon(true);
-                    t.start();
-                }
+                // spawn a daemon thread that will catch the early bits of stderr in case the
+                // launch fails
+                Thread t = new Thread(() -> copyStream(stderr, System.err));
+                t.setDaemon(true);
+                t.start();
             }
 
             // if we have a UI open and we haven't been around for at least 5 seconds (the default
