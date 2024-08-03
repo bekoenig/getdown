@@ -13,6 +13,7 @@ import io.github.bekoenig.getdown.tools.Patcher;
 import io.github.bekoenig.getdown.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -26,6 +27,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Manages the main control for the Getdown application updater and deployment system.
@@ -761,7 +764,7 @@ public abstract class Getdown
 
                 // spawn a daemon thread that will catch the early bits of stderr in case the
                 // launch fails
-                Thread t = new Thread(() -> copyStream(stderr, System.err));
+                Thread t = new Thread(() -> logStream(stderr, Level.ERROR));
                 t.setDaemon(true);
                 t.start();
             }
@@ -1024,22 +1027,22 @@ public abstract class Getdown
     protected abstract void exit(int exitCode);
 
     /**
-     * Copies the supplied stream from the specified input to the specified output. Used to copy
-     * our child processes stderr and stdout to our own stderr and stdout.
+     * Logs the supplied stream from the specified input at level.
      */
-    protected static void copyStream(InputStream in, PrintStream out) {
+    protected static void logStream(InputStream in, Level level) {
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.print(line);
-                out.flush();
+            String result = new BufferedReader(new InputStreamReader(in))
+                .lines().collect(joining(System.lineSeparator()));
+
+            if (!result.isEmpty()) {
+                LOGGER.atLevel(level)
+                    .setMessage(result)
+                    .log();
             }
-        } catch (IOException ioe) {
+        } catch (UncheckedIOException ioe) {
             LOGGER.atWarn()
                 .setMessage("Failure copying")
                 .addKeyValue("in", in)
-                .addKeyValue("out", out)
                 .addKeyValue("error", ioe)
                 .log();
         }
