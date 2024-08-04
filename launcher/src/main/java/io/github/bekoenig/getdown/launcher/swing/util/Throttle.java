@@ -20,6 +20,9 @@
 
 package io.github.bekoenig.getdown.launcher.swing.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A throttle is used to prevent code from attempting a particular operation too often. Often it is
  * desirable to retry an operation under failure conditions, but simplistic approaches to retrying
@@ -46,6 +49,9 @@ package io.github.bekoenig.getdown.launcher.swing.util;
  * </pre>
  */
 public class Throttle {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Throttle.class);
+
     /**
      * Constructs a new throttle instance that will allow the specified number of operations to
      * proceed within the specified period (the period is measured in milliseconds).
@@ -135,7 +141,7 @@ public class Throttle {
         // try doing one operation per second and we should hit the throttle on the sixth operation
         // and then kick in again on the eleventh, only to stop again on the fifteenth
         for (int i = 0; i < 20; i++) {
-            System.out.println((i + 1) + ". Throttle: " + throttle.throttleOp());
+            LOGGER.debug("{}. Throttle: {}", i + 1, throttle.throttleOp());
             // pause for a sec
             try {
                 Thread.sleep(1000L);
