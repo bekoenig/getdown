@@ -760,20 +760,10 @@ public abstract class Getdown
                 // close standard out, since we're not going to write to anything to it anyway
                 proc.getOutputStream().close();
 
-                final InputStream stderr = proc.getErrorStream();
+                logOutput(proc.getErrorStream(), Level.ERROR);
 
-                // spawn a daemon thread that will catch the early bits of stderr in case the
-                // launch fails
-                Thread spawnStdErr = new Thread(() -> logStream(stderr, Level.ERROR));
-                spawnStdErr.setDaemon(true);
-                spawnStdErr.start();
-
-                // same for stdout on debug mode
                 if (SysProps.debug()) {
-                    final InputStream stdout = proc.getInputStream();
-                    Thread spawnStdOut = new Thread(() -> logStream(stdout, Level.DEBUG));
-                    spawnStdOut.setDaemon(true);
-                    spawnStdOut.start();
+                    logOutput(proc.getInputStream(), Level.DEBUG);
                 }
             }
 
@@ -796,6 +786,32 @@ public abstract class Getdown
         } catch (Exception e) {
             LOGGER.warn("launch() failed.", e);
         }
+    }
+
+    /**
+     * Spawns a daemon thread that will catch the early bits of input stream.
+     */
+    private static void logOutput(InputStream inputStream, Level level) {
+        Thread thread = new Thread(() -> {
+            try {
+                String result = new BufferedReader(new InputStreamReader(inputStream))
+                    .lines().collect(joining(System.lineSeparator()));
+
+                if (!result.isEmpty()) {
+                    LOGGER.atLevel(level)
+                        .setMessage(result)
+                        .log();
+                }
+            } catch (UncheckedIOException ioe) {
+                LOGGER.atWarn()
+                    .setMessage("Failure copying")
+                    .addKeyValue("in", inputStream)
+                    .addKeyValue("error", ioe)
+                    .log();
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     /**
@@ -1033,28 +1049,6 @@ public abstract class Getdown
      * Requests that Getdown exit.
      */
     protected abstract void exit(int exitCode);
-
-    /**
-     * Logs the supplied stream from the specified input at level.
-     */
-    protected static void logStream(InputStream in, Level level) {
-        try {
-            String result = new BufferedReader(new InputStreamReader(in))
-                .lines().collect(joining(System.lineSeparator()));
-
-            if (!result.isEmpty()) {
-                LOGGER.atLevel(level)
-                    .setMessage(result)
-                    .log();
-            }
-        } catch (UncheckedIOException ioe) {
-            LOGGER.atWarn()
-                .setMessage("Failure copying")
-                .addKeyValue("in", in)
-                .addKeyValue("error", ioe)
-                .log();
-        }
-    }
 
     /**
      * Used to fetch a progress report URL.
