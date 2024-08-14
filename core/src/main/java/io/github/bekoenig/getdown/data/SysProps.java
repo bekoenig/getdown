@@ -179,7 +179,7 @@ public final class SysProps {
      * Returns the host whitelist from system property.
      */
     public static String hostWhitelist() {
-        return System.getProperty("getdown.host.whitelist", "");
+        return System.getProperty("host_whitelist", "");
     }
 
     /**
