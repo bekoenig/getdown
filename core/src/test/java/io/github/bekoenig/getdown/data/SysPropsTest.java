@@ -71,7 +71,7 @@ class SysPropsTest {
     }
 
     @Test
-    @ClearSystemProperty(key = "getdown.host.whitelist")
+    @ClearSystemProperty(key = "host_whitelist")
     void test_hostWhitelist_undefined() {
         // GIVEN
 
@@ -83,7 +83,7 @@ class SysPropsTest {
     }
 
     @Test
-    @SetSystemProperty(key = "getdown.host.whitelist", value = "app1.foo.com,app2.bar.com,app3.baz.com")
+    @SetSystemProperty(key = "host_whitelist", value = "app1.foo.com,app2.bar.com,app3.baz.com")
     void test_hostWhitelist_defined() {
         // GIVEN
 
