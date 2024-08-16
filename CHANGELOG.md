@@ -30,6 +30,9 @@
 
 * Added logging for process output on debugging mode
 
+* Introduced system property `use_proxy` to toggle proxy detection and info request
+  (default is `true` to keep old behaviour)
+
 ## 1.8.7 - May 24, 2022
 
 * Paths in classpath are specified relative to appdir to avoid excessively long command lines.

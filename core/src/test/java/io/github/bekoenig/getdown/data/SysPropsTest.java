@@ -94,4 +94,52 @@ class SysPropsTest {
         assertThat(hostWhitelist).isEqualTo("app1.foo.com,app2.bar.com,app3.baz.com");
     }
 
+    @Test
+    @ClearSystemProperty(key = "use_proxy")
+    void test_useProxy_undefined() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxy = SysProps.useProxy();
+
+        // THEN
+        assertThat(useProxy).isTrue();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "")
+    void test_useProxy_defined() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxy = SysProps.useProxy();
+
+        // THEN
+        assertThat(useProxy).isTrue();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "true")
+    void test_useProxy_true() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxy = SysProps.useProxy();
+
+        // THEN
+        assertThat(useProxy).isTrue();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "false")
+    void test_useProxy_false() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxy = SysProps.useProxy();
+
+        // THEN
+        assertThat(useProxy).isFalse();
+    }
+
 }

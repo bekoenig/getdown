@@ -176,6 +176,11 @@ public abstract class Getdown
     }
 
     protected boolean detectProxy() {
+        if (!SysProps.useProxy()) {
+            LOGGER.info("Skipped proxy detection");
+            return true;
+        }
+
         // first we have to initialize our application to get the appbase URL, etc.
         LOGGER.info("Checking whether we need to use a proxy...");
         try {
@@ -213,7 +218,7 @@ public abstract class Getdown
     }
 
     protected void requestProxyInfo(boolean reinitAuth) {
-        if (_silent) {
+        if (_silent || !SysProps.useProxy()) {
             LOGGER.warn("Need a proxy, but we don't want to bother anyone. Exiting.");
             return;
         }
