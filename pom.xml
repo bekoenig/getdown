@@ -5,7 +5,7 @@
   <groupId>io.github.bekoenig.getdown</groupId>
   <artifactId>getdown</artifactId>
   <packaging>pom</packaging>
-  <version>2.0.0</version>
+  <version>2.0.1-SNAPSHOT</version>
 
   <name>getdown</name>
   <description>An application installer and updater.</description>
@@ -41,7 +41,7 @@
     <connection>scm:git:git@github.com:bekoenig/getdown.git</connection>
     <developerConnection>scm:git:git@github.com:bekoenig/getdown.git</developerConnection>
     <url>https://github.com/bekoenig/getdown</url>
-    <tag>2.0.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <modules>
