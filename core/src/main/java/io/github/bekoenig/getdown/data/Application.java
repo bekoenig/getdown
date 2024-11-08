@@ -1036,7 +1036,7 @@ public class Application {
             // now re-download our control files; we download the digest first so that if it fails,
             // our config file will still reference the old version and re-running the updater will
             // start the whole process over again
-            downloadDigestFiles();
+            downloadDigestFile();
             downloadConfigFile();
 
         } catch (IOException ex) {
@@ -1335,7 +1335,7 @@ public class Application {
             String olddig = (_digest == null) ? "" : _digest.getMetaDigest();
             try {
                 status.updateStatus("m.checking");
-                downloadDigestFiles();
+                downloadDigestFile();
                 _digest = new Digest(getAppDir(), _strictComments);
                 if (!olddig.equals(_digest.getMetaDigest())) {
                     LOGGER.info("Unversioned digest changed. Revalidating...");
@@ -1352,7 +1352,7 @@ public class Application {
         // exceptions to propagate up to the caller as there is nothing else we can do
         if (_digest == null) {
             status.updateStatus("m.updating_metadata");
-            downloadDigestFiles();
+            downloadDigestFile();
             _digest = new Digest(getAppDir(), _strictComments);
         }
 
@@ -1363,7 +1363,7 @@ public class Application {
             // attempt to redownload both of our metadata files; again we pass errors up to our
             // caller because there's nothing we can do to automatically recover
             downloadConfigFile();
-            downloadDigestFiles();
+            downloadDigestFile();
             _digest = new Digest(getAppDir(), _strictComments);
             // revalidate everything if we end up downloading new metadata
             clearValidationMarkers();
@@ -1681,13 +1681,11 @@ public class Application {
     }
 
     /**
-     * Downloads the digest files and validates their signature.
+     * Downloads the current digest file and validates signature.
      */
-    protected void downloadDigestFiles()
+    protected void downloadDigestFile()
         throws IOException {
-        for (int version = 1; version <= Digest.VERSION; version++) {
-            downloadControlFile(Digest.digestFile(version), version);
-        }
+        downloadControlFile(Digest.digestFile(Digest.VERSION), Digest.VERSION);
     }
 
     /**
@@ -1707,7 +1705,7 @@ public class Application {
         if (sigVersion > 0) {
             if (_envc.certs.isEmpty()) {
                 LOGGER.atInfo()
-                    .setMessage("No signing certs, not verifying digest.txt")
+                    .setMessage("No signing certs, not verifying")
                     .addKeyValue("path", path)
                     .log();
 
