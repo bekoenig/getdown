@@ -142,4 +142,54 @@ class SysPropsTest {
         assertThat(useProxy).isFalse();
     }
 
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "proxy_vole")
+    void test_useProxy_proxyvole() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxy = SysProps.useProxy();
+
+        // THEN
+        assertThat(useProxy).isTrue();
+    }
+
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "proxy_vole")
+    void test_useProxyVole_proxyvole() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isTrue();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "true")
+    void test_useProxyVole_true() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isFalse();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "false")
+    void test_useProxyVole_false() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isFalse();
+    }
+
 }

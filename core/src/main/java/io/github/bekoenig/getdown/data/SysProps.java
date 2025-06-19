@@ -143,6 +143,14 @@ public final class SysProps {
     }
 
     /**
+     * If false, Getdown will detect proxy through Proxy Vole. Default is false (legacy proxy search).
+     * Usage: {@code -Duse_proxy=false}.
+     */
+    public static boolean useProxyVole() {
+        return "proxy_vole".equals(System.getProperty("use_proxy"));
+    }
+
+    /**
      * If true, Getdown will always try to connect without proxy settings even it a proxy is set
      * in {@code proxy.txt}. If direct access is possible it will not clear {@code proxy.txt}, it
      * will preserve the settings. This is to support cases where a user uses a workstation in two
@@ -248,4 +256,6 @@ public final class SysProps {
         }
         return appbase;
     }
+
+
 }
