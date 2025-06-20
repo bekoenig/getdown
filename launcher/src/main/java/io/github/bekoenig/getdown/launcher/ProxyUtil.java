@@ -57,24 +57,24 @@ public final class ProxyUtil {
                 boolean enabled = false;
                 RegistryKey.initialize();
                 RegistryKey r = new RegistryKey(RootKey.HKEY_CURRENT_USER, PROXY_REGISTRY);
-                for(Iterator<?> iter = r.values(); iter.hasNext(); ) {
+                for (Iterator<?> iter = r.values(); iter.hasNext(); ) {
                     RegistryValue value = (RegistryValue) iter.next();
-                    if("ProxyEnable".equals(value.getName())) {
+                    if ("ProxyEnable".equals(value.getName())) {
                         enabled = "1".equals(value.getStringValue());
                     }
-                    if(value.getName().equals("ProxyServer")) {
+                    if (value.getName().equals("ProxyServer")) {
                         String[] hostPort = splitHostPort(value.getStringValue());
                         rhost = hostPort[0];
                         rport = hostPort[1];
                     }
-                    if(value.getName().equals("AutoConfigURL")) {
+                    if (value.getName().equals("AutoConfigURL")) {
                         String acurl = value.getStringValue();
                         Reader acjs = new InputStreamReader(new URL(acurl).openStream());
                         // technically we should be returning all this info and trying each proxy
                         // in succession, but that's complexity we'll leave for another day
                         URL configURL = app.getConfigResource().getRemote();
-                        for(String proxy : findPACProxiesForURL(acjs, configURL)) {
-                            if(proxy.startsWith("PROXY ")) {
+                        for (String proxy : findPACProxiesForURL(acjs, configURL)) {
+                            if (proxy.startsWith("PROXY ")) {
                                 String[] hostPort = splitHostPort(proxy.substring(6));
                                 rhost = hostPort[0];
                                 rport = hostPort[1];
@@ -86,7 +86,7 @@ public final class ProxyUtil {
                     }
                 }
 
-                if(enabled) {
+                if (enabled) {
                     host = rhost;
                     port = rport;
                 } else {
@@ -95,9 +95,9 @@ public final class ProxyUtil {
 
             } catch (Throwable t) {
                 LOGGER.atInfo()
-                      .setMessage("Failed to find proxy settings in Windows registry")
-                      .addKeyValue("error", t)
-                      .log();
+                     .setMessage("Failed to find proxy settings in Windows registry")
+                     .addKeyValue("error", t)
+                     .log();
             }
         }
 
