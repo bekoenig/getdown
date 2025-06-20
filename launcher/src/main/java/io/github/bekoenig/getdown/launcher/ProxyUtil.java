@@ -47,10 +47,10 @@ public final class ProxyUtil {
         if (StringUtil.isBlank(host) && SysProps.useProxyVole()) {
             Proxy neededProxy = getProxyForInternetAccess(app.getConfigResource().getRemote());
 
-            if (neededProxy != null)
-                host= ((InetSocketAddress) neededProxy.address()).getHostString();
-            assert neededProxy != null;
-            port= String.valueOf(((InetSocketAddress) neededProxy.address()).getPort());
+            if (neededProxy != null) {
+                host = ((InetSocketAddress) neededProxy.address()).getHostString();
+                port = String.valueOf(((InetSocketAddress) neededProxy.address()).getPort());
+            }
         } else if (LaunchUtil.isWindows()) {
             try {
                 String rhost = null, rport = null;
