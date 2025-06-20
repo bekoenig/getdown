@@ -143,11 +143,11 @@ public final class SysProps {
     }
 
     /**
-     * If false, Getdown will detect proxy through Proxy Vole. Default is false (legacy proxy search).
+     * If true, Getdown will detect proxy through Proxy Vole. Default is true.
      * Usage: {@code -Duse_proxy=false}.
      */
     public static boolean useProxyVole() {
-        return "proxy_vole".equals(System.getProperty("use_proxy"));
+        return !"false".equals(System.getProperty("use_proxy")) && !"legacy".equals(System.getProperty("use_proxy"));
     }
 
     /**
