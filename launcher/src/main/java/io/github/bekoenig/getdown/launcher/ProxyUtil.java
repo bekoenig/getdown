@@ -9,6 +9,7 @@ import ca.beq.util.win32.registry.RegistryKey;
 import ca.beq.util.win32.registry.RegistryValue;
 import ca.beq.util.win32.registry.RootKey;
 import io.github.bekoenig.getdown.data.Application;
+import io.github.bekoenig.getdown.data.SysProps;
 import io.github.bekoenig.getdown.net.Connector;
 import io.github.bekoenig.getdown.spi.ProxyAuth;
 import io.github.bekoenig.getdown.util.Config;
@@ -16,12 +17,14 @@ import io.github.bekoenig.getdown.util.LaunchUtil;
 import io.github.bekoenig.getdown.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.github.markusbernhardt.proxy.ProxySearch;
 
 import javax.script.*;
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ServiceLoader;
 
 public final class ProxyUtil {
@@ -40,8 +43,15 @@ public final class ProxyUtil {
             port = System.getProperty("http.proxyPort");
         }
 
-        // check the Windows registry
-        if (StringUtil.isBlank(host) && LaunchUtil.isWindows()) {
+        //check using Proxy Vole else check the Windows registry
+        if (StringUtil.isBlank(host) && SysProps.useProxyVole()) {
+            Proxy neededProxy = getProxyForInternetAccess(app.getConfigResource().getRemote());
+
+            if (neededProxy != null) {
+                host = ((InetSocketAddress) neededProxy.address()).getHostString();
+                port = String.valueOf(((InetSocketAddress) neededProxy.address()).getPort());
+            }
+        } else if (LaunchUtil.isWindows()) {
             try {
                 String rhost = null, rport = null;
                 boolean enabled = false;
@@ -85,9 +95,9 @@ public final class ProxyUtil {
 
             } catch (Throwable t) {
                 LOGGER.atInfo()
-                    .setMessage("Failed to find proxy settings in Windows registry")
-                    .addKeyValue("error", t)
-                    .log();
+                      .setMessage("Failed to find proxy settings in Windows registry")
+                      .addKeyValue("error", t)
+                      .log();
             }
         }
 
@@ -284,4 +294,49 @@ public final class ProxyUtil {
 
     private static final String PROXY_REGISTRY =
         "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings";
+
+    public static Proxy getProxyForInternetAccess(URL rurl) {
+        // Use the static factory method getDefaultProxySearch to create a proxy search instance
+        // configured with the default proxy search strategies for the current environment.
+        ProxySearch proxySearch = ProxySearch.getDefaultProxySearch();
+
+        // Invoke the proxy search. This will create a ProxySelector with the detected proxy settings.
+        ProxySelector proxySelector = proxySearch.getProxySelector();
+
+        // Install this ProxySelector as default ProxySelector for all connections.
+        ProxySelector.setDefault(proxySelector);
+
+        // Get list of proxies from default ProxySelector available for given URL
+        List<Proxy> proxies = null;
+        if (ProxySelector.getDefault() != null) {
+            try {
+                proxies = ProxySelector.getDefault().select(rurl.toURI());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Proxy proxy = Proxy.NO_PROXY;
+        // Find first proxy for HTTP/S. Any DIRECT proxy in the list returned is only second choice
+        if (proxies != null) {
+            loop: for (Proxy p : proxies) {
+                switch (p.type()) {
+                    case HTTP:
+                        proxy = p;
+                        break loop;
+                    case DIRECT:
+                        proxy = Proxy.NO_PROXY;
+                        break;
+                }
+            }
+        }
+        if (proxy != Proxy.NO_PROXY)
+            return proxy;
+        else
+            return null;
+    }
+
+
 }
+
+
