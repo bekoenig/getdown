@@ -95,9 +95,9 @@ public final class ProxyUtil {
 
             } catch (Throwable t) {
                 LOGGER.atInfo()
-                     .setMessage("Failed to find proxy settings in Windows registry")
-                     .addKeyValue("error", t)
-                     .log();
+                      .setMessage("Failed to find proxy settings in Windows registry")
+                      .addKeyValue("error", t)
+                      .log();
             }
         }
 
