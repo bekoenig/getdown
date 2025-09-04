@@ -69,6 +69,11 @@
       <version>22.0.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.bidib.com.github.markusbernhardt</groupId>
+      <artifactId>proxy-vole</artifactId>
+      <version>1.1.6</version>
+    </dependency>
   </dependencies>
 
   <build>

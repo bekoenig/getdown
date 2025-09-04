@@ -1,5 +1,10 @@
 # Getdown Releases
 
+## 2.0.1 -
+* Introduction of ProxyVole dependency library as default proxy detection, old usage of JRegistryKey
+  kept, require setting property `use_proxy` to value `legacy`
+
+
 ## 2.0.0 - May 01, 2024
 
 * GroupId and package root have moved from `com.threerings.getdown` to `io.github.bekoenig.getdown`
