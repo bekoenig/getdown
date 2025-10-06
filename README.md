@@ -53,16 +53,16 @@ Getdown will likely need to be integrated into your build. We have separate inst
 Getdown is comprised of three Maven artifacts (jar files), though you probably only need the first
 one:
 
-* [getdown-launcher](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-launcher)
+* [getdown-launcher](https://mvnrepository.com/artifact/io.github.bekoenig.getdown/getdown-launcher)
   contains code that you actually run to update and launch your app. It also contains the tools
 * needed to build a Getdown app distribution.
 
-* [getdown-core](https://repo1.maven.org/maven2/com/bekoenig/getdown/getdown-core) contains the
+* [getdown-core](https://mvnrepository.com/artifact/io.github.bekoenig.getdown/getdown-core) contains the
   core logic for downloading, verifying, patching and launching an app as well as the core logic
   for creating an app distribution. It does not contain any user interface code. You would only
   use this artifact if you were planning to integrate Getdown directly into your app.
 
-* [getdown-ant](http://repo2.maven.org/maven2/com/bekoenig/getdown/getdown-ant) contains an Ant
+* [getdown-ant](https://mvnrepository.com/artifact/io.github.bekoenig.getdown/getdown-ant) contains an Ant
   task for building a Getdown app distribution. See the [build integration] instructions for
   details.
 
