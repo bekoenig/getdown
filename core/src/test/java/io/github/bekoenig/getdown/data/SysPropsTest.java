@@ -106,6 +106,19 @@ class SysPropsTest {
         assertThat(useProxy).isTrue();
     }
 
+
+    @Test
+    @ClearSystemProperty(key = "use_proxy")
+    void test_useProxyVole_undefined() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isTrue();
+    }
+
     @Test
     @SetSystemProperty(key = "use_proxy", value = "")
     void test_useProxy_defined() {
@@ -116,6 +129,18 @@ class SysPropsTest {
 
         // THEN
         assertThat(useProxy).isTrue();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "")
+    void test_useProxyVole_defined() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isTrue();
     }
 
     @Test
@@ -140,6 +165,56 @@ class SysPropsTest {
 
         // THEN
         assertThat(useProxy).isFalse();
+    }
+
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "true")
+    void test_useProxy_proxyvole() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxy = SysProps.useProxy();
+
+        // THEN
+        assertThat(useProxy).isTrue();
+    }
+
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "legacy")
+    void test_useProxyVole_proxyvole() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isFalse();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "true")
+    void test_useProxyVole_true() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isTrue();
+    }
+
+    @Test
+    @SetSystemProperty(key = "use_proxy", value = "legacy")
+    void test_useProxyVole_false() {
+        // GIVEN
+
+        // WHEN
+        boolean useProxyVole = SysProps.useProxyVole();
+
+        // THEN
+        assertThat(useProxyVole).isFalse();
     }
 
 }
